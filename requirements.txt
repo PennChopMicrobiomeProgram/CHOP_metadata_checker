@@ -1,0 +1,5 @@
+flask==1.1.2
+flask-sqlalchemy==2.4.4
+pandas==1.1.1
+xlrd==1.1.0
+python-dotenv==0.9.1
