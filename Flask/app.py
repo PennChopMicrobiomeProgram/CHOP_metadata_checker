@@ -3,12 +3,11 @@ import csv, io
 import pandas as pd
 from werkzeug.utils import secure_filename
 from tablemusthave import *
-import xlrd
 import os
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv()) ##allows me to get secret key
 
-ALLOWED_EXTENSIONS = {'tsv', 'csv', 'xls', 'xlsx'}
+ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 
 #check if period in filename and has correct extensions
 def allowed_file(filename):
@@ -147,32 +146,16 @@ def index():
       flash('No file selected')
       return redirect(request.url)
     if file_fp and not allowed_file(file_fp.filename):
-      flash('Please use the correct file extensions for the metadata {tsv, csv, xls, xlsx}')
+      flash('Please use the allowed file extensions for the metadata {tsv, csv}')
       return redirect(request.url)
     ##check if file was submitted and if it has correct extensions
     if file_fp and allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
       delim = ','
-
-      ##for csv/tsv
-      if(filename.rsplit('.', 1)[1].lower() in ['csv', 'tsv']):
-        ##convert FileStorage to StringIO to read as csv/tsv object
-        string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
-        if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
-          delim = '\t'
-      ##for excel
-      else:
-        excel_open = xlrd.open_workbook(file_contents=file_fp.read())
-        if 'Template' not in excel_open.sheet_names():
-          flash("Your excel file doesn't have the 'Template' sheet")
-          return redirect(request.url)
-        else:
-          data_xls = excel_open.sheet_by_name('Template')
-          template = [data_xls.row_values(rownum) for rownum in range(data_xls.nrows)]
-          ##get the rows that don't have the formatting sentences
-          clear_sheet = [row_x for row_x in template if any([col_x for col_x in map(str,row_x) if not any(rm_str in col_x for rm_str in ['These wells are conditionally formatted to highlight errors', 'DO NOT REMOVE THE FORMATTING.'])])]
-          #print(clear_sheet)
-          string_io = [','.join(map(str, row_list)) for row_list in clear_sheet]
+      ##convert FileStorage to StringIO to read as csv/tsv object
+      string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
+      if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
+        delim = '\t'
       
       t = Table.from_csv(string_io, delimiter = delim)
       
