@@ -15,7 +15,7 @@ def allowed_file(filename):
     filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 chop_mandatory = [
-  "SampleID",
+  "sample_id",
   "investigator",
   "project_name",
   "sample_type",
@@ -23,13 +23,15 @@ chop_mandatory = [
   "host_species",
   "tube_barcode",
   "box_id",
-  "box_position"
+  "box_position",
+  "study_group",
+  "date_collected"
 ]
 
 chop_suggested = [
   "study_day",
-  "study_group",
   "current_antibiotics",
+  "recent_antibiotics",
   "cage_id",
   "mouse_strain"
 ]
@@ -80,7 +82,7 @@ sample_type_list = [
 
 ##table to translate what these regex patterns mean
 regex_translate = {
-  "^[0-9A-Za-z.]+$": " only contain numbers, letters, and periods",
+  "^[0-9A-Za-z._]+$": " only contain numbers, letters, underscores, and periods",
   "^[0-9A-Za-z_]+$": " only contain numbers, letters, and underscores",
   "^[A-Za-z]": " only start with capital or lowercase letters",
   "^[0-9A-Za-z._+-\/<>=|,() ]+$": " only contain numbers, letters, spaces, and allowed characters inside the bracket [._+-\/<>=|,()]",
@@ -102,9 +104,9 @@ def uniq_comb(spec, col1, col2):
 specification = MustHave(
   columns_named(chop_mandatory), ##must contain these columns
   columns_matching("^[0-9A-Za-z_]+$"), ##column names must satisfy this regex
-  values_matching("SampleID", "^[A-Za-z]"), ##columns must satisfy this regex
-  values_matching("SampleID", "^[0-9A-Za-z.]+$"),
-  unique_values_for("SampleID"),
+  values_matching("sample_id", "^[A-Za-z]"), ##columns must satisfy this regex
+  values_matching("sample_id", "^[0-9A-Za-z._]+$"),
+  unique_values_for("sample_id"),
   values_in_set("sample_type", sample_type_list), ##sample_type column can only contain values specified in sample_type_list
   values_matching("subject_id", "^[0-9A-Za-z._-]+$"),
   values_in_set("host_species", ["Human", "Mouse", "Rat", "NA"]),
@@ -122,7 +124,7 @@ uniq_comb(specification, "reverse_barcode_plate", "reverse_barcode_location")
 uniq_comb(specification, "forward_barcode_plate", "forward_barcode_location")
 
 specification.extend(some_value_for(c) for c in chop_mandatory) ##these columns cannot be empty
-specification.extend(values_matching(c, "^[0-9A-Za-z._+-\/<>=|,() ]+$") for c in (chop_mandatory[1:] + chop_suggested)) ##all columns must satisfy the regex
+specification.extend(values_matching(c, "^[0-9A-Za-z._+-\/<>=|,() ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
 
 for d in specification.descriptions():
   print(d)
