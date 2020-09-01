@@ -87,7 +87,9 @@ regex_translate = {
   "^[0-9A-Za-z._+-\/<>=|,() ]+$": " only contain numbers, letters, spaces, and allowed characters inside the bracket [._+-\/<>=|,()]",
   "^[0-9A-Za-z._-]+$": " only contain numbers, letters, periods, dashes, and underscores",
   "^[0-9-/]+$": " only contain numbers, dashes, and forward slashes",
-  "^[0-9:]+$": " only contain numbers and colons"
+  "^[0-9:]+$": " only contain numbers and colons",
+  "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
+  "^[ATCGURYKMSWBDHVNatcgurykmswbdhvn]+$": " only contain nucleotide symbols"
 }
 
 ##function to check unique combinations for these column inputs
@@ -111,6 +113,7 @@ specification = MustHave(
   values_matching("date_collected", "^[0-9-/]+$"),
   values_matching("time_collected", "^[0-9:]+$"),
   unique_values_for("barcode"),
+  values_matching("barcode", "^[ATCGURYKMSWBDHVNatcgurykmswbdhvn]+$"),
   values_matching("reverse_barcode_location", "^[A-H][0-9]{2}$"),
   values_matching("forward_barcode_location", "^[A-H][0-9]{2}$"),
 )
@@ -159,10 +162,17 @@ def index():
           delim = '\t'
       ##for excel
       else:
-        data_xls = xlrd.open_workbook(file_contents=file_fp.read()).sheet_by_name('Template ')
-        template = [data_xls.row_values(rownum) for rownum in range(data_xls.nrows)]
-        string_io = [','.join(map(str, row_list)) for row_list in template[2:]]
-        print(string_io)
+        excel_open = xlrd.open_workbook(file_contents=file_fp.read())
+        if 'Template' not in excel_open.sheet_names():
+          flash("Your excel file doesn't have the 'Template' sheet")
+          return redirect(request.url)
+        else:
+          data_xls = excel_open.sheet_by_name('Template')
+          template = [data_xls.row_values(rownum) for rownum in range(data_xls.nrows)]
+          ##get the rows that don't have the formatting sentences
+          clear_sheet = [row_x for row_x in template if any([col_x for col_x in map(str,row_x) if not any(rm_str in col_x for rm_str in ['These wells are conditionally formatted to highlight errors', 'DO NOT REMOVE THE FORMATTING.'])])]
+          #print(clear_sheet)
+          string_io = [','.join(map(str, row_list)) for row_list in clear_sheet]
       
       t = Table.from_csv(string_io, delimiter = delim)
       
