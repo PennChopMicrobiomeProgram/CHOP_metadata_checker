@@ -1,0 +1,258 @@
+
+---
+title: "CHOP metadata checker"
+author: "PennCHOP Microbiome Program"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '3'
+geometry: margin=3cm
+---
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover(); 
+});
+</script>
+
+```{r setup, echo=FALSE}
+### ================
+###   knitr setup
+### ================
+library(knitr)
+opts_chunk$set(
+  tidy=FALSE,
+  cache=TRUE,
+  echo=FALSE,
+  warning=FALSE,
+  message=FALSE,
+  dpi=100,
+  fig.width=7,
+  fig.height=8,
+  fig.align = "center"
+  )
+options(knitr.table.format = "html")
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+
+library(magrittr)
+library(tidyverse)
+library(kableExtra)
+
+```
+
+# Introduction
+
+This [website](/) is used to validate your metadata spreadsheet used in bioinformatics analyses for the PennCHOP Microbiome Center. This checker will parse your spreadsheet to ensure it fulfills the specifications listed below and highlight and display error messages for cells that do not meet these specifications. All that is required is a tab or comma separatated file (tsv/csv) to be uploaded.
+\
+\
+
+# Specifications
+
+### Mandatory Columns
+The contents within these columns cannot be empty
+```{r}
+manda_cols <- as.data.frame(matrix(c("sample_id",
+  "investigator",
+  "project_name",
+  "sample_type",
+  "subject_id",
+  "host_species",
+  "tube_barcode",
+  "box_id",
+  "box_position",
+  "study_group",
+  "date_collected",
+  ""), ncol = 4))
+
+manda_cols %>%
+  select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F, col.names = NULL) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header"))
+
+```
+
+### Suggested Columns
+
+```{r}
+sugg_cols <- as.data.frame(matrix(c("study_day",
+  "current_antibiotics",
+  "recent_antibiotics",
+  "cage_id",
+  "mouse_strain"), ncol = 5))
+
+sugg_cols %>%
+  select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F, col.names = NULL) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header"))
+
+```
+
+### Formatting
+
+##### General cell formatting
+All cells can only contain numbers, characters, spaces and the following special characters: ._+-\/<>=|,()
+\
+\
+
+##### Special cell formatting
+[sample_id] must begin with a letter and only contain numbers, characters, periods, and underscores (no other special characters)\
+[subject_id] can only contain numbers, letters, periods, dashes, and underscores\
+[date_collected] can only be in format yyyy-mm-dd or yyyy/mm/dd\
+[time_collected] can only be in format hh:mm:ss\
+[barcode] can only contain nucleotide symbols\
+[forward_barcode_location] and [reverse_barcode_location] can only contain 96-well plate IDs
+\
+\
+
+##### Column name formatting
+The names of the columns may only contain numbers, letters, and underscores
+\
+\
+
+##### Unique combinations
+Contents between these column pairs must be unique together:
+```{r}
+uniq_combo <- as.data.frame(matrix(c("box_id", "box_position",
+                                     "reverse_barcode_plate", "reverse_barcode_location",
+                                     "forward_barcode_plate", "forward_barcode_location"), ncol = 2, byrow = TRUE))
+
+uniq_combo %>%
+  select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F, col.names = NULL) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header"))
+
+```
+
+### Pre-selected options
+If you do not see an option listed here for your sample, please contact us
+
+##### [host_species] options
+```{r}
+host_df <- as.data.frame(matrix(c("Human",
+                      "Mouse",
+                      "Rat",
+                      "NA"), ncol = 4))
+
+host_df %>%
+  select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F, col.names = NULL) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header"))
+
+```
+
+##### [sample_type] options
+
+```{r}
+sample_df <- as.data.frame(matrix(c("BAL fluid",
+                                   "Bedding",
+                                   "Breast milk",
+                                   "Breast swab",
+                                   "Bronchoscope post-wash",
+                                   "Bronchoscope pre-wash",
+                                   "Bronchoscope tip",
+                                   "Cheek swab",
+                                   "Cultured cells",
+                                   "Dust",
+                                   "Environmental blank",
+                                   "Esophageal biopsy",
+                                   "Feces",
+                                   "In vivo cells",
+                                   "Kveim reagent",
+                                   "Lab water",
+                                   "Lumenal contents cecum",
+                                   "Lumenal contents colon",
+                                   "Microbial culture",
+                                   "Mock DNA",
+                                   "Mouse chow",
+                                   "Mucosa cecum",
+                                   "Mucosa colon",
+                                   "Nasopharyngeal swab",
+                                   "Oral swab",
+                                   "Oral wash",
+                                   "Oropharyngeal swab",
+                                   "Ostomy fluid",
+                                   "PCR water",
+                                   "Plasma",
+                                   "Rectal swab",
+                                   "Saline",
+                                   "SHIME ascending",
+                                   "SHIME descending",
+                                   "SHIME transverse",
+                                   "Skin swab",
+                                   "Spleen",
+                                   "Sterile swab",
+                                   "Surface swab",
+                                   "Tongue swab",
+                                   "Whole gut",
+                                   ""), ncol = 6))
+
+sample_df %>%
+  select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F, col.names = NULL) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header"))
+
+```
+
+\
+
+# Example of misformatted sheet
+Misformatted cells are highlighted in red
+
+```{r}
+
+df_wrong <- data.frame(`sample_id` = c('Id1', 'Id2', 'Id2'),
+                  `host_species` = c('Mouse', 'Turtle', 'Mouse'),
+                  `study_group` = c('Ctrl', 'Abx', '@bx'),
+                 `box_id` = c('Box1', 'Box1', 'Box1'),
+                 `box_position` = c('A1', 'A1', 'A2'))
+
+df_wrong %>%
+  select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header")) %>%
+  column_spec(1,
+              background = ifelse(duplicated(df_wrong$sample_id)|duplicated(df_wrong$sample_id, fromLast = TRUE), "#f5c6ca", "#FFFFFF"),
+              popover = ifelse(duplicated(df_wrong$sample_id)|duplicated(df_wrong$sample_id, fromLast = TRUE), "Please use unique values", "")) %>%
+  column_spec(2,
+              background = ifelse(!df_wrong$host_species %in% c("Human", "Mouse", "Rat", "NA"), "#f5c6ca", "#FFFFFF"),
+              popover = ifelse(!df_wrong$host_species %in% c("Human", "Mouse", "Rat", "NA"), "Please use only pre-selected host_species", "")) %>%
+  column_spec(3,
+              background = ifelse(!grepl("^[0-9A-Za-z._+-/<>=|,() ]+$", df_wrong$study_group), "#f5c6ca", "#FFFFFF"),
+              popover = ifelse(!grepl("^[0-9A-Za-z._+-/<>=|,() ]+$", df_wrong$study_group), "Please us correct formatting specified above", "")) %>%
+  column_spec(4:5,
+              background = ifelse(duplicated(paste(df_wrong$box_id, df_wrong$box_position))|duplicated(paste(df_wrong$box_id, df_wrong$box_position), fromLast = TRUE), "#f5c6ca", "#FFFFFF"),
+              popover = ifelse(duplicated(paste(df_wrong$box_id, df_wrong$box_position))|duplicated(paste(df_wrong$box_id, df_wrong$box_position), fromLast = TRUE), "Please use unique values", ""))
+  
+
+
+```
+\
+
+# Example of correctly formatted sheet
+
+```{r}
+
+df_right <- data.frame(`sample_id` = c('Id1', 'Id2', 'Id3'),
+                       `host_species` = c('Mouse', 'Mouse', 'Mouse'),
+                       `study_group` = c('Ctrl', 'Abx', 'Abx'),
+                       `box_id` = c('Box1', 'Box1', 'Box1'),
+                       `box_position` = c('A1', 'A2', 'A3'))
+
+df_right %>%
+  select_all(~gsub("_", "\\\\_", .)) %>%
+  mutate_if(function(x) is.character(x) | is.factor(x), ~gsub("_", "\\\\_", .)) %>%
+  kable("html", longtable = F, digits=2, booktabs=T, escape=F) %>%
+  kable_styling(latex_options = c("scale_down", "repeat_header"))
+
+```
+
+#### [Return to checker](/)

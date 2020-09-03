@@ -87,8 +87,8 @@ regex_translate = {
   "^[A-Za-z]": " only start with capital or lowercase letters",
   "^[0-9A-Za-z._+-\/<>=|,() ]+$": " only contain numbers, letters, spaces, and allowed characters inside the bracket [._+-\/<>=|,()]",
   "^[0-9A-Za-z._-]+$": " only contain numbers, letters, periods, dashes, and underscores",
-  "^[0-9-/]+$": " only contain numbers, dashes, and forward slashes",
-  "^[0-9:]+$": " only contain numbers and colons",
+  "^[0-9-/]+$": " be in format yyyy-mm-dd or yyyy/mm/dd",
+  "^[0-9:]+$": " be in format hh:mm:ss",
   "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
   "^[ATCGURYKMSWBDHVNatcgurykmswbdhvn]+$": " only contain nucleotide symbols"
 }
