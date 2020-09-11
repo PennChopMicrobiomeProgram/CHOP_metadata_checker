@@ -1,13 +1,12 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, session
-import csv, io
+import csv, io, os, xlrd
 import pandas as pd
 from werkzeug.utils import secure_filename
 from tablemusthave import *
-import os
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv()) ##allows me to get secret key
 
-ALLOWED_EXTENSIONS = {'tsv', 'csv'}
+ALLOWED_EXTENSIONS = {'tsv', 'csv', 'xls', 'xlsx'}
 
 #check if period in filename and has correct extensions
 def allowed_file(filename):
@@ -15,12 +14,10 @@ def allowed_file(filename):
     filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 chop_mandatory = [
-  "sample_id",
+  "SampleID",
   "investigator",
   "project_name",
   "sample_type",
-  "subject_id",
-  "host_species",
   "tube_barcode",
   "box_id",
   "box_position",
@@ -29,6 +26,8 @@ chop_mandatory = [
 ]
 
 chop_suggested = [
+  "subject_id",
+  "host_species",
   "study_day",
   "current_antibiotics",
   "recent_antibiotics",
@@ -87,10 +86,10 @@ regex_translate = {
   "^[A-Za-z]": " only start with capital or lowercase letters",
   "^[0-9A-Za-z._+-\/<>=|,() ]+$": " only contain numbers, letters, spaces, and allowed characters inside the bracket [._+-\/<>=|,()]",
   "^[0-9A-Za-z._-]+$": " only contain numbers, letters, periods, dashes, and underscores",
-  "^[0-9-/]+$": " be in format yyyy-mm-dd or yyyy/mm/dd",
-  "^[0-9:]+$": " be in format hh:mm:ss",
+  "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": " be in format yyyy-mm-dd",
+  "^[0-9]{2}:[0-9]{2}:[0-9]{2}$": " be in format hh:mm:ss",
   "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
-  "^[ATCGURYKMSWBDHVNatcgurykmswbdhvn]+$": " only contain nucleotide symbols"
+  "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols"
 }
 
 ##function to check unique combinations for these column inputs
@@ -104,17 +103,21 @@ def uniq_comb(spec, col1, col2):
 specification = MustHave(
   columns_named(chop_mandatory), ##must contain these columns
   columns_matching("^[0-9A-Za-z_]+$"), ##column names must satisfy this regex
-  values_matching("sample_id", "^[A-Za-z]"), ##columns must satisfy this regex
-  values_matching("sample_id", "^[0-9A-Za-z._]+$"),
-  unique_values_for("sample_id"),
+  values_matching("SampleID", "^[A-Za-z]"), ##columns must satisfy this regex
+  values_matching("SampleID", "^[0-9A-Za-z._]+$"),
+  unique_values_for("SampleID"),
   values_in_set("sample_type", sample_type_list), ##sample_type column can only contain values specified in sample_type_list
+  values_matching("subject_id", "^[A-Za-z]"),
   values_matching("subject_id", "^[0-9A-Za-z._-]+$"),
-  values_in_set("host_species", ["Human", "Mouse", "Rat", "NA"]),
+  values_in_set("host_species", ["Human", "Mouse", "Rat", None]),
+  some_value_for("host_species", "subject_id"),
+  some_value_for("subject_id", "host_species"),
   some_value_for("mouse_strain", "cage_id"), ##if mouse_strain is given, a cage_id for that sample must be provided
-  values_matching("date_collected", "^[0-9-/]+$"),
-  values_matching("time_collected", "^[0-9:]+$"),
+  ##values_matching("date_collected", "^[0-9-/]+$"),
+  values_matching("date_collected", "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"),
+  values_matching("time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"),
   unique_values_for("barcode"),
-  values_matching("barcode", "^[ATCGURYKMSWBDHVNatcgurykmswbdhvn]+$"),
+  values_matching("barcode", "^[ATCGURYKMSWBDHVN]+$"),
   values_matching("reverse_barcode_location", "^[A-H][0-9]{2}$"),
   values_matching("forward_barcode_location", "^[A-H][0-9]{2}$"),
 )
@@ -124,7 +127,7 @@ uniq_comb(specification, "reverse_barcode_plate", "reverse_barcode_location")
 uniq_comb(specification, "forward_barcode_plate", "forward_barcode_location")
 
 specification.extend(some_value_for(c) for c in chop_mandatory) ##these columns cannot be empty
-specification.extend(values_matching(c, "^[0-9A-Za-z._+-\/<>=|,() ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
+specification.extend(values_matching(c, "^[0-9A-Za-z._+-/<>=,() ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
 
 for d in specification.descriptions():
   print(d)
@@ -148,17 +151,33 @@ def index():
       flash('No file selected')
       return redirect(request.url)
     if file_fp and not allowed_file(file_fp.filename):
-      flash('Please use the allowed file extensions for the metadata {tsv, csv}')
+      flash('Please use the allowed file extensions for the metadata {tsv, csv, xls, xlsx}')
       return redirect(request.url)
     ##check if file was submitted and if it has correct extensions
     if file_fp and allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
       delim = ','
-      ##convert FileStorage to StringIO to read as csv/tsv object
-      string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
-      if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
-        delim = '\t'
-      
+
+      ##for csv/tsv
+      if(filename.rsplit('.', 1)[1].lower() in ['csv', 'tsv']):
+        ##convert FileStorage to StringIO to read as csv/tsv object
+        string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
+        if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
+          delim = '\t'
+      ##for excel
+      else:
+        excel_open = xlrd.open_workbook(file_contents=file_fp.read())
+        if 'Template' not in excel_open.sheet_names():
+          flash("Your excel file doesn't have the 'Template' sheet")
+          return redirect(request.url)
+        else:
+          data_xls = excel_open.sheet_by_name('Template')
+          template = [data_xls.row_values(rownum) for rownum in range(data_xls.nrows)]
+          ##get the rows that don't have the formatting sentences
+          clear_sheet = [row_x for row_x in template if any([col_x for col_x in map(str,row_x) if not any(rm_str in col_x for rm_str in ['These wells are conditionally formatted to highlight errors', 'DO NOT REMOVE THE FORMATTING.'])])]
+          #print(clear_sheet)
+          string_io = [','.join(map(str, row_list)) for row_list in clear_sheet]
+ 
       t = Table.from_csv(string_io, delimiter = delim)
       
       ##get metadata table to print on webpage
