@@ -113,7 +113,6 @@ specification = MustHave(
   some_value_for("host_species", "subject_id"),
   some_value_for("subject_id", "host_species"),
   some_value_for("mouse_strain", "cage_id"), ##if mouse_strain is given, a cage_id for that sample must be provided
-  ##values_matching("date_collected", "^[0-9-/]+$"),
   values_matching("date_collected", "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"),
   values_matching("time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"),
   unique_values_for("barcode"),
