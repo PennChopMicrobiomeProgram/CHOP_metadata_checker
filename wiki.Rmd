@@ -54,18 +54,17 @@ This [website](/) is used to validate your metadata spreadsheet used in bioinfor
 ### Mandatory Columns
 The contents within these columns cannot be empty
 ```{r}
-manda_cols <- as.data.frame(matrix(c("sample_id",
+manda_cols <- as.data.frame(matrix(c(
+  "SampleID",
   "investigator",
   "project_name",
   "sample_type",
-  "subject_id",
-  "host_species",
   "tube_barcode",
   "box_id",
   "box_position",
   "study_group",
-  "date_collected",
-  ""), ncol = 4))
+  "date_collected"
+  ), ncol = 3))
 
 manda_cols %>%
   select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
@@ -78,11 +77,15 @@ manda_cols %>%
 ### Suggested Columns
 
 ```{r}
-sugg_cols <- as.data.frame(matrix(c("study_day",
+sugg_cols <- as.data.frame(matrix(c(
+  "subject_id",
+  "host_species",
+  "study_day",
   "current_antibiotics",
   "recent_antibiotics",
   "cage_id",
-  "mouse_strain"), ncol = 5))
+  "mouse_strain",
+  ""), ncol = 4))
 
 sugg_cols %>%
   select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
@@ -95,14 +98,14 @@ sugg_cols %>%
 ### Formatting
 
 ##### General cell formatting
-All cells can only contain numbers, characters, spaces and the following special characters: ._+-\/<>=|,()
+All cells can only contain numbers, characters, spaces and the following special characters: ._+-/<>=|,()[]
 \
 \
 
 ##### Special cell formatting
-[sample_id] must begin with a letter and only contain numbers, characters, periods, and underscores (no other special characters)\
+[SampleID] must begin with a letter and only contain numbers, characters, periods, and underscores (no other special characters)\
 [subject_id] can only contain numbers, letters, periods, dashes, and underscores\
-[date_collected] can only be in format yyyy-mm-dd or yyyy/mm/dd\
+[date_collected] can only be in format yyyy-mm-dd\
 [time_collected] can only be in format hh:mm:ss\
 [barcode] can only contain nucleotide symbols\
 [forward_barcode_location] and [reverse_barcode_location] can only contain 96-well plate IDs
@@ -134,10 +137,19 @@ If you do not see an option listed here for your sample, please contact us
 
 ##### [host_species] options
 ```{r}
-host_df <- as.data.frame(matrix(c("Human",
-                      "Mouse",
-                      "Rat",
-                      "NA"), ncol = 4))
+host_df <- as.data.frame(matrix(c(
+  "Dog",
+  "Fruit fly",
+  "Human",
+  "Mouse",
+  "Naked mole rat",
+  "Pig",
+  "Pigeon",
+  "Rabbit",
+  "Rat",
+  "Rhesus macaque",
+  "None",
+  ""), ncol = 4))
 
 host_df %>%
   select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores
@@ -150,48 +162,80 @@ host_df %>%
 ##### [sample_type] options
 
 ```{r}
-sample_df <- as.data.frame(matrix(c("BAL fluid",
-                                   "Bedding",
-                                   "Breast milk",
-                                   "Breast swab",
-                                   "Bronchoscope post-wash",
-                                   "Bronchoscope pre-wash",
-                                   "Bronchoscope tip",
-                                   "Cheek swab",
-                                   "Cultured cells",
-                                   "Dust",
-                                   "Environmental blank",
-                                   "Esophageal biopsy",
-                                   "Feces",
-                                   "In vivo cells",
-                                   "Kveim reagent",
-                                   "Lab water",
-                                   "Lumenal contents cecum",
-                                   "Lumenal contents colon",
-                                   "Microbial culture",
-                                   "Mock DNA",
-                                   "Mouse chow",
-                                   "Mucosa cecum",
-                                   "Mucosa colon",
-                                   "Nasopharyngeal swab",
-                                   "Oral swab",
-                                   "Oral wash",
-                                   "Oropharyngeal swab",
-                                   "Ostomy fluid",
-                                   "PCR water",
-                                   "Plasma",
-                                   "Rectal swab",
-                                   "Saline",
-                                   "SHIME ascending",
-                                   "SHIME descending",
-                                   "SHIME transverse",
-                                   "Skin swab",
-                                   "Spleen",
-                                   "Sterile swab",
-                                   "Surface swab",
-                                   "Tongue swab",
-                                   "Whole gut",
-                                   ""), ncol = 6))
+sample_df <- as.data.frame(matrix(c(
+  "Amnoitic fluid",
+  "BAL",
+  "Bedding",
+  "Biofilm",
+  "Bioreactor",
+  "Blank swab",
+  "Blood",
+  "Breast milk",
+  "Buffer",
+  "Cecum",
+  "Cell lysate",
+  "Cervical swab",
+  "Cheek swab",
+  "Crop",
+  "Dental plaque",
+  "Duodenum",
+  "Dust",
+  "Elution buffer",
+  "Empty well",
+  "Endometrial swab",
+  "Environmental control",
+  "Esophageal biopsy",
+  "Esophagus",
+  "Feces",
+  "Feed",
+  "Fistula",
+  "Fistula swab",
+  "Fly food",
+  "Fruit fly",
+  "Ileostomy fluid",
+  "Ileum",
+  "Kveim reagent",
+  "Lab water",
+  "Macular Retina",
+  "Meconium",
+  "Medium",
+  "Microbial culture",
+  "Mock DNA",
+  "Mouse chow",
+  "Nasal swab",
+  "Nasopharyngeal swab",
+  "Oral swab",
+  "Oral wash",
+  "Oropharyngeal swab",
+  "Ostomy fluid",
+  "Pancreatic fluid",
+  "PCR water",
+  "Peripheral retina",
+  "Placenta",
+  "Plasma",
+  "Rectal biopsy",
+  "Rectal swab",
+  "Saline",
+  "Saliva",
+  "Sediment",
+  "Serum",
+  "Skin swab",
+  "Small intestine",
+  "Soil",
+  "Sputum",
+  "Surface swab",
+  "Tongue swab",
+  "Tonsil",
+  "Tracheal aspirate",
+  "Tracheal control",
+  "Urethral swab",
+  "Urine",
+  "Water",
+  "Weighing paper",
+  "Whole gut",
+  "Large intestine mucosa",
+  "Large intestine lumen"
+  ), ncol = 6))
 
 sample_df %>%
   select_all(~gsub("_", "\\\\_", .)) %>% ##need to escape the underscores

@@ -1,12 +1,12 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, session
-import csv, io, os, xlrd
+import csv, io, os
 import pandas as pd
 from werkzeug.utils import secure_filename
 from tablemusthave import *
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv()) ##allows me to get secret key
 
-ALLOWED_EXTENSIONS = {'tsv', 'csv', 'xls', 'xlsx'}
+ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 
 #check if period in filename and has correct extensions
 def allowed_file(filename):
@@ -36,47 +36,92 @@ chop_suggested = [
 ]
 
 sample_type_list = [
-  "BAL fluid",
+  "Amnoitic fluid",
+  "BAL",
   "Bedding",
+  "Biofilm",
+  "Bioreactor",
+  "Blank swab",
+  "Blood",
   "Breast milk",
-  "Breast swab",
-  "Bronchoscope post-wash",
-  "Bronchoscope pre-wash",
-  "Bronchoscope tip",
+  "Buffer",
+  "Cecum",
+  "Cell lysate",
+  "Cervical swab",
   "Cheek swab",
-  "Cultured cells",
+  "Crop",
+  "Dental plaque",
+  "Duodenum",
   "Dust",
-  "Environmental blank",
+  "Elution buffer",
+  "Empty well",
+  "Endometrial swab",
+  "Environmental control",
   "Esophageal biopsy",
+  "Esophagus",
   "Feces",
-  "In vivo cells",
+  "Feed",
+  "Fistula",
+  "Fistula swab",
+  "Fly food",
+  "Fruit fly",
+  "Ileostomy fluid",
+  "Ileum",
   "Kveim reagent",
   "Lab water",
-  "Lumenal contents cecum",
-  "Lumenal contents colon",
+  "Macular Retina",
+  "Meconium",
+  "Medium",
   "Microbial culture",
   "Mock DNA",
   "Mouse chow",
-  "Mucosa cecum",
-  "Mucosa colon",
+  "Nasal swab",
   "Nasopharyngeal swab",
   "Oral swab",
   "Oral wash",
   "Oropharyngeal swab",
   "Ostomy fluid",
+  "Pancreatic fluid",
   "PCR water",
+  "Peripheral retina",
+  "Placenta",
   "Plasma",
+  "Rectal biopsy",
   "Rectal swab",
   "Saline",
-  "SHIME ascending",
-  "SHIME descending",
-  "SHIME transverse",
+  "Saliva",
+  "Sediment",
+  "Serum",
   "Skin swab",
-  "Spleen",
-  "Sterile swab",
+  "Small intestine",
+  "Soil",
+  "Sputum",
   "Surface swab",
   "Tongue swab",
-  "Whole gut"
+  "Tonsil",
+  "Tracheal aspirate",
+  "Tracheal control",
+  "Urethral swab",
+  "Urine",
+  "Water",
+  "Weighing paper",
+  "Whole gut",
+  "Large intestine mucosa",
+  "Large intestine lumen",
+]
+
+host_species_list = [
+  "Dog",
+  "Fruit fly",
+  "Human",
+  "Mouse",
+  "Naked mole rat",
+  "Pig",	
+  "Pigeon",
+  "Rabbit",
+  "Rat",
+  "Rhesus macaque",
+  None
 ]
 
 ##table to translate what these regex patterns mean
@@ -109,7 +154,7 @@ specification = MustHave(
   values_in_set("sample_type", sample_type_list), ##sample_type column can only contain values specified in sample_type_list
   values_matching("subject_id", "^[A-Za-z]"),
   values_matching("subject_id", "^[0-9A-Za-z._-]+$"),
-  values_in_set("host_species", ["Human", "Mouse", "Rat", None]),
+  values_in_set("host_species", host_species_list),
   some_value_for("host_species", "subject_id"),
   some_value_for("subject_id", "host_species"),
   some_value_for("mouse_strain", "cage_id"), ##if mouse_strain is given, a cage_id for that sample must be provided
@@ -126,7 +171,7 @@ uniq_comb(specification, "reverse_barcode_plate", "reverse_barcode_location")
 uniq_comb(specification, "forward_barcode_plate", "forward_barcode_location")
 
 specification.extend(some_value_for(c) for c in chop_mandatory) ##these columns cannot be empty
-specification.extend(values_matching(c, "^[0-9A-Za-z._+-/<>=,() ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
+specification.extend(values_matching(c, "^[0-9A-Za-z._+-/<>=,()\[\] ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
 
 for d in specification.descriptions():
   print(d)
@@ -150,32 +195,22 @@ def index():
       flash('No file selected')
       return redirect(request.url)
     if file_fp and not allowed_file(file_fp.filename):
-      flash('Please use the allowed file extensions for the metadata {tsv, csv, xls, xlsx}')
-      return redirect(request.url)
+      filename = secure_filename(file_fp.filename)
+      if(filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']):
+        flash('Please export your excel file to a .csv or .tsv extension')
+        return redirect(request.url)      
+      else:
+        flash('Please use the allowed file extensions for the metadata {.tsv, .csv}')
+        return redirect(request.url)
     ##check if file was submitted and if it has correct extensions
     if file_fp and allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
       delim = ','
 
-      ##for csv/tsv
-      if(filename.rsplit('.', 1)[1].lower() in ['csv', 'tsv']):
-        ##convert FileStorage to StringIO to read as csv/tsv object
-        string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
-        if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
-          delim = '\t'
-      ##for excel
-      else:
-        excel_open = xlrd.open_workbook(file_contents=file_fp.read())
-        if 'Template' not in excel_open.sheet_names():
-          flash("Your excel file doesn't have the 'Template' sheet")
-          return redirect(request.url)
-        else:
-          data_xls = excel_open.sheet_by_name('Template')
-          template = [data_xls.row_values(rownum) for rownum in range(data_xls.nrows)]
-          ##get the rows that don't have the formatting sentences
-          clear_sheet = [row_x for row_x in template if any([col_x for col_x in map(str,row_x) if not any(rm_str in col_x for rm_str in ['These wells are conditionally formatted to highlight errors', 'DO NOT REMOVE THE FORMATTING.'])])]
-          #print(clear_sheet)
-          string_io = [','.join(map(str, row_list)) for row_list in clear_sheet]
+      ##convert FileStorage to StringIO to read as csv/tsv object
+      string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
+      if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
+        delim = '\t'
  
       t = Table.from_csv(string_io, delimiter = delim)
       

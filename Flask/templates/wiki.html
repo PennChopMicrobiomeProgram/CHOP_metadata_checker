@@ -1867,10 +1867,18 @@ The contents within these columns cannot be empty
 <tbody>
 <tr>
 <td style="text-align:left;">
-sample_id
+SampleID
 </td>
 <td style="text-align:left;">
 sample_type
+</td>
+<td style="text-align:left;">
+box_position
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+investigator
 </td>
 <td style="text-align:left;">
 tube_barcode
@@ -1881,29 +1889,13 @@ study_group
 </tr>
 <tr>
 <td style="text-align:left;">
-investigator
-</td>
-<td style="text-align:left;">
-subject_id
+project_name
 </td>
 <td style="text-align:left;">
 box_id
 </td>
 <td style="text-align:left;">
 date_collected
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-project_name
-</td>
-<td style="text-align:left;">
-host_species
-</td>
-<td style="text-align:left;">
-box_position
-</td>
-<td style="text-align:left;">
 </td>
 </tr>
 </tbody>
@@ -1915,19 +1907,29 @@ box_position
 <tbody>
 <tr>
 <td style="text-align:left;">
-study_day
+subject_id
 </td>
 <td style="text-align:left;">
-current_antibiotics
+study_day
 </td>
 <td style="text-align:left;">
 recent_antibiotics
 </td>
 <td style="text-align:left;">
+mouse_strain
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+host_species
+</td>
+<td style="text-align:left;">
+current_antibiotics
+</td>
+<td style="text-align:left;">
 cage_id
 </td>
 <td style="text-align:left;">
-mouse_strain
 </td>
 </tr>
 </tbody>
@@ -1937,15 +1939,15 @@ mouse_strain
 <h3>Formatting</h3>
 <div id="general-cell-formatting" class="section level5">
 <h5>General cell formatting</h5>
-<p>All cells can only contain numbers, characters, spaces and the following special characters: ._+-/&lt;&gt;=|,()<br />
+<p>All cells can only contain numbers, characters, spaces and the following special characters: ._+-/&lt;&gt;=|,()[]<br />
 <br />
 </p>
 </div>
 <div id="special-cell-formatting" class="section level5">
 <h5>Special cell formatting</h5>
-<p>[sample_id] must begin with a letter and only contain numbers, characters, periods, and underscores (no other special characters)<br />
+<p>[SampleID] must begin with a letter and only contain numbers, characters, periods, and underscores (no other special characters)<br />
 [subject_id] can only contain numbers, letters, periods, dashes, and underscores<br />
-[date_collected] can only be in format yyyy-mm-dd or yyyy/mm/dd<br />
+[date_collected] can only be in format yyyy-mm-dd<br />
 [time_collected] can only be in format hh:mm:ss<br />
 [barcode] can only contain nucleotide symbols<br />
 [forward_barcode_location] and [reverse_barcode_location] can only contain 96-well plate IDs<br />
@@ -2000,16 +2002,43 @@ forward_barcode_location
 <tbody>
 <tr>
 <td style="text-align:left;">
-Human
+Dog
 </td>
 <td style="text-align:left;">
 Mouse
 </td>
 <td style="text-align:left;">
+Pigeon
+</td>
+<td style="text-align:left;">
+Rhesus macaque
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fruit fly
+</td>
+<td style="text-align:left;">
+Naked mole rat
+</td>
+<td style="text-align:left;">
+Rabbit
+</td>
+<td style="text-align:left;">
+None
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Human
+</td>
+<td style="text-align:left;">
+Pig
+</td>
+<td style="text-align:left;">
 Rat
 </td>
 <td style="text-align:left;">
-NA
 </td>
 </tr>
 </tbody>
@@ -2021,79 +2050,19 @@ NA
 <tbody>
 <tr>
 <td style="text-align:left;">
-BAL fluid
+Amnoitic fluid
 </td>
 <td style="text-align:left;">
 Cheek swab
 </td>
 <td style="text-align:left;">
-Kveim reagent
+Feed
 </td>
 <td style="text-align:left;">
-Mucosa cecum
+Microbial culture
 </td>
 <td style="text-align:left;">
-PCR water
-</td>
-<td style="text-align:left;">
-Skin swab
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Bedding
-</td>
-<td style="text-align:left;">
-Cultured cells
-</td>
-<td style="text-align:left;">
-Lab water
-</td>
-<td style="text-align:left;">
-Mucosa colon
-</td>
-<td style="text-align:left;">
-Plasma
-</td>
-<td style="text-align:left;">
-Spleen
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Breast milk
-</td>
-<td style="text-align:left;">
-Dust
-</td>
-<td style="text-align:left;">
-Lumenal contents cecum
-</td>
-<td style="text-align:left;">
-Nasopharyngeal swab
-</td>
-<td style="text-align:left;">
-Rectal swab
-</td>
-<td style="text-align:left;">
-Sterile swab
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Breast swab
-</td>
-<td style="text-align:left;">
-Environmental blank
-</td>
-<td style="text-align:left;">
-Lumenal contents colon
-</td>
-<td style="text-align:left;">
-Oral swab
-</td>
-<td style="text-align:left;">
-Saline
+Placenta
 </td>
 <td style="text-align:left;">
 Surface swab
@@ -2101,19 +2070,19 @@ Surface swab
 </tr>
 <tr>
 <td style="text-align:left;">
-Bronchoscope post-wash
+BAL
 </td>
 <td style="text-align:left;">
-Esophageal biopsy
+Crop
 </td>
 <td style="text-align:left;">
-Microbial culture
+Fistula
 </td>
 <td style="text-align:left;">
-Oral wash
+Mock DNA
 </td>
 <td style="text-align:left;">
-SHIME ascending
+Plasma
 </td>
 <td style="text-align:left;">
 Tongue swab
@@ -2121,19 +2090,159 @@ Tongue swab
 </tr>
 <tr>
 <td style="text-align:left;">
-Bronchoscope pre-wash
+Bedding
 </td>
 <td style="text-align:left;">
-Feces
+Dental plaque
 </td>
 <td style="text-align:left;">
-Mock DNA
+Fistula swab
+</td>
+<td style="text-align:left;">
+Mouse chow
+</td>
+<td style="text-align:left;">
+Rectal biopsy
+</td>
+<td style="text-align:left;">
+Tonsil
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Biofilm
+</td>
+<td style="text-align:left;">
+Duodenum
+</td>
+<td style="text-align:left;">
+Fly food
+</td>
+<td style="text-align:left;">
+Nasal swab
+</td>
+<td style="text-align:left;">
+Rectal swab
+</td>
+<td style="text-align:left;">
+Tracheal aspirate
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bioreactor
+</td>
+<td style="text-align:left;">
+Dust
+</td>
+<td style="text-align:left;">
+Fruit fly
+</td>
+<td style="text-align:left;">
+Nasopharyngeal swab
+</td>
+<td style="text-align:left;">
+Saline
+</td>
+<td style="text-align:left;">
+Tracheal control
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blank swab
+</td>
+<td style="text-align:left;">
+Elution buffer
+</td>
+<td style="text-align:left;">
+Ileostomy fluid
+</td>
+<td style="text-align:left;">
+Oral swab
+</td>
+<td style="text-align:left;">
+Saliva
+</td>
+<td style="text-align:left;">
+Urethral swab
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blood
+</td>
+<td style="text-align:left;">
+Empty well
+</td>
+<td style="text-align:left;">
+Ileum
+</td>
+<td style="text-align:left;">
+Oral wash
+</td>
+<td style="text-align:left;">
+Sediment
+</td>
+<td style="text-align:left;">
+Urine
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Breast milk
+</td>
+<td style="text-align:left;">
+Endometrial swab
+</td>
+<td style="text-align:left;">
+Kveim reagent
 </td>
 <td style="text-align:left;">
 Oropharyngeal swab
 </td>
 <td style="text-align:left;">
-SHIME descending
+Serum
+</td>
+<td style="text-align:left;">
+Water
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Buffer
+</td>
+<td style="text-align:left;">
+Environmental control
+</td>
+<td style="text-align:left;">
+Lab water
+</td>
+<td style="text-align:left;">
+Ostomy fluid
+</td>
+<td style="text-align:left;">
+Skin swab
+</td>
+<td style="text-align:left;">
+Weighing paper
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cecum
+</td>
+<td style="text-align:left;">
+Esophageal biopsy
+</td>
+<td style="text-align:left;">
+Macular Retina
+</td>
+<td style="text-align:left;">
+Pancreatic fluid
+</td>
+<td style="text-align:left;">
+Small intestine
 </td>
 <td style="text-align:left;">
 Whole gut
@@ -2141,21 +2250,42 @@ Whole gut
 </tr>
 <tr>
 <td style="text-align:left;">
-Bronchoscope tip
+Cell lysate
 </td>
 <td style="text-align:left;">
-In vivo cells
+Esophagus
 </td>
 <td style="text-align:left;">
-Mouse chow
+Meconium
 </td>
 <td style="text-align:left;">
-Ostomy fluid
+PCR water
 </td>
 <td style="text-align:left;">
-SHIME transverse
+Soil
 </td>
 <td style="text-align:left;">
+Large intestine mucosa
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cervical swab
+</td>
+<td style="text-align:left;">
+Feces
+</td>
+<td style="text-align:left;">
+Medium
+</td>
+<td style="text-align:left;">
+Peripheral retina
+</td>
+<td style="text-align:left;">
+Sputum
+</td>
+<td style="text-align:left;">
+Large intestine lumen
 </td>
 </tr>
 </tbody>
