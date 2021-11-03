@@ -271,7 +271,7 @@ df_wrong %>%
               popover = ifelse(!df_wrong$host_species %in% c("Human", "Mouse", "Rat", "NA"), "Please use only pre-selected host_species", "")) %>%
   column_spec(3,
               background = ifelse(!grepl("^[0-9A-Za-z._+-/<>=|,() ]+$", df_wrong$study_group), "#f5c6ca", "#FFFFFF"),
-              popover = ifelse(!grepl("^[0-9A-Za-z._+-/<>=|,() ]+$", df_wrong$study_group), "Please us correct formatting specified above", "")) %>%
+              popover = ifelse(!grepl("^[0-9A-Za-z._+-/<>=|,() ]+$", df_wrong$study_group), "Please use the correct formatting specified above", "")) %>%
   column_spec(4:5,
               background = ifelse(duplicated(paste(df_wrong$box_id, df_wrong$box_position))|duplicated(paste(df_wrong$box_id, df_wrong$box_position), fromLast = TRUE), "#f5c6ca", "#FFFFFF"),
               popover = ifelse(duplicated(paste(df_wrong$box_id, df_wrong$box_position))|duplicated(paste(df_wrong$box_id, df_wrong$box_position), fromLast = TRUE), "Please use unique values", ""))

@@ -197,7 +197,7 @@ def index():
     if file_fp and not allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
       if(filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']):
-        flash('Please export your excel file to a .csv or .tsv extension')
+        flash('Please export your excel file as .csv or .tsv first')
         return redirect(request.url)      
       else:
         flash('Please use the allowed file extensions for the metadata {.tsv, .csv}')
@@ -208,7 +208,7 @@ def index():
       delim = ','
 
       ##convert FileStorage to StringIO to read as csv/tsv object
-      string_io = io.StringIO(file_fp.read().decode('utf-8'), newline=None)
+      string_io = io.StringIO(file_fp.read().decode('utf-8-sig'), newline=None)
       if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
         delim = '\t'
  
@@ -230,10 +230,10 @@ def index():
 
       ##create dictionaries for misformmated cell highlighting and popover text
       header_issues = {}
-      hi_lite_missing = {}
-      hi_lite_mismatch = {}
-      hi_lite_repeating = {}
-      hi_lite_not_allowed = {}
+      highlight_missing = {}
+      highlight_mismatch = {}
+      highlight_repeating = {}
+      highlight_not_allowed = {}
       
       ##print requirements and save the errors in the dictionarys to highlight in table
       for req, res in specification.check(t):
@@ -244,10 +244,10 @@ def index():
           if(res.idxs is not None):
             for row_num in res.idxs:
               for col_nam in req.colnames:
-                if row_num in hi_lite_missing.keys():
-                  hi_lite_missing = {**hi_lite_missing, **{row_num: hi_lite_missing[row_num] + [col_nam]}}
+                if row_num in highlight_missing.keys():
+                  highlight_missing = {**highlight_missing, **{row_num: highlight_missing[row_num] + [col_nam]}}
                 else:
-                  hi_lite_missing = {**hi_lite_missing, **{row_num: [col_nam]}}
+                  highlight_missing = {**highlight_missing, **{row_num: [col_nam]}}
             ##populate header dictionary for empty cell dictionary
             if len(req.colnames) == 1:
               header_issues = {**header_issues, **{req.colnames[0]: "Empty cell"}}
@@ -256,18 +256,18 @@ def index():
               header_issues = {**header_issues, **{req.colnames[0]: (" + ".join(req.colnames) + " must be filled in together")}}
           ##populate mismatch dictionary for illegally formmated cells (e.g. containing specials characters)
           if(res.not_matching is not None and hasattr(req, "colname")):
-            hi_lite_mismatch = {**hi_lite_mismatch, **{cells : req.colname for cells in res.not_matching}}
+            highlight_mismatch = {**highlight_mismatch, **{cells : req.colname for cells in res.not_matching}}
             header_issues = {**header_issues, **{req.colname: "Wrong formatting"}}
           ##populate header dictionary with column names with wrong format
           if(res.not_matching is not None and not hasattr(req, "colname")):
             header_issues = {**header_issues, **{col_names: "Forbidden characters in column name" for col_names in res.not_matching}}
           ##populate repeating dictionary with repeating cells
           if(res.repeated is not None):
-            hi_lite_repeating = {**hi_lite_repeating, **{cells[0][0] : req.colnames[0] for cells in res.repeated}}
+            highlight_repeating = {**highlight_repeating, **{cells[0][0] : req.colnames[0] for cells in res.repeated}}
             header_issues = {**header_issues, **{req.colnames[0]: "Repeated values"}}
           ##populate dictionary with cells that does not hold a pre-selected option
           if(res.not_allowed is not None):
-            hi_lite_not_allowed = {**hi_lite_not_allowed, **{cells : req.colname for cells in res.not_allowed}}
+            highlight_not_allowed = {**highlight_not_allowed, **{cells : req.colname for cells in res.not_allowed}}
             header_issues = {**header_issues, **{req.colname: "Use only allowed selections"}}
         ##print error messages
         if res.message() != 'OK' and "Doesn't apply" not in res.message():
@@ -276,8 +276,8 @@ def index():
             if keys in req.description():
               modified_descrip = modified_descrip.split('match')[0] + regex_translate[keys]
           flash(modified_descrip + ": " + res.message())
-      #print(hi_lite_repeating)
-      return render_template('index.html', filename=filename, headers=headers, rows=rows, table=t, missing=hi_lite_missing, mismatch=hi_lite_mismatch, repeating=hi_lite_repeating, not_allowed=hi_lite_not_allowed, header_issues=header_issues)
+      #print(highlight_repeating)
+      return render_template('index.html', filename=filename, headers=headers, rows=rows, table=t, missing=highlight_missing, mismatch=highlight_mismatch, repeating=highlight_repeating, not_allowed=highlight_not_allowed, header_issues=header_issues)
     return redirect(request.url)
 
 @app.route('/wiki')
