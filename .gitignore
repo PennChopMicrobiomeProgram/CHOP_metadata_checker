@@ -1,2 +1,5 @@
 #Dotenv
 .env
+
+__pycache__
+/test.db
