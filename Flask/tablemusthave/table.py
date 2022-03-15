@@ -40,6 +40,9 @@ class Table:
     def get(self, colname):
         return self.data.get(colname)
 
+    def set(self, colname, v):
+        self.data[colname] = v
+
     def __contains__(self, colname):
         return colname in self.data
 

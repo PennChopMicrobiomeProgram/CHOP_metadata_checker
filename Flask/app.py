@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, session
-import csv, io, os
+import csv, io, os, re
 import pandas as pd
 from werkzeug.utils import secure_filename
 from tablemusthave import *
@@ -11,7 +11,7 @@ ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 #check if period in filename and has correct extensions
 def allowed_file(filename):
   return '.' in filename and \
-    filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    filename.rsplit('.', 1)[-1].lower() in ALLOWED_EXTENSIONS
 
 chop_mandatory = [
   "SampleID",
@@ -174,7 +174,8 @@ specification.extend(some_value_for(c) for c in chop_mandatory) ##these columns 
 specification.extend(values_matching(c, "^[0-9A-Za-z._+-/<>=,()\[\] ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
 
 for d in specification.descriptions():
-  print(d)
+  #print(d)
+  None
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
@@ -200,7 +201,7 @@ def index():
         flash('Please export your excel file as .csv or .tsv first')
         return redirect(request.url)      
       else:
-        flash('Please use the allowed file extensions for the metadata {.tsv, .csv}')
+        flash('Please use the allowed file extensions for the metadata ' + str(ALLOWED_EXTENSIONS))
         return redirect(request.url)
     ##check if file was submitted and if it has correct extensions
     if file_fp and allowed_file(file_fp.filename):
@@ -209,17 +210,26 @@ def index():
 
       ##convert FileStorage to StringIO to read as csv/tsv object
       string_io = io.StringIO(file_fp.read().decode('utf-8-sig'), newline=None)
-      if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
+      if(filename.rsplit('.', 1)[-1].lower() == 'tsv'):
         delim = '\t'
  
       t = Table.from_csv(string_io, delimiter = delim)
+
+      ##do some preliminary cleanup to data in table
+      headers = t.colnames()
+      try:
+        t.set("SampleID", list(map(lambda sample: re.sub(r'[^0-9A-Za-z._]', ".", sample), t.get("SampleID")))) ##replace invalid chars in SampleID field with '.'
+        t.set("subject_id", list(map(lambda sample: re.sub(r'[^0-9A-Za-z._-]', ".", sample), t.get("subject_id")))) ##replace invalid chars in subject_id field with '.'
+        ##delete completely empty rows???
+        
+      except Exception:
+        None
       
       ##get metadata table to print on webpage
-      headers = t.colnames()
-      sample_num = len(t.get(t.colnames()[0]))
+      sample_num = len(t.get(headers[0]))
       rows = list(range(0, sample_num))
 
-      #overall check to see if metadata satisfies all requirements
+      ##overall check to see if metadata satisfies all requirements
       checks = specification.check(t)
       all_msg = [msg[1].message() for msg in checks]
       print(all_msg)
