@@ -3,4 +3,7 @@
 
 __pycache__
 /test.db
-/logs/
+
+logs/
+*.egg-info/
+build
