@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+src/metadatacli/__init__.py
+src/metadatacli/command.py
+src/metadatacli.egg-info/PKG-INFO
+src/metadatacli.egg-info/SOURCES.txt
+src/metadatacli.egg-info/dependency_links.txt
+src/metadatacli.egg-info/entry_points.txt
+src/metadatacli.egg-info/top_level.txt
