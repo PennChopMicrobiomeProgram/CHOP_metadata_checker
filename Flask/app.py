@@ -182,51 +182,45 @@ for d in specification.descriptions():
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
 
-#@app.route('/upload/<project_code>', methods=['GET', 'POST'])
-#def login(project_code):
-#    if request.method == 'POST':
-#        return render_template('index.html', filename="Uploaded")
-#    else:
-#        return render_template('index.html', filename="Select file ...")
-
 @app.route('/favicon.ico')
 def favicon():
   return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+                              
+@app.route('/wiki')
+def wiki():
+  return render_template('wiki.html')
 
-#@app.route('/project/<project_code>')
-#def project(project_code):
-#  return render_template('index.html', filename=filename)
+@app.route('/review/<project_code>')
+def review(project_code):
+  if request.method == 'POST':
+    return render_template('final.html', confirm=True)
+  else:
+    return render_template('final.html', confirm = False, project_code=project_code)
 
 @app.route('/<project_code>', methods=['GET', 'POST'])
 def index(project_code):
   print(url_for('index', project_code=project_code))
   filename = "Select file ..."
   if request.method == 'GET':
-    print("-1: " + project_code)
     return render_template('index.html', filename=filename, project_code=project_code)
   elif request.method == 'POST':
-    print("POST but nothing: " + project_code + " " + str(request.args))
     ##check if post request has a file
     if 'metadata_upload' not in request.files:
       flash('Please select a file')
-      print("0: " + project_code)
       return redirect(url_for('index', project_code=project_code))
     file_fp = request.files['metadata_upload']
     ##check if user submitted a file
     if file_fp.filename == '':
       flash('No file selected')
-      print("1: " + project_code)
       return redirect(url_for('index', project_code=project_code))
     if file_fp and not allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
       if(filename.rsplit('.', 1)[-1].lower() in ['xls', 'xlsx']):
         flash('Please export your excel file as .csv or .tsv first')
-        print("2: " + project_code)
         return redirect(url_for('index', project_code=project_code))      
       else:
         flash('Please use the allowed file extensions for the metadata {.tsv, .csv}')
-        print("3: " + project_code)
         return redirect(url_for('index', project_code=project_code))
     ##check if file was submitted and if it has correct extensions
     if file_fp and allowed_file(file_fp.filename):
@@ -304,12 +298,7 @@ def index(project_code):
           flash(modified_descrip + ": " + res.message())
       #print(highlight_repeating)
       return render_template('index.html', filename=filename, project_code=project_code, headers=headers, rows=rows, table=t, missing=highlight_missing, mismatch=highlight_mismatch, repeating=highlight_repeating, not_allowed=highlight_not_allowed, header_issues=header_issues)
-    print("4: " + project_code)
     return (url_for('index', project_code=project_code))
-
-@app.route('/wiki')
-def wiki():
-  return render_template('wiki.html')
 
 if __name__ == "__main__":
   app.run(debug=True)
