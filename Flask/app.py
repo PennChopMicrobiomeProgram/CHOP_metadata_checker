@@ -1,11 +1,9 @@
-from pyexpat.errors import messages
-import re
 from tkinter import PROJECTING
 from flask import Flask, render_template, url_for, request, redirect, flash, session, send_from_directory
-import csv, io, os
-import pandas as pd
+import io, os
 from werkzeug.utils import secure_filename
 from tablemusthave import *
+from db.db import MetadataDB
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv()) ##allows me to get secret key
 
@@ -181,6 +179,7 @@ for d in specification.descriptions():
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
+db_fp = os.environ.get('DB_FP')
 
 @app.route('/favicon.ico')
 def favicon():
@@ -191,12 +190,9 @@ def favicon():
 def wiki():
   return render_template('wiki.html')
 
-@app.route('/dne/<project_code>')
-def dne(project_code):
-  return render_template('dne.html', project_code=project_code)
-
 @app.route('/review/<project_code>')
 def review(project_code):
+  db = MetadataDB(db_fp)
   if request.method == 'POST':
     return render_template('final.html', confirm=True)
   else:
@@ -206,7 +202,12 @@ def review(project_code):
 def index(project_code):
   print(url_for('index', project_code=project_code))
   filename = "Select file ..."
-  if request.method == 'GET':
+  ##ideally we would have one db object for the whole app, seems like routes spawn their own threads though,
+  ##which sqlite doesn't play nice with
+  db = MetadataDB(db_fp)
+  if not db.project_hash_collision(project_code):
+    return render_template('dne.html', project_code=project_code)
+  elif request.method == 'GET':
     return render_template('index.html', filename=filename, project_code=project_code)
   elif request.method == 'POST':
     ##check if post request has a file
