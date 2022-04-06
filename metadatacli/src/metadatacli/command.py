@@ -9,7 +9,7 @@ from .db import MetadataDB
 
 def _create_project(args, db):
     code = createProject(db, args.project_name, args.customer_name, args.customer_email)
-    url = "http://127.0.0.1:5000/?code=" + code
+    url = "http://127.0.0.1:5000/" + code
     print(url)
     return code
 

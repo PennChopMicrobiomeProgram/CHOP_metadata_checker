@@ -191,12 +191,16 @@ def favicon():
 def wiki():
   return render_template('wiki.html')
 
+@app.route('/dne/<project_code>')
+def dne(project_code):
+  return render_template('dne.html', project_code=project_code)
+
 @app.route('/review/<project_code>')
 def review(project_code):
   if request.method == 'POST':
     return render_template('final.html', confirm=True)
   else:
-    return render_template('final.html', confirm = False, project_code=project_code)
+    return render_template('final.html', confirm=False, project_code=project_code)
 
 @app.route('/<project_code>', methods=['GET', 'POST'])
 def index(project_code):
