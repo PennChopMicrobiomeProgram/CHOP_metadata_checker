@@ -1,8 +1,9 @@
 import argparse
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv('CHOP.env'))
+load_dotenv(Path.cwd() / '..' / 'CHOP.env')
 
 from .createProject import createProject
 from .db import MetadataDB

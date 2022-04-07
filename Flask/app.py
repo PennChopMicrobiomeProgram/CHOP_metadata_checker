@@ -4,8 +4,9 @@ import io, os
 from werkzeug.utils import secure_filename
 from tablemusthave import *
 from db.db import MetadataDB
+from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv('CHOP.env'))
+load_dotenv(Path.cwd() / '..' / 'CHOP.env')
 
 ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 
