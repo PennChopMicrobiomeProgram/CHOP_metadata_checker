@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 from tablemusthave import *
 from db.db import MetadataDB
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv()) ##allows me to get secret key
+load_dotenv(find_dotenv('CHOP.env'))
 
 ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 

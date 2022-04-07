@@ -1,5 +1,5 @@
 #Dotenv
-.env
+CHOP.env
 
 __pycache__
 /test.db
