@@ -34,6 +34,10 @@
           </ul>
         {% endif %}
       {% endwith %}
+
+      {% if checks_passed %}
+        <a href="{{ url_for('review', project_code=project_code) }}" class="btn btn-success">Submit Metadata</a>
+      {% endif %}
     </div>
     <div class="container-fluid" style="min-height:95%; ">
       <div class="mt-2">

@@ -1,46 +1,63 @@
+import datetime
 import sqlite3
-import sys
 
 class MetadataDB(object):
     def __init__(self, database_fp):
         self.db: str = database_fp
         self.con: sqlite3.Connection = sqlite3.connect(self.db)
     
-    create_projectQ = (
-        "INSERT INTO projects "
-        "(`project_name`, `contact_name`, `contact_email`, `ticket_code`) "
-        "VALUES (?, ?, ?, ?)")
+    create_annotationQ = (
+        "INSERT INTO annotations "
+        "(`sample_accession`, `attr`, `val`) "
+        "VALUES (?, ?, ?)")
+
+    create_sampleQ = (
+        "INSERT INTO samples "
+        "(`sample_name`, `submission_id`, `sample_type`, `subject_id`, `host_species`"
+        "VALUES (?, ?, ?, ?, ?)")
     
-    get_projectQ = (
-        "SELECT * "
-        "FROM projects "
-        "WHERE `project_name`=?")
+    create_submissionQ = (
+        "INSERT INTO submissions "
+        "(`project_id`, `time_submitted`, `comment`) "
+        "VALUES (?, ?, ?)")
     
     find_project_by_codeQ = (
         "SELECT * "
         "FROM projects "
         "WHERE `ticket_code`=?")
 
-    # Creates a new project in the db
-    # @param project_name is the project name
-    # @param contact_name is the contact name
-    # @param contact_email is the contact email
-    # @param code is the project code
-    def create_project(self: object, project_name: str, contact_name: str, contact_email: str, code: str):
+    # Creates a new annotation for a sample
+    # @param sample_accession is the accession of the sample this annotation is for
+    # @param attr is the attribute
+    # @param val is the value
+    def create_annotation(self: object, sample_accession: int, attr: str, val: str):
         cur = self.con.cursor()
-        try:
-            cur.execute(self.create_projectQ, (project_name, contact_name, contact_email, code, ))
-        except sqlite3.IntegrityError as e:
-            print(e)
-            cur.execute(self.get_projectQ, (project_name, ))
-            self.con.commit()
-            res = cur.fetchall()
-            if len(res) > 0:
-                print(str(res[0]) + " already exists")
-                sys.exit()
+        cur.execute(self.create_annotationQ, (sample_accession, attr, val))
         self.con.commit()
         cur.close()
     
+    # Creates a new sample for a submission
+    # @param sample_name is the sample name
+    # @param submission_id is the id of the submission this sample is a part of
+    # @param sample_type is the sample type
+    # @param subject_id is the subject id
+    # @param host_species is the host species
+    def create_sample(self: object, sample_name: str, submission_id: int, sample_type: str, subject_id: str, host_species: str):
+        cur = self.con.cursor()
+        cur.execute(self.create_sampleQ, (sample_name, submission_id, sample_type, subject_id, host_species))
+        self.con.commit()
+        cur.close()
+
+    # Creates a new submission for a project
+    # @param project_id is the id for the project this is a submission for
+    # @param comment is the associated comment
+    def create_submission(self: object, project_id: int, comment: str):
+        time_submitted = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        cur = self.con.cursor()
+        cur.execute(self.create_submissionQ, (project_id, time_submitted, comment))
+        self.con.commit()
+        cur.close()
+
     # Determine if the given project code already exists in the db
     # @param code is the project code to check for
     # @return is True if code already exists, False otherwise
@@ -57,3 +74,16 @@ class MetadataDB(object):
             return True
         else:
             sqlite3.IntegrityError("Something's gone wrong, there shouldn't be more than one instance of ticket_code " + code + " in the projects table.")
+
+    # Get a project's integer id from it's unique hex hash
+    # @param code is the project hash
+    # @return is the project's id
+    def project_id_from_project_code(self: object, code: str) -> int:
+        cur = self.con.cursor()
+        cur.execute(self.find_project_by_codeQ, (code, ))
+        self.con.commit()
+        res = cur.fetchall()
+        cur.close()
+        
+        print(res)
+        return res[0][0]

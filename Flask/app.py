@@ -190,13 +190,10 @@ def favicon():
 def wiki():
   return render_template('wiki.html')
 
-@app.route('/review/<project_code>')
+@app.route('/review/<project_code>', methods=['GET', 'POST'])
 def review(project_code):
   db = MetadataDB(db_fp)
-  if request.method == 'POST':
-    return render_template('final.html', confirm=True)
-  else:
-    return render_template('final.html', confirm=False, project_code=project_code)
+  return render_template('final.html', project_code=project_code)
 
 @app.route('/<project_code>', methods=['GET', 'POST'])
 def index(project_code):
@@ -247,11 +244,14 @@ def index(project_code):
       #overall check to see if metadata satisfies all requirements
       checks = specification.check(t)
       all_msg = [msg[1].message() for msg in checks]
+      checks_passed = False
       print(all_msg)
       if(all(msg == 'OK' or "Doesn't apply" in msg for msg in all_msg)):
         flash('Your metadata is good to go!')
+        checks_passed = True
       else:
         flash('Your metadata still has errors!')
+        checks_passed = False
 
       ##create dictionaries for misformmated cell highlighting and popover text
       header_issues = {}
@@ -302,8 +302,8 @@ def index(project_code):
               modified_descrip = modified_descrip.split('match')[0] + regex_translate[keys]
           flash(modified_descrip + ": " + res.message())
       #print(highlight_repeating)
-      return render_template('index.html', filename=filename, project_code=project_code, headers=headers, rows=rows, table=t, missing=highlight_missing, mismatch=highlight_mismatch, repeating=highlight_repeating, not_allowed=highlight_not_allowed, header_issues=header_issues)
-    return (url_for('index', project_code=project_code))
+      return render_template('index.html', filename=filename, project_code=project_code, headers=headers, rows=rows, table=t, missing=highlight_missing, mismatch=highlight_mismatch, repeating=highlight_repeating, not_allowed=highlight_not_allowed, header_issues=header_issues, checks_passed=checks_passed)
+    return redirect(url_for('index', project_code=project_code))
 
 if __name__ == "__main__":
   app.run(debug=True)
