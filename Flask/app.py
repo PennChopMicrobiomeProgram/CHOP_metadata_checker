@@ -180,6 +180,7 @@ for d in specification.descriptions():
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
 db_fp = os.environ.get('DB_FP')
+t = Table([], []) # Declare as global var so it's accessible across pages easily
 
 @app.route('/favicon.ico')
 def favicon():
@@ -192,7 +193,25 @@ def wiki():
 
 @app.route('/review/<project_code>', methods=['GET', 'POST'])
 def review(project_code):
-  db = MetadataDB(db_fp)
+  if request.method == 'POST':
+    ##submit metadata
+    db = MetadataDB(db_fp)
+    ##create submission
+    print(request.form['comment'])
+    project_id = db.project_id_from_project_code(project_code)
+    submission_id = db.create_submission(project_id, request.form['comment'])
+    ##create samples
+    cols = t.colnames()
+    indeces = [cols.index('SampleID'), cols.index('SampleType'), cols.index('subject_id'), cols.index('host_species')]
+    num_samples = len(t.get(cols[indeces[0]]))
+
+    for i in range(num_samples):
+      sample_id = db.create_sample(t.get_element('SampleID', i), submission_id, t.get_element('SampleType', i), t.get_element('subject_id', i), t.get_element('host_species', i))
+      for j in range(len(cols)):
+        ##create annotations
+        if j not in indeces:
+          db.create_annotation(sample_id, cols[j], t.get_element(cols[j], i))
+  
   return render_template('final.html', project_code=project_code)
 
 @app.route('/<project_code>', methods=['GET', 'POST'])
@@ -233,7 +252,8 @@ def index(project_code):
       string_io = io.StringIO(file_fp.read().decode('utf-8-sig'), newline=None)
       if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
         delim = '\t'
- 
+
+      global t
       t = Table.from_csv(string_io, delimiter = delim)
       
       ##get metadata table to print on webpage

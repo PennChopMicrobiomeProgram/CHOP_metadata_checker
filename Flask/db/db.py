@@ -13,7 +13,7 @@ class MetadataDB(object):
 
     create_sampleQ = (
         "INSERT INTO samples "
-        "(`sample_name`, `submission_id`, `sample_type`, `subject_id`, `host_species`"
+        "(`sample_name`, `submission_id`, `sample_type`, `subject_id`, `host_species`)"
         "VALUES (?, ?, ?, ?, ?)")
     
     create_submissionQ = (
@@ -25,6 +25,16 @@ class MetadataDB(object):
         "SELECT * "
         "FROM projects "
         "WHERE `ticket_code`=?")
+    
+    find_sample_by_name_and_idQ = (
+        "SELECT `sample_accession` "
+        "fROM samples "
+        "WHERE `sample_name`=? AND `submission_id`=?")
+    
+    find_submission_by_timeQ = (
+        "SELECT `submission_id` "
+        "FROM submissions "
+        "WHERE `time_submitted`=?")
 
     # Creates a new annotation for a sample
     # @param sample_accession is the accession of the sample this annotation is for
@@ -42,21 +52,35 @@ class MetadataDB(object):
     # @param sample_type is the sample type
     # @param subject_id is the subject id
     # @param host_species is the host species
-    def create_sample(self: object, sample_name: str, submission_id: int, sample_type: str, subject_id: str, host_species: str):
+    # @return is the accession of the new sample
+    def create_sample(self: object, sample_name: str, submission_id: int, sample_type: str, subject_id: str, host_species: str) -> int:
         cur = self.con.cursor()
         cur.execute(self.create_sampleQ, (sample_name, submission_id, sample_type, subject_id, host_species))
         self.con.commit()
+
+        cur.execute(self.find_sample_by_name_and_idQ, (sample_name, submission_id))
+        self.con.commit()
+        res = cur.fetchall()
         cur.close()
+
+        return res[0][0]
 
     # Creates a new submission for a project
     # @param project_id is the id for the project this is a submission for
     # @param comment is the associated comment
-    def create_submission(self: object, project_id: int, comment: str):
+    # @return is the id of the new submission
+    def create_submission(self: object, project_id: int, comment: str) -> int:
         time_submitted = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         cur = self.con.cursor()
         cur.execute(self.create_submissionQ, (project_id, time_submitted, comment))
         self.con.commit()
+
+        cur.execute(self.find_submission_by_timeQ, (time_submitted, ))
+        self.con.commit()
+        res = cur.fetchall()
         cur.close()
+
+        return res[0][0]
 
     # Determine if the given project code already exists in the db
     # @param code is the project code to check for
@@ -84,6 +108,5 @@ class MetadataDB(object):
         self.con.commit()
         res = cur.fetchall()
         cur.close()
-        
-        print(res)
+
         return res[0][0]
