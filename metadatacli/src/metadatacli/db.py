@@ -1,11 +1,10 @@
-from distutils.log import error
 import sqlite3
 import sys
 
 class MetadataDB(object):
     def __init__(self, database_fp):
-        self.db = database_fp
-        self.con = sqlite3.connect(self.db)
+        self.db: str = database_fp
+        self.con: sqlite3.Connection = sqlite3.connect(self.db)
     
     create_projectQ = (
         "INSERT INTO projects "
@@ -22,6 +21,11 @@ class MetadataDB(object):
         "FROM projects "
         "WHERE `ticket_code`=?")
 
+    # Creates a new project in the db
+    # @param project_name is the project name
+    # @param contact_name is the contact name
+    # @param contact_email is the contact email
+    # @param code is the project code
     def create_project(self: object, project_name: str, contact_name: str, contact_email: str, code: str):
         cur = self.con.cursor()
         try:
@@ -37,6 +41,9 @@ class MetadataDB(object):
         self.con.commit()
         cur.close()
     
+    # Determine if the given project code already exists in the db
+    # @param code is the project code to check for
+    # @return is True if code already exists, False otherwise
     def project_hash_collision(self: object, code: str) -> bool:
         cur = self.con.cursor()
         cur.execute(self.find_project_by_codeQ, (code, ))

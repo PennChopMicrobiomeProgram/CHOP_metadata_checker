@@ -1,15 +1,16 @@
 import argparse
-import csv
 import os
-import shutil
-import sys
+from pathlib import Path
+
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(Path.cwd() / '..' / 'CHOP.env')
 
 from .createProject import createProject
 from .db import MetadataDB
 
 def _create_project(args, db):
     code = createProject(db, args.project_name, args.customer_name, args.customer_email)
-    url = "http://127.0.0.1:5000/?code=" + code
+    url = "http://127.0.0.1:5000/" + code
     print(url)
     return code
 
@@ -25,7 +26,7 @@ def main(argv=None):
     logF = open("logs/main.log", "w")
     print("Writing logs to: " + logF.name)
 
-    db = MetadataDB("/mnt/d/Penn/CHOP_metadata_checker/test.db")
+    db = MetadataDB(os.environ.get('DB_FP'))
 
     logF.write("Creating project...")
     code = _create_project(args, db)
