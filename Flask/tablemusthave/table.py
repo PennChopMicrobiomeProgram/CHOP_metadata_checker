@@ -39,9 +39,6 @@ class Table:
 
     def get(self, colname):
         return self.data.get(colname)
-    
-    def get_element(self, colname, index):
-        return self.data.get(colname)[index]
 
     def __contains__(self, colname):
         return colname in self.data

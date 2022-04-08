@@ -1,12 +1,10 @@
-from tkinter import PROJECTING
-from flask import Flask, render_template, url_for, request, redirect, flash, session, send_from_directory
-import io, os
+from flask import Flask, render_template, url_for, request, redirect, flash, session
+import csv, io, os
+import pandas as pd
 from werkzeug.utils import secure_filename
 from tablemusthave import *
-from db.db import MetadataDB
-from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(Path.cwd() / '..' / 'CHOP.env')
+load_dotenv(find_dotenv()) ##allows me to get secret key
 
 ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 
@@ -180,70 +178,30 @@ for d in specification.descriptions():
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
-db_fp = os.environ.get('DB_FP')
-t = Table([], []) # Declare as global var so it's accessible across pages easily
 
-@app.route('/favicon.ico')
-def favicon():
-  return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-                              
-@app.route('/wiki')
-def wiki():
-  return render_template('wiki.html')
-
-@app.route('/review/<project_code>', methods=['GET', 'POST'])
-def review(project_code):
-  if request.method == 'POST':
-    ##submit metadata
-    db = MetadataDB(db_fp)
-    ##create submission
-    print(request.form['comment'])
-    project_id = db.project_id_from_project_code(project_code)
-    submission_id = db.create_submission(project_id, request.form['comment'])
-    ##create samples
-    cols = t.colnames()
-    indeces = [cols.index('SampleID'), cols.index('SampleType'), cols.index('subject_id'), cols.index('host_species')]
-    num_samples = len(t.get(cols[indeces[0]]))
-
-    for i in range(num_samples):
-      sample_id = db.create_sample(t.get_element('SampleID', i), submission_id, t.get_element('SampleType', i), t.get_element('subject_id', i), t.get_element('host_species', i))
-      for j in range(len(cols)):
-        ##create annotations
-        if j not in indeces:
-          db.create_annotation(sample_id, cols[j], t.get_element(cols[j], i))
-  
-  return render_template('final.html', project_code=project_code)
-
-@app.route('/<project_code>', methods=['GET', 'POST'])
-def index(project_code):
-  print(url_for('index', project_code=project_code))
+@app.route('/', methods=['GET', 'POST'])
+def index():
   filename = "Select file ..."
-  ##ideally we would have one db object for the whole app, seems like routes spawn their own threads though,
-  ##which sqlite doesn't play nice with
-  db = MetadataDB(db_fp)
-  if not db.project_hash_collision(project_code):
-    return render_template('dne.html', project_code=project_code)
-  elif request.method == 'GET':
-    return render_template('index.html', filename=filename, project_code=project_code)
+  if request.method == 'GET':
+    return render_template('index.html', filename=filename)
   elif request.method == 'POST':
     ##check if post request has a file
     if 'metadata_upload' not in request.files:
       flash('Please select a file')
-      return redirect(url_for('index', project_code=project_code))
+      return redirect(request.url)
     file_fp = request.files['metadata_upload']
     ##check if user submitted a file
     if file_fp.filename == '':
       flash('No file selected')
-      return redirect(url_for('index', project_code=project_code))
+      return redirect(request.url)
     if file_fp and not allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
-      if(filename.rsplit('.', 1)[-1].lower() in ['xls', 'xlsx']):
+      if(filename.rsplit('.', 1)[1].lower() in ['xls', 'xlsx']):
         flash('Please export your excel file as .csv or .tsv first')
-        return redirect(url_for('index', project_code=project_code))      
+        return redirect(request.url)      
       else:
         flash('Please use the allowed file extensions for the metadata {.tsv, .csv}')
-        return redirect(url_for('index', project_code=project_code))
+        return redirect(request.url)
     ##check if file was submitted and if it has correct extensions
     if file_fp and allowed_file(file_fp.filename):
       filename = secure_filename(file_fp.filename)
@@ -253,8 +211,7 @@ def index(project_code):
       string_io = io.StringIO(file_fp.read().decode('utf-8-sig'), newline=None)
       if(filename.rsplit('.', 1)[1].lower() == 'tsv'):
         delim = '\t'
-
-      global t
+ 
       t = Table.from_csv(string_io, delimiter = delim)
       
       ##get metadata table to print on webpage
@@ -265,14 +222,11 @@ def index(project_code):
       #overall check to see if metadata satisfies all requirements
       checks = specification.check(t)
       all_msg = [msg[1].message() for msg in checks]
-      checks_passed = False
       print(all_msg)
       if(all(msg == 'OK' or "Doesn't apply" in msg for msg in all_msg)):
         flash('Your metadata is good to go!')
-        checks_passed = True
       else:
         flash('Your metadata still has errors!')
-        checks_passed = False
 
       ##create dictionaries for misformmated cell highlighting and popover text
       header_issues = {}
@@ -323,8 +277,12 @@ def index(project_code):
               modified_descrip = modified_descrip.split('match')[0] + regex_translate[keys]
           flash(modified_descrip + ": " + res.message())
       #print(highlight_repeating)
-      return render_template('index.html', filename=filename, project_code=project_code, headers=headers, rows=rows, table=t, missing=highlight_missing, mismatch=highlight_mismatch, repeating=highlight_repeating, not_allowed=highlight_not_allowed, header_issues=header_issues, checks_passed=checks_passed)
-    return redirect(url_for('index', project_code=project_code))
+      return render_template('index.html', filename=filename, headers=headers, rows=rows, table=t, missing=highlight_missing, mismatch=highlight_mismatch, repeating=highlight_repeating, not_allowed=highlight_not_allowed, header_issues=header_issues)
+    return redirect(request.url)
+
+@app.route('/wiki')
+def wiki():
+  return render_template('wiki.html')
 
 if __name__ == "__main__":
   app.run(debug=True)

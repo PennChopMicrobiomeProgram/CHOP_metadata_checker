@@ -1,9 +1,2 @@
 #Dotenv
-CHOP.env
-
-__pycache__
-/test.db
-
-logs/
-*.egg-info/
-build
+.env

@@ -8,7 +8,7 @@
 <body>
   <div class="card">
     <div class="card-body">
-      <form action="{{ '/' + project_code }}" method="POST" enctype="multipart/form-data">
+      <form action="/" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label>Select metadata file</label>
           <div class="row">
@@ -34,10 +34,6 @@
           </ul>
         {% endif %}
       {% endwith %}
-
-      {% if checks_passed %}
-        <a href="{{ url_for('review', project_code=project_code) }}" class="btn btn-success">Submit Metadata</a>
-      {% endif %}
     </div>
     <div class="container-fluid" style="min-height:95%; ">
       <div class="mt-2">
