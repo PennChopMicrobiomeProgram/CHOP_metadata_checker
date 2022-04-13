@@ -15,7 +15,7 @@ def allowed_file(filename):
   return '.' in filename and \
     filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-chop_mandatory = [
+chop_mandatory_tube = [
   "SampleID",
   "investigator",
   "project_name",
@@ -133,7 +133,7 @@ regex_translate = {
   "^[A-Za-z]": " only start with capital or lowercase letters",
   "^[0-9A-Za-z._+-\/<>=|,() ]+$": " only contain numbers, letters, spaces, and allowed characters inside the bracket [._+-\/<>=|,()]",
   "^[0-9A-Za-z._-]+$": " only contain numbers, letters, periods, dashes, and underscores",
-  "^[0-9]{4}-[0-9]{2}-[0-9]{2}$": " be in format yyyy-mm-dd",
+  "^[0-9]{2}/[0-9]{2}/[0-9]{2}$": " be in format mm/dd/yy",
   "^[0-9]{2}:[0-9]{2}:[0-9]{2}$": " be in format hh:mm:ss",
   "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
   "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols"
@@ -148,7 +148,7 @@ def uniq_comb(spec, col1, col2):
 
 ##specification is an object of MustHave class which contains other classes that checks table by calling a function that returns AllGood or StillNeeds class (DoesntApply class is called if no such column exists in the input)
 specification = MustHave(
-  columns_named(chop_mandatory), ##must contain these columns
+  columns_named(chop_mandatory_tube), ##must contain these columns
   columns_matching("^[0-9A-Za-z_]+$"), ##column names must satisfy this regex
   values_matching("SampleID", "^[A-Za-z]"), ##columns must satisfy this regex
   values_matching("SampleID", "^[0-9A-Za-z._]+$"),
@@ -160,7 +160,7 @@ specification = MustHave(
   some_value_for("host_species", "subject_id"),
   some_value_for("subject_id", "host_species"),
   some_value_for("mouse_strain", "cage_id"), ##if mouse_strain is given, a cage_id for that sample must be provided
-  values_matching("date_collected", "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"),
+  values_matching("date_collected", "^[0-9]{2}/[0-9]{2}/[0-9]{2}$"),
   values_matching("time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"),
   unique_values_for("barcode"),
   values_matching("barcode", "^[ATCGURYKMSWBDHVN]+$"),
@@ -172,8 +172,8 @@ uniq_comb(specification, "box_id", "box_position")
 uniq_comb(specification, "reverse_barcode_plate", "reverse_barcode_location")
 uniq_comb(specification, "forward_barcode_plate", "forward_barcode_location")
 
-specification.extend(some_value_for(c) for c in chop_mandatory) ##these columns cannot be empty
-specification.extend(values_matching(c, "^[0-9A-Za-z._+-/<>=,()\[\] ]+$") for c in (chop_mandatory + chop_suggested)) ##all columns must satisfy the regex
+specification.extend(some_value_for(c) for c in chop_mandatory_tube) ##these columns cannot be empty
+specification.extend(values_matching(c, "^[0-9A-Za-z._+-/<>=,()\[\] ]+$") for c in (chop_mandatory_tube + chop_suggested)) ##all columns must satisfy the regex
 
 for d in specification.descriptions():
   print(d)
@@ -203,15 +203,16 @@ def review(project_code):
     submission_id = db.create_submission(project_id, request.form['comment'])
     ##create samples
     cols = t.colnames()
-    indeces = [cols.index('SampleID'), cols.index('SampleType'), cols.index('subject_id'), cols.index('host_species')]
+    indeces = [cols.index('SampleID'), cols.index('sample_type'), cols.index('subject_id'), cols.index('host_species')]
     num_samples = len(t.get(cols[indeces[0]]))
 
     for i in range(num_samples):
-      sample_id = db.create_sample(t.get_element('SampleID', i), submission_id, t.get_element('SampleType', i), t.get_element('subject_id', i), t.get_element('host_species', i))
+      sample_id = db.create_sample(t.get_element('SampleID', i), submission_id, t.get_element('sample_type', i), t.get_element('subject_id', i), t.get_element('host_species', i))
       for j in range(len(cols)):
         ##create annotations
         if j not in indeces:
-          db.create_annotation(sample_id, cols[j], t.get_element(cols[j], i))
+          if t.get_element(cols[j],i) != None:
+            db.create_annotation(sample_id, cols[j], t.get_element(cols[j], i))
   
   return render_template('final.html', project_code=project_code)
 
