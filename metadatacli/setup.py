@@ -16,7 +16,7 @@ setuptools.setup(
         ],
     },
     install_requires=[
-        
+        'python-dotenv',
     ],
     classifiers=[
         'Intended Audience :: Science/Research',

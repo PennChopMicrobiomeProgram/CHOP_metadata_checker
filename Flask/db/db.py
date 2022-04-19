@@ -21,6 +21,11 @@ class MetadataDB(object):
         "(`project_id`, `time_submitted`, `comment`) "
         "VALUES (?, ?, ?)")
     
+    find_annotationQ = (
+        "SELECT `sample_accession` "
+        "FROM annotations "
+        "WHERE `sample_accession`=? AND `attr`=? AND `val`=?")
+    
     find_project_by_codeQ = (
         "SELECT * "
         "FROM projects "
@@ -40,11 +45,18 @@ class MetadataDB(object):
     # @param sample_accession is the accession of the sample this annotation is for
     # @param attr is the attribute
     # @param val is the value
+    # @return is the sample accession of the new annotation
     def create_annotation(self: object, sample_accession: int, attr: str, val: str):
         cur = self.con.cursor()
         cur.execute(self.create_annotationQ, (sample_accession, attr, val))
         self.con.commit()
+
+        cur.execute(self.find_annotationQ, (sample_accession, attr, val))
+        self.con.commit()
+        res = cur.fetchall()
         cur.close()
+
+        return res[0][0]
     
     # Creates a new sample for a submission
     # @param sample_name is the sample name

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test-upload-site:
+    name: Test Flask Upload Site
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install -U pytest
+
+      - name: Run Tests
+        run: |
+          cd Flask
+          pytest tests/
+  
+  test-metadata-admin-tools:
+    name: Test Metadata Admin Tools
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      
+      - name: Install Dependencies
+        run: |
+          cd metadatacli
+          python -m pip install .
+          python -m pip install -U pytest
+      
+      - name: Run Tests
+        run: |
+          cd metadatacli
+          pytest tests/
+          
