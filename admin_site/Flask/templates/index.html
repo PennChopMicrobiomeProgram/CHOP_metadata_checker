@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<div class="col-sm-auto">
+  <a href="/download" class="btn btn-primary" name="download" href="/download">Get Metadata</a>
+</div>
 {% endblock %}
 
 {% block body %}
-
 <body>
   {% if request.method == 'POST' %}
     <div class="card">

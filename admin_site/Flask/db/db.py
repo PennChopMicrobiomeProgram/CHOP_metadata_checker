@@ -21,6 +21,15 @@ class MetadataDB(object):
         "FROM projects "
         "WHERE `ticket_code`=?")
 
+    list_projectsQ = (
+        "SELECT * "
+        "FROM projects")
+
+    list_submissionsQ = (
+        "SELECT * "
+        "FROM submissions "
+        "WHERE `project_id`=?")
+
     # Creates a new project in the db
     # @param project_name is the project name
     # @param contact_name is the contact name
@@ -40,6 +49,23 @@ class MetadataDB(object):
                 sys.exit()
         self.con.commit()
         cur.close()
+
+    # List projects in the db
+    # @return is the list of projects
+    def list_projects(self: object) -> list:
+        cur = self.con.cursor()
+        cur.execute(self.list_projectsQ)
+        self.con.commit()
+        return cur.fetchall()
+
+    # List submissions in the db for a given project
+    # @param code is the code for the project
+    # @return is the list of submissions for that project
+    def list_submissions(self: object, code: str) -> list:
+        cur = self.con.cursor()
+        cur.execute(self.list_submissionsQ, (code, ))
+        self.con.commit()
+        return cur.fetchall()
     
     # Determine if the given project code already exists in the db
     # @param code is the project code to check for
