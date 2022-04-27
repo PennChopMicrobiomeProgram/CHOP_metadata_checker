@@ -22,7 +22,25 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd Flask
+          cd metadata_checker_site/Flask
+          pytest tests/
+  
+  test-admin-site:
+    name: Test Flask Admin Site
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install -U pytest
+          python -m pip install -U python-dotenv
+
+      - name: Run Tests
+        run: |
+          cd admin_site/Flask
           pytest tests/
   
   test-metadata-admin-tools:
