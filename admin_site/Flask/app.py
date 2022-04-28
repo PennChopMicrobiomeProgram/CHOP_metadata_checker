@@ -1,10 +1,11 @@
 import os
 import random
 
-from flask import Flask, render_template, url_for, request, redirect, flash, session, send_from_directory
+from flask import Flask, render_template, url_for, request, redirect, flash, session, send_from_directory, make_response
 from pathlib import Path
 from ast import literal_eval
 from db.db import MetadataDB
+from csv_writer.writer import generate_csv
 from dotenv import load_dotenv
 load_dotenv(Path.cwd() / '../../CHOP.env')
 
@@ -27,15 +28,18 @@ def download():
     db = MetadataDB(db_fp)
 
     if request.method == 'POST':
-        if request.form['project']:
+        print(request.form)
+        if request.form.get('project', None):
             project_id = literal_eval(request.form['project'])[0] # literal_eval turns returned str to tuple
             submissions = db.list_submissions(project_id)
-        elif request.form['submission_id']:
-            project_id = literal_eval(request.form['submission_id'])[1]
-            submission_id = literal_eval(request.form['submission_id'])[0]
+        elif request.form.get('submission', None):
+            project_id = literal_eval(request.form['submission'])[1]
+            submission_id = literal_eval(request.form['submission'])[0]
 
             # Generate metadata CSV and download
-            
+            response = make_response(generate_csv(db, project_id, submission_id))
+            response.headers["Content-Disposition"] = f"attachment; filename=metadata_{project_id}_{submission_id}.csv"
+            return response
     else:
         projects = db.list_projects()
 
