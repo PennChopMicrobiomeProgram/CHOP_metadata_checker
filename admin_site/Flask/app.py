@@ -28,7 +28,6 @@ def download():
     db = MetadataDB(db_fp)
 
     if request.method == 'POST':
-        print(request.form)
         if request.form.get('project', None):
             project_id = literal_eval(request.form['project'])[0] # literal_eval turns returned str to tuple
             submissions = db.list_submissions(project_id)
@@ -37,7 +36,7 @@ def download():
             submission_id = literal_eval(request.form['submission'])[0]
 
             # Generate metadata CSV and download
-            response = make_response(generate_csv(db, project_id, submission_id))
+            response = make_response(generate_csv(db, submission_id))
             response.headers["Content-Disposition"] = f"attachment; filename=metadata_{project_id}_{submission_id}.csv"
             return response
     else:

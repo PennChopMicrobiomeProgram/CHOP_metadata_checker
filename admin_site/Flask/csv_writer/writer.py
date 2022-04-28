@@ -1,15 +1,36 @@
 from db.db import MetadataDB
 
 # Helper function for generating a csv string for flask to download
-# @param project_id is the id of the project to download
 # @param submission_id is the id of the submissions to download
 # @return is the csv in string form for flask to output
-def generate_csv(db: MetadataDB, project_id: int, submission_id: int) -> str:
-    return """
-    "REVIEW_DATE","AUTHOR","ISBN","DISCOUNTED_PRICE"
-    "1985/01/21","Douglas Adams",0345391802,5.95
-    "1990/01/12","Douglas Hofstadter",0465026567,9.95
-    "1998/07/15","Timothy ""The Parser"" Campbell",0968411304,18.99
-    "1999/12/03","Richard Friedman",0060630353,5.95
-    "2004/10/04","Randel Helms",0879755725,4.50
-    """
+def generate_csv(db: MetadataDB, submission_id: int) -> str:
+    samples = db.list_samples(submission_id)
+    annotations = []
+    for sample in samples:
+        annotations.append(db.list_annotations(sample[0]))
+    annotations = [item for sublist in annotations for item in sublist]
+
+    fields = ["SampleID", "sample_type", "subject_id", "host_species"]
+    for annotation in annotations:
+        if annotation[1] not in fields:
+            fields.append(annotation[1])
+
+    sep = '\",\"'
+    ret = f"\"{sep.join(fields)}\"\n"
+    for sample in samples:
+        l = f"\"{sample[1]}\",\"{sample[3]}\",\"{sample[4]}\",\"{sample[5]}\""
+
+        a = {}
+        for annotation in annotations:
+            if annotation[0] == sample[0]:
+                a[annotation[1]] = annotation[2]
+        for f in fields[4:]:
+            if f in a:
+                l += f",\"{a[f]}\""
+            else:
+                l += ",\"\""
+        
+        l += "\n"
+        ret += l
+
+    return ret

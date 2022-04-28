@@ -11,19 +11,29 @@ class MetadataDB(object):
         "(`project_name`, `contact_name`, `contact_email`, `ticket_code`) "
         "VALUES (?, ?, ?, ?)")
     
-    get_projectQ = (
-        "SELECT * "
-        "FROM projects "
-        "WHERE `project_name`=?")
-    
     find_project_by_codeQ = (
         "SELECT * "
         "FROM projects "
         "WHERE `ticket_code`=?")
 
+    get_projectQ = (
+        "SELECT * "
+        "FROM projects "
+        "WHERE `project_name`=?")
+
+    list_annotationsQ = (
+        "SELECT * "
+        "FROM annotations "
+        "WHERE `sample_accession`=?")
+
     list_projectsQ = (
         "SELECT * "
         "FROM projects")
+        
+    list_samplesQ = (
+        "SELECT * "
+        "FROM samples "
+        "WHERE `submission_id`=?")
 
     list_submissionsQ = (
         "SELECT * "
@@ -50,11 +60,29 @@ class MetadataDB(object):
         self.con.commit()
         cur.close()
 
+    # List annotations for a given sample
+    # @param sample_accession is the accession for the sample
+    # @return is the list of accessions
+    def list_annotations(self: object, sample_accession: int) -> list:
+        cur = self.con.cursor()
+        cur.execute(self.list_annotationsQ, (sample_accession, ))
+        self.con.commit()
+        return cur.fetchall()
+
     # List projects in the db
     # @return is the list of projects
     def list_projects(self: object) -> list:
         cur = self.con.cursor()
         cur.execute(self.list_projectsQ)
+        self.con.commit()
+        return cur.fetchall()
+
+    # List samples for a given submission
+    # @param submission_id is the id for the submission
+    # @return is the list of samples
+    def list_samples(self: object, submission_id: int) -> list:
+        cur = self.con.cursor()
+        cur.execute(self.list_samplesQ, (submission_id, ))
         self.con.commit()
         return cur.fetchall()
 
