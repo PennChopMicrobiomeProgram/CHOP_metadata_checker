@@ -6,7 +6,7 @@ from tablemusthave import *
 from db.db import MetadataDB
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(Path.cwd() / '..' / 'CHOP.env')
+load_dotenv(Path.cwd() / '../../CHOP.env')
 
 ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 
@@ -198,7 +198,6 @@ def review(project_code):
     ##submit metadata
     db = MetadataDB(db_fp)
     ##create submission
-    print(request.form['comment'])
     project_id = db.project_id_from_project_code(project_code)
     submission_id = db.create_submission(project_id, request.form['comment'])
     ##create samples
