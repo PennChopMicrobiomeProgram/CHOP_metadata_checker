@@ -15,7 +15,7 @@ class MetadataDBTests(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.db = MetadataDB(":memory:")
 
-        self.schema_fp = Path.cwd() / "../../schema.sql"
+        self.schema_fp = Path.cwd() / "../schema.sql"
         with open(self.schema_fp, "rt") as f:
             schema = f.read()
         self.db.con.executescript(schema)
