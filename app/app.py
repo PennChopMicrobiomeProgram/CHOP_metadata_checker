@@ -1,4 +1,3 @@
-from tkinter import PROJECTING
 from flask import Flask, render_template, url_for, request, redirect, flash, session, send_from_directory
 import io, os
 from werkzeug.utils import secure_filename
@@ -6,7 +5,7 @@ from tablemusthave import *
 from db.db import MetadataDB
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
-load_dotenv(Path.cwd() / '../../CHOP.env')
+load_dotenv(Path.cwd() / '../CHOP.env')
 
 ALLOWED_EXTENSIONS = {'tsv', 'csv'}
 
@@ -38,7 +37,7 @@ chop_suggested = [
 ]
 
 sample_type_list = [
-  "Amnoitic fluid",
+  "Amniotic fluid",
   "BAL",
   "Bedding",
   "Biofilm",
