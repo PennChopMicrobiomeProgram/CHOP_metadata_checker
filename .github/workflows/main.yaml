@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd metadatalib
+          cd app/metadatalib
           pytest tests/
   
   test-metadata-admin-tools:
