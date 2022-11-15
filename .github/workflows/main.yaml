@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-upload-site:
-    name: Test Flask Upload Site
+    name: Test Metadata Library
     runs-on: ubuntu-latest
     
     steps:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd app/
+          cd metadatalib
           pytest tests/
   
   test-metadata-admin-tools:

@@ -4,83 +4,13 @@
 {% endblock %}
 
 {% block body %}
-
 <body>
   <div class="card">
-    <div class="card-body">
-      <form action="{{ '/' + project_code }}" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-          <label>Select metadata file</label>
-          <div class="row">
-            <div class="col-sm">
-              <div class="custom-file">
-                <input type="file" class="custom-file-input" name="metadata_upload" id="metadata_upload">
-                <label class="custom-file-label" for="metadata_upload" id="filename">{{ filename }}</label>
-              </div>
-            </div>
-            <div class="col-sm">
-              <button type="submit" class="btn btn-success">Upload metadata</button>
-            </div>
-          </div>
-        </div>
-      </form>
-     
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <ul class=flashes>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      {% endwith %}
-
-      {% if checks_passed %}
-        <a href="{{ url_for('review', project_code=project_code) }}" class="btn btn-success">Submit Metadata</a>
-      {% endif %}
-    </div>
-    <div class="container-fluid" style="min-height:95%; ">
-      <div class="mt-2">
-        {% if request.method == 'POST' %}
-          <div class="table-responsive text-nowrap">
-            <table class="table table-hover" style="width: 100%">
-              <thead>
-                <tr>
-                  <th class="table-light">Row #</th>
-                  {% for headers in headers %}
-                    {% if headers in header_issues.keys() %}
-                      <th class="table-danger" data-toggle="popover" title="There are issues in this column" data-content="{{header_issues[headers]}}">{{headers}}</th>
-                    {% else %}
-                      <th class="table-light">{{headers}}</th>
-                    {% endif %}
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row_num in rows %}
-                  <tr>
-                    <td>{{row_num + 1}}</td>
-                    {% for cols in headers %}
-                      {% if (row_num+1) in missing.keys() and cols in missing[(row_num+1)]%}
-                        <td class="table-danger" data-toggle="popover" title="Empty cell" data-content="Please fill in cell">{{table.get(cols)[row_num]}}</td>
-                      {% elif table.get(cols)[row_num] in mismatch.keys() and cols == mismatch[table.get(cols)[row_num]] %}
-                        <td class="table-danger" data-toggle="popover" title="Wrong formatting" data-content="Please use the correct formatting specified above">{{table.get(cols)[row_num]}}</td>
-                      {% elif table.get(cols)[row_num] in repeating.keys() and cols == repeating[table.get(cols)[row_num]] %}
-                        <td class="table-danger" data-toggle="popover" title="Repeated values" data-content="Please use unique values">{{table.get(cols)[row_num]}}</td>
-                      {% elif table.get(cols)[row_num] in not_allowed.keys() and cols == not_allowed[table.get(cols)[row_num]] %}
-                        <td class="table-danger" data-toggle="popover" title="Choose from pre-selected list" data-content="Please use only pre-selected {{cols}}">{{table.get(cols)[row_num]}}</td>
-                      {% else %}
-                        <td>{{table.get(cols)[row_num]}}</td>
-                      {% endif %}
-                    {% endfor %}
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endif %}
-      </div>
-    </div>
+    <p>Please submit your project id below to get to the metadata submission page.</p>
+    <form action="{{ '/' }}" method="POST" enctype="multipart/form-data">
+      <input name="project_code" id="project_code"><br />
+      <button type="submit" class="btn btn-success">GO</button>
+    </form>
   </div>
 </body>
 {% endblock %}
