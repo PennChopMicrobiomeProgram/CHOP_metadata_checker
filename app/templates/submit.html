@@ -6,6 +6,8 @@
 {% block body %}
 
 <body>
+  <h2>{{project_name}}</h2>
+  <h3>{{client_name}}</h3><h4>{{client_email}}</h4>
   <div class="card">
     <div class="card-body">
       <form action="{{ '/submit/' + project_code }}" method="POST" enctype="multipart/form-data">

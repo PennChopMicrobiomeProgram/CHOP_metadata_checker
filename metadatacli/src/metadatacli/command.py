@@ -2,15 +2,16 @@ import argparse
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv, find_dotenv
-load_dotenv(Path.cwd() / '..' / 'CHOP.env')
+from dotenv import load_dotenv
+SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(SRC_ROOT, '../../../CHOP.env'))
 
 from .createProject import createProject
 from .db import MetadataDB
 
 def _create_project(args, db):
     code = createProject(db, args.project_name, args.customer_name, args.customer_email)
-    url = "http://127.0.0.1:5000/" + code
+    url = os.environ.get('URL') + "/submit/" + code
     print(url)
     return code
 
@@ -22,13 +23,14 @@ def main(argv=None):
 
     args = p.parse_args(argv)
 
-    None if os.path.isdir("logs/") else os.mkdir("logs")
-    logF = open("logs/main.log", "w")
-    print("Writing logs to: " + logF.name)
-
+    log_fp = os.path.join(os.environ.get('LOG_FP'), "log.cli")
+    print("Writing logs to: " + log_fp)
+    
     db = MetadataDB(os.environ.get('DB_FP'))
 
-    logF.write("Creating project...")
+    with open(log_fp, "a+") as f:
+        f.write("Creating project...\n")
     code = _create_project(args, db)
-    logF.write("Project code: " + code)
+    with open(log_fp, "a+") as f:
+        f.write(f"Project code: {code}\n")
     

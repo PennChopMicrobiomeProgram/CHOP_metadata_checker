@@ -111,14 +111,14 @@ class MetadataDB(object):
         else:
             sqlite3.IntegrityError("Something's gone wrong, there shouldn't be more than one instance of ticket_code " + code + " in the projects table.")
 
-    # Get a project's integer id from it's unique hex hash
+    # Get a project from its unique hex hash
     # @param code is the project hash
-    # @return is the project's id
-    def project_id_from_project_code(self: object, code: str) -> int:
+    # @return are the project fields
+    def get_project_from_project_code(self: object, code: str) -> list:
         cur = self.con.cursor()
         cur.execute(self.find_project_by_codeQ, (code, ))
         self.con.commit()
         res = cur.fetchall()
         cur.close()
 
-        return res[0][0]
+        return res[0]

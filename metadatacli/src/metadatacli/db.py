@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import sys
 
@@ -32,11 +33,16 @@ class MetadataDB(object):
             cur.execute(self.create_projectQ, (project_name, contact_name, contact_email, code, ))
         except sqlite3.IntegrityError as e:
             print(e)
+            log_fp = os.environ.get('LOG_FP')
+            with open(os.path.join(log_fp, "log.cli"), "a+") as f:
+                f.write(f"{str(e)}\n")
             cur.execute(self.get_projectQ, (project_name, ))
             self.con.commit()
             res = cur.fetchall()
             if len(res) > 0:
                 print(str(res[0]) + " already exists")
+                with open(os.path.join(log_fp, "log.cli"), "a+") as f:
+                    f.write(f"{str(res[0])} already exists\n")
                 sys.exit()
         self.con.commit()
         cur.close()

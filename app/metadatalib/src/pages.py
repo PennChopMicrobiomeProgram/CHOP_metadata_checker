@@ -10,7 +10,7 @@ from werkzeug.datastructures import FileStorage
 
 def post_review(t: Table, db: MetadataDB, project_code: str, comment: str, l: Logger) -> None:
     # Create submission
-    project_id = db.project_id_from_project_code(project_code)
+    project_id = db.get_project_from_project_code(project_code)[0]
     submission_id = db.create_submission(project_id, comment)
     # Create samples
     cols = t.colnames()
