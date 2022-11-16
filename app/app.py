@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 load_dotenv(os.path.join(app.root_path, '../CHOP.env'))
 app.secret_key = os.environ.get('SECRET_KEY')
+
+# This line is only used in production mode on a nginx server, follow instructions to setup forwarding for
+# whatever production server you are using instead. It's ok to leave this in when running the dev server.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 db_fp = os.environ.get('DB_FP')
