@@ -8,14 +8,15 @@ from pathlib import Path
 from src.db import MetadataDB
 
 from dotenv import load_dotenv
-load_dotenv(Path.cwd() / '../../CHOP.env')
+SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(SRC_ROOT, '../../../CHOP.env'))
 
 class MetadataDBTests(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.db = MetadataDB(":memory:")
 
-        self.schema_fp = Path.cwd() / "../../schema.sql"
+        self.schema_fp = os.path.join(SRC_ROOT, '../../../schema.sql')
         with open(self.schema_fp, "rt") as f:
             schema = f.read()
         self.db.con.executescript(schema)
@@ -38,8 +39,8 @@ class MetadataDBTests(unittest.TestCase):
         self.assertFalse(self.db.project_hash_collision("DOESN'T EXIST"))
         self.assertTrue(self.db.project_hash_collision("EXISTS"))
 
-    def test_project_id_from_project_code(self):
-        self.assertEqual(1, self.db.project_id_from_project_code("EXISTS"))
+    def test_get_project_from_project_code(self):
+        self.assertEqual(1, self.db.get_project_from_project_code("EXISTS")[0])
     
     def test_create_submission(self):
         self.assertEqual(1, self.db.create_submission(1, "COMMENT"))
