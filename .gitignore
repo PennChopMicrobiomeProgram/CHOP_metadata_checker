@@ -1,8 +1,7 @@
-#Dotenv
 CHOP.env
+DB.db
 
 __pycache__
-/test.db
 
 logs/
 *.egg-info/

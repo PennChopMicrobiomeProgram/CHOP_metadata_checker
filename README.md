@@ -12,14 +12,14 @@ To run the flask app on its own (i.e. in development mode) follow the instructio
 
 ### Running Flask App
 
-Clone the repo and start by making a copy of `SAMPLE.env` called CHOP.env, filling in any blank values (SECRET_KEY can be any string), and use sqlite to initialize the database based on schema.sql (you can call it anything you want, TEST.db is used below). Next install the required python packages listed in `requirements.txt`. Then start the flask app.
+Clone the repo and start by making a copy of `SAMPLE.env` called CHOP.env, filling in any blank values (SECRET_KEY can be any string), and use sqlite to initialize the database based on schema.sql (you can call it anything you want, DB.db is used below). Next install the required python packages listed in `requirements.txt`. Then start the flask app.
 
 ```
 git clone git@github.com:PennChopMicrobiomeProgram/CHOP_metadata_checker.git
 cd CHOP_metadata_checker
 cp SAMPLE.env CHOP.env
 **Make changes to CHOP.env in editor of your choice**
-sqlite3 TEST.db < schema.sql
+sqlite3 DB.db < schema.sql
 pip install -r requirements.txt
 flask --app=app/app run -p 5000 >> logs/log.app 2>&1
 ```

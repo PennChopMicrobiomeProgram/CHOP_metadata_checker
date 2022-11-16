@@ -24,6 +24,10 @@ def main(argv=None):
     args = p.parse_args(argv)
 
     log_fp = os.path.join(os.environ.get('LOG_FP'), "log.cli")
+    try:
+        os.makedirs(os.environ.get('LOG_FP'))
+    except FileExistsError as e:
+        None
     print("Writing logs to: " + log_fp)
     
     db = MetadataDB(os.environ.get('DB_FP'))
