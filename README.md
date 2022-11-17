@@ -44,6 +44,6 @@ echo "Metadata checker started!"
 Use the metadatacli to create new projects in the database.
 
 ```
-pip install metadatacli/
+pip install -e metadatacli/
 metadatacli PROJECT_NAME CLIENT_NAME CLIENT_EMAIL
 ```
