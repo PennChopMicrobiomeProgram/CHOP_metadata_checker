@@ -25,7 +25,7 @@ def post_review(t: Table, db: MetadataDB, project_code: str, comment: str, l: Lo
                 if t.get(cols[j])[i] != None:
                     db.create_annotation(sample_id, cols[j], t.get(cols[j])[i])
     
-    l.log(f"Submission {submission_id} for project {project_id} has been entered.")
+    l.log(f"Submission {submission_id} for project {project_id} has been entered.\n")
 
 def run_checks(file_fp: FileStorage) -> tuple:
     filename = secure_filename(file_fp.filename)
