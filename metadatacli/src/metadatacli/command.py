@@ -1,6 +1,6 @@
 import argparse
 import os
-from pathlib import Path
+import sys
 
 from dotenv import load_dotenv
 SRC_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -10,18 +10,22 @@ from .createProject import createProject
 from .db import MetadataDB
 
 def _create_project(args, db):
-    code = createProject(db, args.project_name, args.customer_name, args.customer_email)
+    code = createProject(db, ' '.join(args.project_name), ' '.join(args.customer_name), ' '.join(args.customer_email))
     url = os.environ.get('URL') + "/submit/" + code
     print(url)
     return code
 
 def main(argv=None):
     p = argparse.ArgumentParser()
-    p.add_argument("project_name", help="Name of the project")
-    p.add_argument("customer_name", help="Name of the customer")
-    p.add_argument("customer_email", help="Contact email for the customer")
+    p.add_argument("-p", "--project_name", nargs='+', default=[], help="Name of the project")
+    p.add_argument("-n", "--customer_name", nargs='+', default=[], help="Name of the customer")
+    p.add_argument("-e", "--customer_email", nargs='+', default=[], help="Contact email for the customer")
 
     args = p.parse_args(argv)
+
+    if args.project_name == [] or args.customer_name == [] or args.customer_email == []:
+        print("Please provide arguments for each option (--project_name, --customer_name, and --customer_email).")
+        sys.exit(0)
 
     log_fp = os.path.join(os.environ.get('LOG_FP'), "log.cli")
     try:

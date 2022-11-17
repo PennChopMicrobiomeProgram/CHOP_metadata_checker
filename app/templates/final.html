@@ -6,12 +6,12 @@
 {% block body %}
 <body>
   {% if request.method == 'POST' %}
-    <div class="card">
+    <div class="card m-3">
       <p>{{ project_code }} submitted.</p>
-      <a href="{{url_for('index')}}">Go To Home</a>
+      <h4><a href="{{url_for('index')}}">Go To Home</a></h4>
     </div>
   {% else %}
-    <div class="card">
+    <div class="card m-3">
       <div class="card-body">
         <form action="{{ '/review/' + project_code }}" method="POST" enctype="multipart/form-data">
           <div class="form-group">

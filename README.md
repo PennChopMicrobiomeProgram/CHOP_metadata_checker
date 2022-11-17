@@ -35,7 +35,7 @@ source $CONDA_BASE/etc/profile.d/conda.sh
 conda activate metadata_checker
 
 cd /path/to/CHOP_metadata_checker/
-sudo nohup flask --app=app/app run -p 5000 >> log.app 2>&1
+sudo nohup flask --app=app/app run -p 5000 >> logs/log.app 2>&1
 echo "Metadata checker started!"
 ```
 

@@ -5,11 +5,22 @@
 
 {% block body %}
 <body>
-  <div class="card">
-    <p>Please submit your project id below to get to the metadata submission page.</p>
+  <div class="card m-3">
+    <h5 class="m-3">Please submit your project id below to get to the metadata submission page.</h5>
     <form action="{{ '/' }}" method="POST" enctype="multipart/form-data">
-      <input name="project_code" id="project_code"><br />
-      <button type="submit" class="btn btn-success">GO</button>
+      <div class="row m-3">
+        <div class="form-group">
+          <label for="project_code">Email address</label>
+          <input
+            class="form-control"
+            name="project_code"
+            id="project_code"
+            aria-describedby="help"
+            placeholder="Enter project ID...">
+          <small id="help" class="form-text text-muted">If you received a URL, this should be the string of alphanumeric characters at the end.</small>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success m-3">GO</button>
     </form>
   </div>
 </body>
