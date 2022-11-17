@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 import os
 import sys
 
@@ -40,5 +41,5 @@ def main(argv=None):
         f.write("Creating project...\n")
     code = _create_project(args, db)
     with open(log_fp, "a+") as f:
-        f.write(f"Project code: {code}\n")
+        f.write(f"{datetime.now()}\nProject code: {code}\nProject name: {args.project_name}\nClient name: {args.client_name}\n")
     
