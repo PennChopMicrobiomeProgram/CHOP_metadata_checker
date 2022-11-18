@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # @param $1 is the project name
 # @param $2 is the client's name
@@ -6,8 +6,11 @@
 
 PROJECT_HASH=$(tr -dc a-f0-9 </dev/urandom | head -c 30 ; echo '')
 
-export $(grep -v '^#' CHOP.env | xargs -d '\n')
-echo "Creating project...\n" >> $LOG_FP/log.cli
+export $(grep -v '^#' CHOP.env)
+LOG_FP=$(echo "$LOG_FP" | tr -d '[:space:]')
+DB_FP=$(echo "$DB_FP" | tr -d '[:space:]')
+URL=$(echo "$URL" | tr -d '[:space:]')
+echo "Creating project..." >> $LOG_FP/log.cli
 
 CHECK=$(sqlite3 $DB_FP "SELECT * FROM projects WHERE ticket_code='$PROJECT_HASH';")
 if [ -z "${CHECK}" ]; then
@@ -22,4 +25,4 @@ SELECT * FROM projects WHERE ticket_code='$PROJECT_HASH';
 EOF
 
 echo "Submission URL: ${URL}/submit/${PROJECT_HASH}"
-echo "Created project with\nProject name: ${1}\nClient name: ${2}\nClient email ${3}\nTicket code ${PROJECT_HASH}\n" >> $LOG_FP/log.cli
+echo "Created project with/\nProject name: ${1}/\nClient name: ${2}/\nClient email ${3}/\nTicket code ${PROJECT_HASH}" >> $LOG_FP/log.cli
