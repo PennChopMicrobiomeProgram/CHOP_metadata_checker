@@ -31,11 +31,11 @@
       <div class="row justify-content-start">
         <div class="col-sm-auto">
           <h2>
-            <a href="/" style="text-decoration: none">CHOP Microbiome Metadata Checker</a>
+            <a href="{{ url_for('index') }}" style="text-decoration: none">CHOP Microbiome Metadata Checker</a>
           </h2>
         </div>
         <div class="col-sm-auto">
-          <a href="/wiki" class="btn btn-primary" name="wiki" href="/wiki">Wiki</a>
+          <a href="{{ url_for('wiki') }}" class="btn btn-primary" name="wiki">Wiki</a>
         </div>
       </div>
     </nav>    
