@@ -25,4 +25,4 @@ SELECT * FROM projects WHERE ticket_code='$PROJECT_HASH';
 EOF
 
 echo "Submission URL: ${URL}/submit/${PROJECT_HASH}"
-echo "Created project with/\nProject name: ${1}/\nClient name: ${2}/\nClient email ${3}/\nTicket code ${PROJECT_HASH}" >> $LOG_FP/log.cli
+echo "$(date) Created project with/\nProject name: ${1}/\nClient name: ${2}/\nClient email ${3}/\nTicket code ${PROJECT_HASH}" >> $LOG_FP/log.cli
