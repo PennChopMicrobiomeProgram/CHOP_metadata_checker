@@ -47,3 +47,9 @@ Use the metadatacli to create new projects in the database.
 pip install -e metadatacli/
 metadatacli PROJECT_NAME CLIENT_NAME CLIENT_EMAIL
 ```
+
+Alternatively, use the create_project.sh script.
+
+```
+./create_project.sh "PROJECT_NAME" "CLIENT_NAME" "CLIENT_EMAIL"
+```
