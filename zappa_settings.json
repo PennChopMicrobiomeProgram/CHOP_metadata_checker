@@ -1,0 +1,15 @@
+{
+    "dev": {
+        "app_function": "app.app.app",
+        "aws_region": "us-east-1",
+        "profile_name": "default",
+        "project_name": "chop-metadata-c",
+        "runtime": "python3.9",
+        "s3_bucket": "zappa-8uv9cc1h0",
+        "environment_variables": {
+            "BUCKET": "chop-metadata-db",
+            "PROJECT_TABLE": "chop-metadata-db",
+            "SUBMISSION_TABLE": "chop-metadata-submission-db"
+        }
+    }
+}

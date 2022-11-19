@@ -8,24 +8,10 @@ from tablemusthave import Table, musthave
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
-def post_review(t: Table, db: MetadataDB, project_code: str, comment: str, l: Logger) -> None:
-    # Create submission
-    project_id = db.get_project_from_project_code(project_code)[0]
-    submission_id = db.create_submission(project_id, comment)
-    # Create samples
-    cols = t.colnames()
-    indeces = [cols.index('SampleID'), cols.index('sample_type'), cols.index('subject_id'), cols.index('host_species')]
-    num_samples = len(t.get(cols[indeces[0]]))
-
-    for i in range(num_samples):
-        sample_id = db.create_sample(t.get('SampleID')[i], submission_id, t.get('sample_type')[i], t.get('subject_id')[i], t.get('host_species')[i])
-        for j in range(len(cols)):
-            # Create annotations
-            if j not in indeces:
-                if t.get(cols[j])[i] != None:
-                    db.create_annotation(sample_id, cols[j], t.get(cols[j])[i])
-    
-    l.log(f"Submission {submission_id} for project {project_id} has been entered.\n")
+def post_review(file_bytes: bytes, db: MetadataDB, project_code: str, comment: str) -> None:
+    #db.upload_bytes(project_code, file_bytes, partial_fp)
+    #db.upload_comment(project_code, comment, partial_fp)
+    db.upload(project_code, file_bytes.decode(), comment)
 
 def run_checks(file_fp: FileStorage) -> tuple:
     filename = secure_filename(file_fp.filename)

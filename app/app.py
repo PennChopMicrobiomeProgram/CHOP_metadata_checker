@@ -8,15 +8,18 @@ from metadatalib.pages import post_review, run_checks
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY')
+app.secret_key = os.urandom(12)
 
 # This line is only used in production mode on a nginx server, follow instructions to setup forwarding for
 # whatever production server you are using instead. It's ok to leave this in when running the dev server.
 #app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 bucket = os.environ.get('BUCKET')
-db = MetadataDB(bucket)
+project_table = os.environ.get('PROJECT_TABLE')
+submission_table = os.environ.get('SUBMISSION_TABLE')
+db = MetadataDB(bucket, project_table, submission_table)
 t = Table([], [])
+file_bytes = b""
 #l = Logger(os.path.join(os.environ.get('LOG_FP'), 'log.out'), os.path.join(os.environ.get('LOG_FP'), 'log.err'))
 
 @app.route('/favicon.ico')
@@ -32,20 +35,21 @@ def wiki():
 @app.route('/review/<project_code>', methods=['GET', 'POST'])
 def review(project_code):
   if request.method == 'POST':
-    post_review(t, db, project_code, request.form['comment'])
+    post_review(file_bytes, db, project_code, request.form['comment'])
+    None
   #l.log(f"Rendering final.html with project_code {project_code}.\n")
   return render_template('final.html', project_code=project_code)
 
 @app.route('/submit/<project_code>', methods=['GET', 'POST'])
 def submit(project_code):
   filename = "Select file ..."
-  project_name, client_name, client_email = db.get_project_info(project_code)
 
   if not db.code_exists(project_code):
     #l.err(f"Rendering dne.html with project_code {project_code}.\n")
     return render_template('dne.html', project_code=project_code)
   elif request.method == 'GET':
     #l.log(f"Rendering submit.html with project_code {project_code} and attachment named {filename}.\n")
+    project_name, client_name, client_email = db.get_project_info(project_code)
     return render_template('submit.html', filename=filename, project_code=project_code, project_name=project_name, client_name=client_name, client_email=client_email)
   elif request.method == 'POST':
     # Check if post request has a file
@@ -66,7 +70,10 @@ def submit(project_code):
       return redirect(url_for('submit', project_code=project_code))
     
     if file_fp and allowed_file(file_fp.filename):
-      global t
+      global t, file_bytes
+      file_bytes = file_fp.read()
+      file_fp.seek(0)
+      project_name, client_name, client_email = db.get_project_info(project_code)
       t, headers, rows, highlight_missing, highlight_mismatch, highlight_repeating, highlight_not_allowed, header_issues, checks_passed = run_checks(file_fp)
       
       #l.log(f"Rendering submit.html with project_code {project_code} and attachment named {filename}. Includes\n\theaders: {headers}\n\trows: {rows}\n\ttable: {t}\n\tmissing: {highlight_missing}\n\tmismatch: {highlight_mismatch}\n\trepeating: {highlight_repeating}\n\tnot_allowed: {highlight_not_allowed}\n\theader_issues: {header_issues}\n\tchecks_passed: {checks_passed}\n")
