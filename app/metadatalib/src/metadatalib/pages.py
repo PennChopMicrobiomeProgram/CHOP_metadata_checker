@@ -9,8 +9,6 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 def post_review(file_bytes: bytes, db: MetadataDB, project_code: str, comment: str) -> None:
-    #db.upload_bytes(project_code, file_bytes, partial_fp)
-    #db.upload_comment(project_code, comment, partial_fp)
     db.upload(project_code, file_bytes.decode(), comment)
 
 def run_checks(file_fp: FileStorage) -> tuple:

@@ -36,7 +36,6 @@ def wiki():
 def review(project_code):
   if request.method == 'POST':
     post_review(file_bytes, db, project_code, request.form['comment'])
-    None
   #l.log(f"Rendering final.html with project_code {project_code}.\n")
   return render_template('final.html', project_code=project_code)
 
