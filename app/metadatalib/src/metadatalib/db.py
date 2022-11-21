@@ -1,5 +1,5 @@
 import boto3
-import json
+import datetime
 from boto3.dynamodb.conditions import Key, Attr
 
 class MetadataDB(object):
@@ -42,18 +42,10 @@ class MetadataDB(object):
         fp = f"{partial_fp}_comment.txt"
         response = self.client.put_object(Body=str.encode(comment), Bucket=self.bucket, Key=fp)
 
-    def get_highest_submission_index(self, code: str) -> int:
-        response = self.submission_table.scan(FilterExpression=Attr('project_code').eq(code))
-        items = response['Items']
-        if len(items) != 0:
-            return max([int(x['submission_id']) for x in items]) + 1
-        else:
-            return 0
-
     def upload(self, code: str, file_str: str, comment: str):
         response = self.submission_table.put_item(
             Item={
-                'submission_id': self.get_highest_submission_index(code),
+                'submission_id': int(datetime.datetime.now().timestamp() * 1000),
                 'project_code': code,
                 'metadata': file_str,
                 'comment': comment

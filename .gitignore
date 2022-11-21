@@ -1,5 +1,3 @@
-CHOP.env
-DB.db
 env/
 
 __pycache__
