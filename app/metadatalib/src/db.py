@@ -1,45 +1,47 @@
 import datetime
 import sqlite3
 
+
 class MetadataDB(object):
     def __init__(self, database_fp):
-        self.db: str = database_fp
+        self.db: str = str(database_fp)
         self.con: sqlite3.Connection = sqlite3.connect(self.db)
-    
+
     create_annotationQ = (
         "INSERT INTO annotations "
         "(`sample_accession`, `attr`, `val`) "
-        "VALUES (?, ?, ?)")
+        "VALUES (?, ?, ?)"
+    )
 
     create_sampleQ = (
         "INSERT INTO samples "
         "(`sample_name`, `submission_id`, `sample_type`, `subject_id`, `host_species`)"
-        "VALUES (?, ?, ?, ?, ?)")
-    
+        "VALUES (?, ?, ?, ?, ?)"
+    )
+
     create_submissionQ = (
         "INSERT INTO submissions "
         "(`project_id`, `time_submitted`, `comment`) "
-        "VALUES (?, ?, ?)")
-    
+        "VALUES (?, ?, ?)"
+    )
+
     find_annotationQ = (
         "SELECT `sample_accession` "
         "FROM annotations "
-        "WHERE `sample_accession`=? AND `attr`=? AND `val`=?")
-    
-    find_project_by_codeQ = (
-        "SELECT * "
-        "FROM projects "
-        "WHERE `ticket_code`=?")
-    
+        "WHERE `sample_accession`=? AND `attr`=? AND `val`=?"
+    )
+
+    find_project_by_codeQ = "SELECT * " "FROM projects " "WHERE `ticket_code`=?"
+
     find_sample_by_name_and_idQ = (
         "SELECT `sample_accession` "
         "fROM samples "
-        "WHERE `sample_name`=? AND `submission_id`=?")
-    
+        "WHERE `sample_name`=? AND `submission_id`=?"
+    )
+
     find_submission_by_timeQ = (
-        "SELECT `submission_id` "
-        "FROM submissions "
-        "WHERE `time_submitted`=?")
+        "SELECT `submission_id` " "FROM submissions " "WHERE `time_submitted`=?"
+    )
 
     # Creates a new annotation for a sample
     # @param sample_accession is the accession of the sample this annotation is for
@@ -57,7 +59,7 @@ class MetadataDB(object):
         cur.close()
 
         return res[0][0]
-    
+
     # Creates a new sample for a submission
     # @param sample_name is the sample name
     # @param submission_id is the id of the submission this sample is a part of
@@ -65,9 +67,19 @@ class MetadataDB(object):
     # @param subject_id is the subject id
     # @param host_species is the host species
     # @return is the accession of the new sample
-    def create_sample(self: object, sample_name: str, submission_id: int, sample_type: str, subject_id: str, host_species: str) -> int:
+    def create_sample(
+        self: object,
+        sample_name: str,
+        submission_id: int,
+        sample_type: str,
+        subject_id: str,
+        host_species: str,
+    ) -> int:
         cur = self.con.cursor()
-        cur.execute(self.create_sampleQ, (sample_name, submission_id, sample_type, subject_id, host_species))
+        cur.execute(
+            self.create_sampleQ,
+            (sample_name, submission_id, sample_type, subject_id, host_species),
+        )
         self.con.commit()
 
         cur.execute(self.find_sample_by_name_and_idQ, (sample_name, submission_id))
@@ -87,7 +99,7 @@ class MetadataDB(object):
         cur.execute(self.create_submissionQ, (project_id, time_submitted, comment))
         self.con.commit()
 
-        cur.execute(self.find_submission_by_timeQ, (time_submitted, ))
+        cur.execute(self.find_submission_by_timeQ, (time_submitted,))
         self.con.commit()
         res = cur.fetchall()
         cur.close()
@@ -99,24 +111,28 @@ class MetadataDB(object):
     # @return is True if code already exists, False otherwise
     def project_hash_collision(self: object, code: str) -> bool:
         cur = self.con.cursor()
-        cur.execute(self.find_project_by_codeQ, (code, ))
+        cur.execute(self.find_project_by_codeQ, (code,))
         self.con.commit()
         res = cur.fetchall()
         cur.close()
-        
+
         if len(res) == 0:
             return False
         elif len(res) == 1:
             return True
         else:
-            sqlite3.IntegrityError("Something's gone wrong, there shouldn't be more than one instance of ticket_code " + code + " in the projects table.")
+            sqlite3.IntegrityError(
+                "Something's gone wrong, there shouldn't be more than one instance of ticket_code "
+                + code
+                + " in the projects table."
+            )
 
     # Get a project from its unique hex hash
     # @param code is the project hash
     # @return are the project fields
     def get_project_from_project_code(self: object, code: str) -> list:
         cur = self.con.cursor()
-        cur.execute(self.find_project_by_codeQ, (code, ))
+        cur.execute(self.find_project_by_codeQ, (code,))
         self.con.commit()
         res = cur.fetchall()
         cur.close()
