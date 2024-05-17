@@ -2,9 +2,8 @@ import argparse
 import os
 import sys
 from datetime import datetime
-from pathlib import Path
 from .createProject import createProject
-from .db import MetadataDB
+from .db import MetadataDB, create_test_db
 
 
 def _create_project(args, db):
@@ -46,7 +45,9 @@ def main(argv=None):
     try:
         db = MetadataDB(os.environ["DB_FP"])
     except KeyError:
-        print("ERR: Please provide a database file path in the DB_FP environment variable.")
+        print(
+            "ERR: Please provide a database file path in the DB_FP environment variable."
+        )
         sys.exit(0)
 
     print("Creating project...\n")

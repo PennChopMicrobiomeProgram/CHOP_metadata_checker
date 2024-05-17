@@ -1,3 +1,4 @@
+import os
 from flask import (
     Flask,
     render_template,
@@ -7,14 +8,14 @@ from flask import (
     flash,
     send_from_directory,
 )
-import os
+from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
-from tablemusthave import Table
 from metadatalib import SQLALCHEMY_DATABASE_URI
-from metadatalib.src.db import MetadataDB
-from metadatalib.src.models import Base
-from metadatalib.src.utils import allowed_file
-from metadatalib.src.pages import post_review, run_checks
+from metadatalib.db import MetadataDB
+from metadatalib.models import Base
+from metadatalib.utils import allowed_file
+from metadatalib.pages import post_review, run_checks
+from tablemusthave import Table
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
@@ -54,7 +55,9 @@ def wiki():
 def review(project_code):
     if request.method == "POST":
         post_review(t, db, project_code, request.form["comment"], app.logger)
-        app.logger.info(f"Submission {submission_id} for project {project_id} has been entered.\n")
+        app.logger.info(
+            f"Submission {submission_id} for project {project_id} has been entered.\n"
+        )
     app.logger.info(f"Rendering final.html with project_code {project_code}.\n")
     return render_template("final.html", project_code=project_code)
 
@@ -149,7 +152,9 @@ def submit(project_code):
                 checks_passed=checks_passed,
             )
 
-        app.logger.info(f"Redirecting to submit route with project_code {project_code}.\n")
+        app.logger.info(
+            f"Redirecting to submit route with project_code {project_code}.\n"
+        )
         return redirect(url_for("submit", project_code=project_code))
 
 
@@ -172,5 +177,5 @@ def index():
 
 
 if __name__ == "__main__":
-    #port = int(os.environ.get("PORT", 80))
+    # port = int(os.environ.get("PORT", 80))
     app.run(host="0.0.0.0", port=80)

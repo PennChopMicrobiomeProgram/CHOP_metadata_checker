@@ -1,9 +1,11 @@
 CHOP.env
 DB.db
 .env
+metadata.sqlite3
 
 __pycache__
 
 logs/
 *.egg-info/
 build
+env/

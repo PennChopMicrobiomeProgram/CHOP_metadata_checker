@@ -10,13 +10,20 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 
-def post_review(
-    t: Table, db: SQLAlchemy, project_code: str, comment: str
-) -> None:
+def post_review(t: Table, db: SQLAlchemy, project_code: str, comment: str) -> None:
     # Create submission
-    project_id = db.session.query(Project).filter(Project.ticket_code == project_code).first().project_id
+    project_id = (
+        db.session.query(Project)
+        .filter(Project.ticket_code == project_code)
+        .first()
+        .project_id
+    )
 
-    submission = Submission(project_id=project_id, time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), comment=comment)
+    submission = Submission(
+        project_id=project_id,
+        time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        comment=comment,
+    )
     db.session.add(submission)
     db.session.commit()
 
@@ -33,21 +40,26 @@ def post_review(
     annotations = []
 
     for i in range(num_samples):
-        samples.append((
-            t.get("SampleID")[i],
-            submission.submission_id,
-            t.get("sample_type")[i],
-            t.get("subject_id")[i],
-            t.get("host_species")[i],
-        ))
+        samples.append(
+            (
+                t.get("SampleID")[i],
+                submission.submission_id,
+                t.get("sample_type")[i],
+                t.get("subject_id")[i],
+                t.get("host_species")[i],
+            )
+        )
 
     first_sample_accession = db.create_samples(samples)
+
     def create_samples(self, samples):
-        sql_command = 'INSERT INTO samples (sample_name, submission_id, sample_type, subject_id, host_species) VALUES '
-        sql_command += ', '.join([f'(\'{n}\', {s}, \'{t}\', \'{i}\', \'{h}\')' for n, s, t, i, h in samples])
+        sql_command = "INSERT INTO samples (sample_name, submission_id, sample_type, subject_id, host_species) VALUES "
+        sql_command += ", ".join(
+            [f"('{n}', {s}, '{t}', '{i}', '{h}')" for n, s, t, i, h in samples]
+        )
         self.execute_sql_command(sql_command)
 
-        sql_command = f'SELECT sample_accession FROM samples WHERE sample_name=\'{samples[0][0]}\' AND submission_id=\'{samples[0][1]}\''
+        sql_command = f"SELECT sample_accession FROM samples WHERE sample_name='{samples[0][0]}' AND submission_id='{samples[0][1]}'"
         return int(self.execute_sql_command(sql_command).strip())
 
     for i in range(num_samples):
@@ -55,7 +67,9 @@ def post_review(
             # Create annotations
             if j not in indeces:
                 if t.get(cols[j])[i] is not None:
-                    annotations.append((first_sample_accession + i, cols[j], t.get(cols[j])[i]))
+                    annotations.append(
+                        (first_sample_accession + i, cols[j], t.get(cols[j])[i])
+                    )
 
     db.create_annotations(annotations)
 
