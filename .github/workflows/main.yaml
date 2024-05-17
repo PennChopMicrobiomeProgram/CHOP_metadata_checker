@@ -9,20 +9,41 @@ on:
 jobs:
   test-metadatalib:
     name: Test Metadata Library
-    runs-on:
-      labels: RIS
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
 
       - name: Install Dependencies
         run: |
-          python -m pip install -U pytest
-          python -m pip install -U python-dotenv
-          python -m pip install -U app/metadatalib/
+          python -m pip install -r requirements.txt
+          python -m pip install -r dev-requirements.txt
+          python -m pip install app/metadatalib
 
       - name: Run Tests
         run: |
           cd app/metadatalib
           pytest tests/
+
+  lint:
+    name: Lint Code Base
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install Dependencies
+        run: pip install black
+
+      - name: Lint Code Base
+        run: black --check .
