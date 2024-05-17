@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metadata-checker
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: metadata-checker
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: metadata-checker
+    spec:
+      volumes:
+      - name: pcmp-volume
+        persistentVolumeClaim:
+          claimName: pcmp-volume
+
+      containers:
+        - name: metadata-checker
+          image: ctbushman/sample_registry:latest
+          #image: quay.research.chop.edu/bushmanc1/metadata_checker:9-switch-to-postgresql
+          imagePullPolicy: "Always"
+          env:
+          - name: DB_PSWD
+            valueFrom:
+              secretKeyRef:
+                name: pg-password
+                key: DB_PSWD
+          resources:
+            limits:
+              cpu: "0.1"
+              memory: "100Mi"
+            requests:
+              cpu: "0.1"
+              memory: "100Mi"
+          volumeMounts:
+          - name: pcmp-volume
+            mountPath: /data
+          ports:
+            - containerPort: 80
+          readinessProbe:
+           httpGet:
+             path: /
+             port: 80
+             scheme: HTTP
+          livenessProbe:
+           initialDelaySeconds: 30
+           timeoutSeconds: 1
+           httpGet:
+             path: /
+             port: 80
+             scheme: HTTP
