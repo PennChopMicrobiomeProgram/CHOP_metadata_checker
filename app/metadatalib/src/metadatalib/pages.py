@@ -1,7 +1,7 @@
 import datetime
 import io
 from .consts import REGEX_TRANSLATE
-from .models import Project, Submission
+from .models import Annotation, Project, Sample, Submission
 from .utils import specification
 from flask import flash
 from flask_sqlalchemy import SQLAlchemy
@@ -10,7 +10,9 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 
-def post_review(t: Table, db: SQLAlchemy, project_code: str, comment: str) -> None:
+def post_review(
+    t: Table, db: SQLAlchemy, project_code: str, comment: str
+) -> Submission:
     # Create submission
     project_id = (
         db.session.query(Project)
@@ -19,8 +21,14 @@ def post_review(t: Table, db: SQLAlchemy, project_code: str, comment: str) -> No
         .project_id
     )
 
+    version = (
+        db.session.query(Submission).filter(Submission.project_id == project_id).count()
+        + 1
+    )
+
     submission = Submission(
         project_id=project_id,
+        version=version,
         time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
         comment=comment,
     )
@@ -36,31 +44,22 @@ def post_review(t: Table, db: SQLAlchemy, project_code: str, comment: str) -> No
         cols.index("host_species"),
     ]
     num_samples = len(t.get(cols[indeces[0]]))
-    samples = []
-    annotations = []
+    samples: list[Sample] = []
+    annotations: list[Annotation] = []
 
     for i in range(num_samples):
         samples.append(
-            (
-                t.get("SampleID")[i],
-                submission.submission_id,
-                t.get("sample_type")[i],
-                t.get("subject_id")[i],
-                t.get("host_species")[i],
+            Sample(
+                sample_name=t.get("SampleID")[i],
+                submission_id=submission.submission_id,
+                sample_type=t.get("sample_type")[i],
+                subject_id=t.get("subject_id")[i],
+                host_species=t.get("host_species")[i],
             )
         )
 
-    first_sample_accession = db.create_samples(samples)
-
-    def create_samples(self, samples):
-        sql_command = "INSERT INTO samples (sample_name, submission_id, sample_type, subject_id, host_species) VALUES "
-        sql_command += ", ".join(
-            [f"('{n}', {s}, '{t}', '{i}', '{h}')" for n, s, t, i, h in samples]
-        )
-        self.execute_sql_command(sql_command)
-
-        sql_command = f"SELECT sample_accession FROM samples WHERE sample_name='{samples[0][0]}' AND submission_id='{samples[0][1]}'"
-        return int(self.execute_sql_command(sql_command).strip())
+    db.session.add_all(samples)
+    db.session.commit()
 
     for i in range(num_samples):
         for j in range(len(cols)):
@@ -68,10 +67,17 @@ def post_review(t: Table, db: SQLAlchemy, project_code: str, comment: str) -> No
             if j not in indeces:
                 if t.get(cols[j])[i] is not None:
                     annotations.append(
-                        (first_sample_accession + i, cols[j], t.get(cols[j])[i])
+                        Annotation(
+                            sample_accession=samples[i].sample_accession,
+                            attr=cols[j],
+                            val=t.get(cols[j])[i],
+                        )
                     )
 
-    db.create_annotations(annotations)
+    db.session.add_all(annotations)
+    db.session.commit()
+
+    return submission
 
 
 def run_checks(file_fp: FileStorage) -> tuple:

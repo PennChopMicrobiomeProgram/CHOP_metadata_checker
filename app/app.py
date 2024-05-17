@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
 from metadatalib import SQLALCHEMY_DATABASE_URI
 from metadatalib.db import MetadataDB
-from metadatalib.models import Base
+from metadatalib.models import Base, Project, Submission
 from metadatalib.utils import allowed_file
 from metadatalib.pages import post_review, run_checks
 from tablemusthave import Table
@@ -51,68 +51,51 @@ def wiki():
     return render_template("wiki.html")
 
 
-@app.route("/review/<project_code>", methods=["GET", "POST"])
-def review(project_code):
+@app.route("/review/<ticket_code>", methods=["GET", "POST"])
+def review(ticket_code):
     if request.method == "POST":
-        post_review(t, db, project_code, request.form["comment"], app.logger)
-        app.logger.info(
-            f"Submission {submission_id} for project {project_id} has been entered.\n"
+        submission: Submission = post_review(
+            t, db, ticket_code, request.form["comment"]
         )
-    app.logger.info(f"Rendering final.html with project_code {project_code}.\n")
-    return render_template("final.html", project_code=project_code)
+
+    return render_template("final.html", ticket_code=ticket_code)
 
 
-@app.route("/submit/<project_code>", methods=["GET", "POST"])
-def submit(project_code):
+@app.route("/submit/<ticket_code>", methods=["GET", "POST"])
+def submit(ticket_code):
     filename = "Select file ..."
-    # Ideally we would have one db object for the whole app, seems like routes spawn their own threads though,
-    # which sqlite doesn't play nice with
-    # TODO: Revisit this for pg implementation
-    db = MetadataDB(db_host, db_user, db_pswd, db_name)
+    project = (
+        db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
+    )
 
-    if not db.project_hash_collision(project_code):
-        l.err(f"Rendering dne.html with project_code {project_code}.\n")
-        return render_template("dne.html", project_code=project_code)
+    if not project:
+        # Check that ticket_code exists in the database
+        return render_template("dne.html", project=project)
     elif request.method == "GET":
-        app.logger.info(
-            f"Rendering submit.html with project_code {project_code} and attachment named {filename}.\n"
-        )
-        project_name, client_name, client_email = [
-            db.get_project_from_project_code(project_code)[x] for x in [1, 2, 3]
-        ]
+        # Display submission page for ticket_code
         return render_template(
             "submit.html",
             filename=filename,
-            project_code=project_code,
-            project_name=project_name,
-            client_name=client_name,
-            client_email=client_email,
+            project=project,
         )
     elif request.method == "POST":
         # Check if post request has a file
         if "metadata_upload" not in request.files:
             flash("Please select a file")
-            app.logger.info(
-                f"Redirecting to submit route for no attachement with project_code {project_code}.\n"
-            )
-            return redirect(url_for("submit", project_code=project_code))
+            return redirect(url_for("submit", project=project))
         file_fp = request.files["metadata_upload"]
+
         # Check if user submitted a file
         if file_fp.filename == "":
             flash("No file selected")
-            app.logger.err(
-                f"Redirecting to submit route for no attachement with project_code {project_code}.\n"
-            )
-            return redirect(url_for("submit", project_code=project_code))
+            return redirect(url_for("submit", project=project))
+
         # Check if file was submitted and if it has correct extensions
         if file_fp and not allowed_file(file_fp.filename):
             flash(
                 "Please use the allowed file extensions for the metadata {.tsv, .csv}"
             )
-            app.logger.err(
-                f"Redirecting to submit route for wrong extension with project_code {project_code}.\n"
-            )
-            return redirect(url_for("submit", project_code=project_code))
+            return redirect(url_for("submit", project=project))
 
         if file_fp and allowed_file(file_fp.filename):
             global t
@@ -127,20 +110,11 @@ def submit(project_code):
                 header_issues,
                 checks_passed,
             ) = run_checks(file_fp)
-            project_name, client_name, client_email = [
-                db.get_project_from_project_code(project_code)[x] for x in [1, 2, 3]
-            ]
 
-            app.logger.info(
-                f"Rendering submit.html with project_code {project_code} and attachment named {filename}. Includes\n\theaders: {headers}\n\trows: {rows}\n\ttable: {t}\n\tmissing: {highlight_missing}\n\tmismatch: {highlight_mismatch}\n\trepeating: {highlight_repeating}\n\tnot_allowed: {highlight_not_allowed}\n\theader_issues: {header_issues}\n\tchecks_passed: {checks_passed}\n"
-            )
             return render_template(
                 "submit.html",
                 filename=filename,
-                project_code=project_code,
-                project_name=project_name,
-                client_name=client_name,
-                client_email=client_email,
+                project=project,
                 headers=headers,
                 rows=rows,
                 table=t,
@@ -152,27 +126,21 @@ def submit(project_code):
                 checks_passed=checks_passed,
             )
 
-        app.logger.info(
-            f"Redirecting to submit route with project_code {project_code}.\n"
-        )
-        return redirect(url_for("submit", project_code=project_code))
+        return redirect(url_for("submit", project=project))
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        app.logger.info(
-            f"Redirecting to submit route with project_code {request.form['project_code']}.\n"
-        )
         return redirect(
             url_for(
                 "submit",
-                project_code="".join(
-                    c for c in request.form["project_code"] if c.isalnum()
+                ticket_code="".join(
+                    c for c in request.form["ticket_code"] if c.isalnum()
                 ),
             )
         )
-    app.logger.info(f"Rendering index.html.\n")
+
     return render_template("index.html")
 
 
