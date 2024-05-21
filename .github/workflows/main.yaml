@@ -2,45 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
 
 jobs:
-  test-upload-site:
+  test-metadatalib:
     name: Test Metadata Library
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
 
       - name: Install Dependencies
         run: |
-          python -m pip install -U pytest
-          python -m pip install -U python-dotenv
+          python -m pip install -r requirements.txt
+          python -m pip install -r dev-requirements.txt
+          python -m pip install app/metadatalib
 
       - name: Run Tests
         run: |
           cd app/metadatalib
           pytest tests/
-  
-  test-metadata-admin-tools:
-    name: Test Metadata Admin Tools
+
+  lint:
+    name: Lint Code Base
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
-      
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
       - name: Install Dependencies
-        run: |
-          cd metadatacli
-          python -m pip install .
-          python -m pip install -U pytest
-      
-      - name: Run Tests
-        run: |
-          cd metadatacli
-          pytest tests/
-          
+        run: pip install black
+
+      - name: Lint Code Base
+        run: black --check .

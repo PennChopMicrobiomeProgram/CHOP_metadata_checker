@@ -7,13 +7,13 @@
 <body>
   {% if request.method == 'POST' %}
     <div class="card m-3">
-      <p>{{ project_code }} submitted.</p>
+      <p>{{ ticket_code }} submitted.</p>
       <h4><a href="{{url_for('index')}}">Go To Home</a></h4>
     </div>
   {% else %}
     <div class="card m-3">
       <div class="card-body">
-        <form action="{{ '/review/' + project_code }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ '/review/' + ticket_code }}" method="POST" enctype="multipart/form-data">
           <div class="form-group">
             <label class="m-3">Comments (optional):</label><br />
             <textarea class="m-3" name="comment" id="comment" style="height: 300px; width: 450px;"></textarea><br />

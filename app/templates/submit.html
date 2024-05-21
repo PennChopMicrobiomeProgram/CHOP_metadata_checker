@@ -7,10 +7,10 @@
 
 <body>
   <div class="card m-3">
-    <h2 class="m-3">{{project_name}}</h2>
-    <h3 class="m-3">{{client_name}} :-: {{client_email}}</h3>
+    <h2 class="m-3">{{project.project_name}}</h2>
+    <h3 class="m-3">{{project.contact_name}} :-: {{project.contact_email}}</h3>
     <div class="card-body">
-      <form action="{{ '/submit/' + project_code }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ '/submit/' + project.ticket_code }}" method="POST" enctype="multipart/form-data">
         <div class="form-group">
           <label>Select metadata file</label>
           <div class="row">
@@ -38,7 +38,7 @@
       {% endwith %}
 
       {% if checks_passed %}
-        <a href="{{ url_for('review', project_code=project_code) }}" class="btn btn-success">Submit Metadata</a>
+        <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
       {% endif %}
     </div>
     <div class="container-fluid" style="min-height:95%; ">
