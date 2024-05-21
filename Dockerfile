@@ -15,6 +15,7 @@ RUN pip install /app/app/metadatalib/
 #RUN pytest /app/metadatacli/tests/
 
 # Default values, can be overridden by config
+# TODO: Move these to K8s config, shouldn't be in dockerfile
 ENV DB_HOST=10.30.22.12
 ENV DB_USER=postgres
 ENV DB_NAME=metadata
