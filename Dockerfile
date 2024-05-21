@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt-get clean && apt-get -y update
-RUN apt-get -y install postgresql-client curl git vim
+RUN apt-get -y install curl git vim
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY . .
 
 RUN pip install -r requirements.txt
 RUN pip install -r dev-requirements.txt
-RUN pip install metadatalib/
+RUN pip install /app/app/metadatalib/
 
 #RUN pytest /app/metadatalib/tests/
 #RUN pytest /app/metadatacli/tests/
