@@ -53,7 +53,7 @@ def wiki():
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
 def review(ticket_code):
     if request.method == "POST":
-        submission = post_review(t, db, ticket_code, request.form["comment"])
+        post_review(t, db, ticket_code, request.form["comment"])
 
     return render_template("final.html", ticket_code=ticket_code)
 
