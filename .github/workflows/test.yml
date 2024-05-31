@@ -58,7 +58,7 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r dev-requirements.txt
       - name: Run tests
-        run: pytest -s -vvvv -l --tb=long app/metadatalib/test
+        run: pytest -s -vvvv -l --tb=long app/metadatalib/tests
 
   lint:
     name: Lint Code Base
