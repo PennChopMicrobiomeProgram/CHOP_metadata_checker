@@ -1,18 +1,33 @@
 import argparse
 import os
+import random
 import sys
 from datetime import datetime
-from .createProject import createProject
-from .db import MetadataDB, create_test_db
+
+from sqlalchemy import insert, select
+
+from metadatalib.models import Project
+from metadatalib import __version__, session
 
 
-def _create_project(args, db):
-    code = createProject(
-        db,
-        " ".join(args.project_name),
-        " ".join(args.customer_name),
-        " ".join(args.customer_email),
+def _create_project(args):
+    code = "%030x" % random.randrange(16**30)
+    while session.scalar(select(Project).filter(Project.ticket_code == code)):
+        code = "%030x" % random.randrange(16**30)
+
+    session.scalar(
+        insert(Project)
+        .returning(Project.ticket_code)
+        .values(
+            {
+                "project_name": " ".join(args.project_name),
+                "contact_name": " ".join(args.customer_name),
+                "contact_email": " ".join(args.customer_email),
+                "ticket_code": code,
+            }
+        )
     )
+
     url = os.environ.get("URL", "") + "/submit/" + code
     print(url)
     return code
@@ -33,6 +48,7 @@ def main(argv=None):
         default=[],
         help="Contact email for the customer",
     )
+    p.add_argument("-v", "--version", action="version", version=__version__)
 
     args = p.parse_args(argv)
 
@@ -42,16 +58,7 @@ def main(argv=None):
         )
         sys.exit(0)
 
-    try:
-        db = MetadataDB(os.environ["DB_FP"])
-    except KeyError:
-        print(
-            "ERR: Please provide a database file path in the DB_FP environment variable."
-        )
-        sys.exit(0)
-
-    print("Creating project...\n")
-    code = _create_project(args, db)
+    code = _create_project(args)
     print(
         f"{datetime.now()}\nProject code: {code}\nProject name: {args.project_name}\nClient name: {args.customer_name}\n"
     )

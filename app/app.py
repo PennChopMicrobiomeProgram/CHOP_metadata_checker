@@ -11,8 +11,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
 from metadatalib import SQLALCHEMY_DATABASE_URI
-from metadatalib.db import MetadataDB
-from metadatalib.models import Base, Project, Submission
+from metadatalib.models import Base, Project
 from metadatalib.utils import allowed_file
 from metadatalib.pages import post_review, run_checks
 from tablemusthave import Table
@@ -54,9 +53,7 @@ def wiki():
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
 def review(ticket_code):
     if request.method == "POST":
-        submission: Submission = post_review(
-            t, db, ticket_code, request.form["comment"]
-        )
+        post_review(t, db, ticket_code, request.form["comment"])
 
     return render_template("final.html", ticket_code=ticket_code)
 
@@ -132,12 +129,13 @@ def submit(ticket_code):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        sanitized_ticket_code = "".join(
+            c for c in request.form["ticket_code"] if c.isalnum()
+        )
         return redirect(
             url_for(
                 "submit",
-                ticket_code="".join(
-                    c for c in request.form["ticket_code"] if c.isalnum()
-                ),
+                ticket_code=sanitized_ticket_code,
             )
         )
 
@@ -145,5 +143,4 @@ def index():
 
 
 if __name__ == "__main__":
-    # port = int(os.environ.get("PORT", 80))
     app.run(host="0.0.0.0", port=80)
