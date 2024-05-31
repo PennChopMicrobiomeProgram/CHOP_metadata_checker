@@ -1,20 +1,28 @@
 import datetime
 import sys
-from pathlib import Path
-from . import engine, session, SQLALCHEMY_DATABASE_URI
+from sqlalchemy import delete
+from sqlalchemy.orm import Session
+from . import SQLALCHEMY_DATABASE_URI
 from .models import Annotation, Base, Project, Sample, Submission
 
 
-def create_test_db():
-    print(SQLALCHEMY_DATABASE_URI)
-    if "sqlite" not in SQLALCHEMY_DATABASE_URI:
-        print("Not a SQLite database, skipping test database creation.")
-        sys.exit(1)
-    if Path(SQLALCHEMY_DATABASE_URI[10:]).exists():
-        print("Test database already exists, skipping test database creation.")
-        sys.exit(1)
+def create_test_db(session: Session = None):
+    if not session:
+        from . import engine
+        from . import session as imported_session
 
-    Base.metadata.create_all(engine)
+        if "sqlite" not in SQLALCHEMY_DATABASE_URI:
+            print("Not a SQLite database, skipping test database creation.")
+            sys.exit(1)
+
+        session = imported_session
+        Base.metadata.create_all(engine)
+
+    if session.query(Project).count():
+        session.execute(delete(Project))
+        session.execute(delete(Submission))
+        session.execute(delete(Sample))
+        session.execute(delete(Annotation))
 
     p1 = Project(
         project_id=1,
