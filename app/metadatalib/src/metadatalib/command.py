@@ -5,12 +5,12 @@ import sys
 from datetime import datetime
 
 from sqlalchemy import insert, select
-
+from sqlalchemy.orm import Session
 from metadatalib.models import Project
 from metadatalib import __version__, session
 
 
-def _create_project(args):
+def _create_project(args, session: Session):
     code = "%030x" % random.randrange(16**30)
     while session.scalar(select(Project).filter(Project.ticket_code == code)):
         code = "%030x" % random.randrange(16**30)
@@ -33,7 +33,7 @@ def _create_project(args):
     return code
 
 
-def main(argv=None):
+def main(argv=None, session: Session = session):
     p = argparse.ArgumentParser()
     p.add_argument(
         "-p", "--project_name", nargs="+", default=[], help="Name of the project"
@@ -58,7 +58,8 @@ def main(argv=None):
         )
         sys.exit(0)
 
-    code = _create_project(args)
+    code = _create_project(args, session)
     print(
         f"{datetime.now()}\nProject code: {code}\nProject name: {args.project_name}\nClient name: {args.customer_name}\n"
     )
+    return code

@@ -2,8 +2,8 @@ import datetime
 import sys
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
-from . import SQLALCHEMY_DATABASE_URI
-from .models import Annotation, Base, Project, Sample, Submission
+from metadatalib import SQLALCHEMY_DATABASE_URI
+from metadatalib.models import Annotation, Base, Project, Sample, Submission
 
 
 def create_test_db(session: Session = None):
