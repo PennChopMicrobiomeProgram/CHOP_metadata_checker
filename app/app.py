@@ -11,7 +11,6 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
 from metadatalib import SQLALCHEMY_DATABASE_URI
-from metadatalib.db import MetadataDB
 from metadatalib.models import Base, Project, Submission
 from metadatalib.utils import allowed_file
 from metadatalib.pages import post_review, run_checks
@@ -54,9 +53,7 @@ def wiki():
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
 def review(ticket_code):
     if request.method == "POST":
-        submission: Submission = post_review(
-            t, db, ticket_code, request.form["comment"]
-        )
+        submission = post_review(t, db, ticket_code, request.form["comment"])
 
     return render_template("final.html", ticket_code=ticket_code)
 
