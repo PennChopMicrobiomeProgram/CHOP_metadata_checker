@@ -1,13 +1,13 @@
 import datetime
 import io
-from .consts import REGEX_TRANSLATE
-from .models import Annotation, Project, Sample, Submission
-from .utils import specification
 from flask import flash
 from flask_sqlalchemy import SQLAlchemy
 from tablemusthave import Table, musthave
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
+from metadatalib.consts import REGEX_TRANSLATE
+from metadatalib.models import Annotation, Project, Sample, Submission
+from metadatalib.utils import specification
 
 
 def post_review(
@@ -62,7 +62,7 @@ def post_review(
     db.session.commit()
 
     for i in range(num_samples):
-        for j in range(len(cols)):
+        for j, _ in enumerate(cols):
             # Create annotations
             if j not in indeces:
                 if t.get(cols[j])[i] is not None:

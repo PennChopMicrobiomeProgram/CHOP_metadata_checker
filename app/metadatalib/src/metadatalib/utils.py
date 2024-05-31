@@ -1,5 +1,13 @@
-from tablemusthave import *
-from .consts import (
+from tablemusthave import (
+    unique_values_for,
+    some_value_for,
+    MustHave,
+    columns_named,
+    columns_matching,
+    values_matching,
+    values_in_set,
+)
+from metadatalib.consts import (
     ALLOWED_EXTENSIONS,
     CHOP_MANDATORY_TUBE,
     CHOP_SUGGESTED,
@@ -9,12 +17,12 @@ from .consts import (
 
 
 # check if period in filename and has correct extensions
-def allowed_file(filename):
+def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 ##function to check unique combinations for these column inputs
-def uniq_comb(spec, col1, col2):
+def uniq_comb(spec: MustHave, col1: str, col2: str):
     spec.append(unique_values_for(col1, col2))
     spec.append(some_value_for(col1, col2))
     spec.append(unique_values_for(col2, col1))
@@ -22,7 +30,7 @@ def uniq_comb(spec, col1, col2):
 
 
 ##specification is an object of MustHave class which contains other classes that checks table by calling a function that returns AllGood or StillNeeds class (DoesntApply class is called if no such column exists in the input)
-specification = MustHave(
+specification: MustHave = MustHave(
     columns_named(CHOP_MANDATORY_TUBE),  ##must contain these columns
     columns_matching("^[0-9A-Za-z_]+$"),  ##column names must satisfy this regex
     values_matching("SampleID", "^[A-Za-z]"),  ##columns must satisfy this regex
