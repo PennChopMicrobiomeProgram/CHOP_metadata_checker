@@ -62,7 +62,7 @@ def post_review(
     db.session.commit()
 
     for i in range(num_samples):
-        for j in range(len(cols)):
+        for j, _ in enumerate(cols):
             # Create annotations
             if j not in indeces:
                 if t.get(cols[j])[i] is not None:
