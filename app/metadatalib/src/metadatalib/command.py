@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
 from metadatalib.models import Project
-from metadatalib import __version__, session
+from metadatalib import __version__, session, SQLALCHEMY_DATABASE_URI
 
 
 def _create_project(args, session: Session):
@@ -27,13 +27,14 @@ def _create_project(args, session: Session):
             }
         )
     )
+    session.commit()
 
     url = os.environ.get("URL", "") + "/submit/" + code
     print(url)
     return code
 
 
-def main(argv=None, session: Session = session):
+def main(argv=None, session: Session = session) -> str:
     p = argparse.ArgumentParser()
     p.add_argument(
         "-p", "--project_name", nargs="+", default=[], help="Name of the project"
@@ -48,9 +49,16 @@ def main(argv=None, session: Session = session):
         default=[],
         help="Contact email for the customer",
     )
+    p.add_argument(
+        "--show_db", action="store_true", help="Show the database connection string"
+    )
     p.add_argument("-v", "--version", action="version", version=__version__)
 
     args = p.parse_args(argv)
+
+    if args.show_db:
+        print(SQLALCHEMY_DATABASE_URI)
+        sys.exit(0)
 
     if args.project_name == [] or args.customer_name == [] or args.customer_email == []:
         print(
