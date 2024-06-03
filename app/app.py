@@ -66,8 +66,9 @@ def submit(ticket_code):
     )
 
     if not project:
-        # Check that ticket_code exists in the database
-        return render_template("dne.html", project=project)
+        # If ticket_code doesn't exist in DB, project will be None so we
+        # have to pass ticket_code directly to the template
+        return render_template("dne.html", ticket_code=ticket_code)
     elif request.method == "GET":
         # Display submission page for ticket_code
         return render_template(
