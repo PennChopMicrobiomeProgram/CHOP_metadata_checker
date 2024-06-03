@@ -11,12 +11,12 @@ def create_test_db(session: Session = None):
         from . import engine
         from . import session as imported_session
 
-        if "sqlite" not in SQLALCHEMY_DATABASE_URI:
-            print("Not a SQLite database, skipping test database creation.")
-            sys.exit(1)
-
         session = imported_session
         Base.metadata.create_all(engine)
+
+    if "sqlite" not in SQLALCHEMY_DATABASE_URI:
+        print("Not a SQLite database, skipping test database creation.")
+        sys.exit(1)
 
     if session.query(Project).count():
         session.execute(delete(Project))

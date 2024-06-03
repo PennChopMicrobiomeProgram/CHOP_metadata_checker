@@ -13,6 +13,10 @@ from metadatalib.utils import specification
 def post_review(
     t: Table, db: SQLAlchemy, project_code: str, comment: str
 ) -> Submission:
+    ### NOTE ###
+    # The db object in this function is an instance from flask_sqlalchemy, unlike
+    # any other functions in this library
+
     # Create submission
     project_id = (
         db.session.query(Project)
