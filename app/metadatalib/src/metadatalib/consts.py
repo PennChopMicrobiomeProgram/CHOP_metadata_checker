@@ -1,4 +1,4 @@
-ALLOWED_EXTENSIONS = {"tsv", "csv"}
+ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
 
 CHOP_MANDATORY_TUBE = [
     "SampleID",

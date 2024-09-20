@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 
@@ -22,6 +23,11 @@ except KeyError:
     )
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{Path(__file__).parent.parent.parent.parent.parent.resolve()}/metadata.sqlite3"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-Session = sessionmaker(bind=engine)
-session = Session()
+try:
+    engine = create_engine(SQLALCHEMY_DATABASE_URI)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+except SQLAlchemyError as e:
+    # Need to do handling here
+    raise e
+    session = None
