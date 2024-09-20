@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 class Project(Base):
     __tablename__ = "projects"
 
-    project_id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     project_name: Mapped[str] = mapped_column(nullable=False, unique=True)
     contact_name: Mapped[str] = mapped_column(nullable=False)
     contact_email: Mapped[str] = mapped_column(nullable=False)
@@ -23,7 +23,7 @@ class Project(Base):
 class Submission(Base):
     __tablename__ = "submissions"
 
-    submission_id: Mapped[int] = mapped_column(primary_key=True)
+    submission_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     project_id: Mapped[int] = mapped_column(
         ForeignKey("projects.project_id", onupdate="CASCADE", ondelete="CASCADE")
     )
@@ -38,7 +38,7 @@ class Submission(Base):
 class Sample(Base):
     __tablename__ = "samples"
 
-    sample_accession: Mapped[int] = mapped_column(primary_key=True)
+    sample_accession: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     sample_name: Mapped[str] = mapped_column(nullable=False)
     submission_id: Mapped[int] = mapped_column(
         ForeignKey("submissions.submission_id", onupdate="CASCADE", ondelete="CASCADE")

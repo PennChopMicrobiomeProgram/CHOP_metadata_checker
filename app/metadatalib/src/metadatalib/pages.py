@@ -1,87 +1,10 @@
-import datetime
 import io
 from flask import flash
-from flask_sqlalchemy import SQLAlchemy
 from tablemusthave import Table, musthave
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from metadatalib.consts import REGEX_TRANSLATE
-from metadatalib.models import Annotation, Project, Sample, Submission
 from metadatalib.utils import specification
-
-
-def post_review(
-    t: Table, db: SQLAlchemy, project_code: str, comment: str
-) -> Submission:
-    ### NOTE ###
-    # The db object in this function is an instance from flask_sqlalchemy, unlike
-    # any other functions in this library
-
-    # Create submission
-    project_id = (
-        db.session.query(Project)
-        .filter(Project.ticket_code == project_code)
-        .first()
-        .project_id
-    )
-
-    version = (
-        db.session.query(Submission).filter(Submission.project_id == project_id).count()
-        + 1
-    )
-
-    submission = Submission(
-        project_id=project_id,
-        version=version,
-        time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
-        comment=comment,
-    )
-    db.session.add(submission)
-    db.session.commit()
-
-    # Create samples
-    cols = t.colnames()
-    indeces = [
-        cols.index("SampleID"),
-        cols.index("sample_type"),
-        cols.index("subject_id"),
-        cols.index("host_species"),
-    ]
-    num_samples = len(t.get(cols[indeces[0]]))
-    samples: list[Sample] = []
-    annotations: list[Annotation] = []
-
-    for i in range(num_samples):
-        samples.append(
-            Sample(
-                sample_name=t.get("SampleID")[i],
-                submission_id=submission.submission_id,
-                sample_type=t.get("sample_type")[i],
-                subject_id=t.get("subject_id")[i],
-                host_species=t.get("host_species")[i],
-            )
-        )
-
-    db.session.add_all(samples)
-    db.session.commit()
-
-    for i in range(num_samples):
-        for j, _ in enumerate(cols):
-            # Create annotations
-            if j not in indeces:
-                if t.get(cols[j])[i] is not None:
-                    annotations.append(
-                        Annotation(
-                            sample_accession=samples[i].sample_accession,
-                            attr=cols[j],
-                            val=t.get(cols[j])[i],
-                        )
-                    )
-
-    db.session.add_all(annotations)
-    db.session.commit()
-
-    return submission
 
 
 def run_checks(file_fp: FileStorage) -> tuple:

@@ -1,4 +1,9 @@
 import os
+from app.src.utils import export_table, import_table
+from app.metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
+from app.metadatalib.src.metadatalib.models import Base, Project, Submission
+from app.metadatalib.src.metadatalib.utils import allowed_file
+from app.metadatalib.src.metadatalib.pages import run_checks
 from flask import (
     Flask,
     render_template,
@@ -10,10 +15,6 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
-from metadatalib import SQLALCHEMY_DATABASE_URI
-from metadatalib.models import Base, Project, Submission
-from metadatalib.utils import allowed_file
-from metadatalib.pages import post_review, run_checks
 from tablemusthave import Table
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -89,7 +90,7 @@ def show_submission(submission_id):
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
 def review(ticket_code):
     if request.method == "POST":
-        post_review(t, db, ticket_code, request.form["comment"])
+        import_table(t, db, ticket_code, request.form["comment"])
 
     return render_template("final.html", ticket_code=ticket_code)
 

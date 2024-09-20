@@ -1,5 +1,12 @@
 ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
 
+DEFAULT_SAMPLE_FIELDS = [
+    "SampleID",
+    "sample_type",
+    "subject_id",
+    "host_species",
+]
+
 CHOP_MANDATORY_TUBE = [
     "SampleID",
     "investigator",
