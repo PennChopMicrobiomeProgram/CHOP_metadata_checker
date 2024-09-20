@@ -147,7 +147,7 @@ def submit(ticket_code):
 
             return render_template(
                 "submit.html",
-                filename=filename,
+                filename=file_fp.filename,
                 project=project,
                 headers=headers,
                 rows=rows,
