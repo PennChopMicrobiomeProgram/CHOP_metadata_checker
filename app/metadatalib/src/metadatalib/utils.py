@@ -32,7 +32,7 @@ def uniq_comb(spec: MustHave, col1: str, col2: str):
 ##specification is an object of MustHave class which contains other classes that checks table by calling a function that returns AllGood or StillNeeds class (DoesntApply class is called if no such column exists in the input)
 specification: MustHave = MustHave(
     columns_named(CHOP_MANDATORY_TUBE),  ##must contain these columns
-    columns_matching("^[0-9A-Za-z_]+$"),  ##column names must satisfy this regex
+    columns_matching("^[0-9A-Za-z_.]+$"),  ##column names must satisfy this regex
     values_matching("SampleID", "^[A-Za-z]"),  ##columns must satisfy this regex
     values_matching("SampleID", "^[0-9A-Za-z._]+$"),
     unique_values_for("SampleID"),

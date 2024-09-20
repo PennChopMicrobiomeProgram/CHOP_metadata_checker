@@ -3,13 +3,7 @@ ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
 CHOP_MANDATORY_TUBE = [
     "SampleID",
     "investigator",
-    "project_name",
     "sample_type",
-    "tube_barcode",
-    "box_id",
-    "box_position",
-    "study_group",
-    "date_collected",
 ]
 
 CHOP_SUGGESTED = [
