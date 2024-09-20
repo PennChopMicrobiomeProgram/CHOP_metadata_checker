@@ -45,14 +45,14 @@ def create_test_db(session: Session = None):
         project_id=p1.project_id,
         version=1,
         comment="Test Comment 1",
-        time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        time_submitted=datetime.datetime.now().strftime("%m-%d-%Y, %H:%M:%S"),
     )
     sub2 = Submission(
         submission_id=2,
         project_id=p2.project_id,
         version=1,
         comment="Test Comment 2",
-        time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        time_submitted=datetime.datetime.now().strftime("%m-%d-%Y, %H:%M:%S"),
     )
     session.bulk_save_objects([sub1, sub2])
 
