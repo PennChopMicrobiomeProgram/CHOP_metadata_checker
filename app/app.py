@@ -11,7 +11,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
 from metadatalib import SQLALCHEMY_DATABASE_URI
-from metadatalib.models import Base, Project
+from metadatalib.models import Base, Project, Submission
 from metadatalib.utils import allowed_file
 from metadatalib.pages import post_review, run_checks
 from tablemusthave import Table
@@ -48,6 +48,42 @@ def favicon():
 def wiki():
     app.logger.info("Rendering wiki.html.\n")
     return render_template("wiki.html")
+
+
+@app.route("/project/<ticket_code>")
+def show_project(ticket_code):
+    project = (
+        db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
+    )
+    submissions = (
+        db.session.query(Submission)
+        .filter(Submission.project_id == project.project_id)
+        .all()
+    )
+
+    if not project:
+        return render_template("dne.html", ticket_code=ticket_code)
+
+    return render_template("project.html", project=project, submissions=submissions)
+
+
+@app.route("/submission/<submission_id>")
+def show_submission(submission_id):
+    submission = (
+        db.session.query(Submission)
+        .filter(Submission.submission_id == submission_id)
+        .first()
+    )
+    project = (
+        db.session.query(Project)
+        .filter(Project.project_id == submission.project_id)
+        .first()
+    )
+
+    if not submission:
+        return render_template("dne.html", ticket_code=project.ticket_code)
+
+    return render_template("submission.html", submission=submission)
 
 
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
@@ -140,7 +176,7 @@ def index():
             )
         )
 
-    return render_template("index.html")
+    return render_template("index.html", projects=db.session.query(Project).all())
 
 
 if __name__ == "__main__":
