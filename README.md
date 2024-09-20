@@ -24,6 +24,8 @@ create_metadata_test_db
 export FLASK_DEBUG=1 && flask --app app/app run
 ```
 
+`create_metadata_test_db` will create a couple projects with ids `1` and `2`. Feel free to `sqlite3 metadata.sqlite3` to examine the test data more closely.
+
 ## Deployment
 
 How you want to deploy this will depend on your needs, facilities, and ability. We have it deployed by a Kubernetes cluster but you could also 1) just run it in development mode from a lab computer or 2) setup Nginx/Apache on a dedicated server or 3) run it serverlessly in the cloud (e.g. with [Zappa](https://github.com/zappa/Zappa) on AWS) or 4) do something else. There are lots of well documented examples of deploying Flask sites out there, look around and find what works best for you.

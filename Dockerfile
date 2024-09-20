@@ -14,5 +14,8 @@ RUN pip install -r requirements.txt
 RUN pip install -r dev-requirements.txt
 RUN pip install /app/app/metadatalib/
 
+# Until this faces third parties, it's easier to just provide debug info to users on crashes than have it just show a 500 errror
+ENV FLASK_DEBUG=1
+
 ENTRYPOINT [ "python" ]
 CMD [ "app/app.py" ]

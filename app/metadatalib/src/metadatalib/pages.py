@@ -90,7 +90,7 @@ def run_checks(file_fp: FileStorage) -> tuple:
 
     # Convert FileStorage to StringIO to read as csv/tsv object
     string_io = io.StringIO(file_fp.read().decode("utf-8-sig"), newline=None)
-    if filename.rsplit(".", 1)[1].lower() == "tsv":
+    if filename.rsplit(".", 1)[1].lower() in ["tsv", "txt"]:
         delim = "\t"
 
     t = Table.from_csv(string_io, delimiter=delim)
