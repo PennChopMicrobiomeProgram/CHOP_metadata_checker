@@ -9,6 +9,7 @@ def test_allowed_file():
     assert allowed_file("test.xlsx") == False
     assert allowed_file("test") == False
     assert allowed_file("test.") == False
+    assert allowed_file("test.txt") == True
 
 
 # Tests for the specification are not even close to comprehensive, in this case I think it's better to just be very attentive to the code given its declarative nature instead of having a million tests that need to be rewritten every time the specification changes
@@ -72,7 +73,7 @@ good_samples = [
         "box1",
         "position1",
         "group1",
-        "01/04/21",
+        "01-04-21",
     ],
     [
         "AnotherOne",
@@ -85,6 +86,6 @@ good_samples = [
         "box2",
         "position2",
         "group2",
-        "06/07/23",
+        "06-07-23",
     ],
 ]

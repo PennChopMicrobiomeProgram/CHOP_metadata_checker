@@ -47,7 +47,7 @@ specification: MustHave = MustHave(
     some_value_for(
         "mouse_strain", "cage_id"
     ),  ##if mouse_strain is given, a cage_id for that sample must be provided
-    values_matching("date_collected", "^[0-9]{2}/[0-9]{2}/[0-9]{2}$"),
+    values_matching("date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$"),
     values_matching("time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"),
     unique_values_for("barcode"),
     values_matching("barcode", "^[ATCGURYKMSWBDHVN]+$"),
