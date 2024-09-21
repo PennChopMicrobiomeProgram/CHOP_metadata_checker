@@ -1,9 +1,14 @@
 import os
-from app.src.utils import export_table, import_table
+from app.src.utils import export_table, import_table, run_checks
 from app.metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
-from app.metadatalib.src.metadatalib.models import Base, Project, Submission
+from app.metadatalib.src.metadatalib.models import (
+    Annotation,
+    Base,
+    Project,
+    Sample,
+    Submission,
+)
 from app.metadatalib.src.metadatalib.utils import allowed_file
-from app.metadatalib.src.metadatalib.pages import run_checks
 from flask import (
     Flask,
     render_template,
@@ -75,16 +80,42 @@ def show_submission(submission_id):
         .filter(Submission.submission_id == submission_id)
         .first()
     )
+
+    if not submission:
+        return render_template("dne.html", ticket_code=project.ticket_code)
+
     project = (
         db.session.query(Project)
         .filter(Project.project_id == submission.project_id)
         .first()
     )
 
-    if not submission:
-        return render_template("dne.html", ticket_code=project.ticket_code)
+    global t
+    t = export_table(db, submission_id)
+    t, checks = run_checks(t=t)
 
-    return render_template("submission.html", submission=submission)
+    return render_template(
+        "submission.html",
+        submission=submission,
+        project=project,
+        table=t,
+        checks=checks,
+    )
+
+
+@app.route("/download/<submission_id>")
+def download(submission_id):
+    submission = (
+        db.session.query(Submission)
+        .filter(Submission.submission_id == submission_id)
+        .first()
+    )
+
+    if not submission:
+        return render_template("dne.html", submission_id=submission_id)
+
+    t = export_table(db, submission_id)
+    return t.to_csv()
 
 
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
@@ -97,71 +128,51 @@ def review(ticket_code):
 
 @app.route("/submit/<ticket_code>", methods=["GET", "POST"])
 def submit(ticket_code):
-    filename = "Select file ..."
     project = (
         db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
     )
 
     if not project:
-        # If ticket_code doesn't exist in DB, project will be None so we
-        # have to pass ticket_code directly to the template
         return render_template("dne.html", ticket_code=ticket_code)
     elif request.method == "GET":
         # Display submission page for ticket_code
         return render_template(
             "submit.html",
-            filename=filename,
+            filename="Select file ...",
             project=project,
         )
     elif request.method == "POST":
         # Check if post request has a file
         if "metadata_upload" not in request.files:
             flash("Please select a file")
-            return redirect(url_for("submit", project=project))
+            return redirect(url_for("submit", ticket_code=project.ticket_code))
         file_fp = request.files["metadata_upload"]
 
         # Check if user submitted a file
         if file_fp.filename == "":
             flash("No file selected")
-            return redirect(url_for("submit", project=project))
+            return redirect(url_for("submit", ticket_code=project.ticket_code))
 
         # Check if file was submitted and if it has correct extensions
         if file_fp and not allowed_file(file_fp.filename):
             flash(
                 "Please use the allowed file extensions for the metadata {.tsv, .csv}"
             )
-            return redirect(url_for("submit", project=project))
+            return redirect(url_for("submit", ticket_code=project.ticket_code))
 
         if file_fp and allowed_file(file_fp.filename):
             global t
-            (
-                t,
-                headers,
-                rows,
-                highlight_missing,
-                highlight_mismatch,
-                highlight_repeating,
-                highlight_not_allowed,
-                header_issues,
-                checks_passed,
-            ) = run_checks(file_fp)
+            t, checks = run_checks(file_fp=file_fp)
 
             return render_template(
                 "submit.html",
                 filename=file_fp.filename,
                 project=project,
-                headers=headers,
-                rows=rows,
                 table=t,
-                missing=highlight_missing,
-                mismatch=highlight_mismatch,
-                repeating=highlight_repeating,
-                not_allowed=highlight_not_allowed,
-                header_issues=header_issues,
-                checks_passed=checks_passed,
+                checks=checks,
             )
 
-        return redirect(url_for("submit", project=project))
+        return redirect(url_for("submit", ticket_code=project.ticket_code))
 
 
 @app.route("/", methods=["GET", "POST"])

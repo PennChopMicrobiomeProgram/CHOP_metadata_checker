@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% import 'macros.jinja' as macros %}
+
+{% block head %}
+{% endblock %}
+
+{% block body %}
+
+<body>
+  <div class="card m-3">
+    <h2 class="m-3">{{project.project_name}}</h2>
+    <h3 class="m-3">{{project.contact_name}} :-: {{project.contact_email}}</h3>
+    <div class="card-body">
+      <form action="{{ '/download/' + submission.submission_id }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <button type="submit" class="btn btn-success">Download metadata</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {{ macros.table(table, checks) }}
+</body>
+{% endblock %}
