@@ -1,0 +1,52 @@
+{% macro table(t, checks) %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+        <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endwith %}
+
+<div class="container-fluid" style="min-height:95%; ">
+    <div class="mt-2">
+        <div class="table-responsive text-nowrap">
+        <table class="table table-hover" style="width: 100%">
+            <thead>
+            <tr>
+                <th class="table-light">Row #</th>
+                {% for header in checks['headers'] %}
+                {% if header in checks['header_issues'].keys() %}
+                    <th class="table-danger" data-toggle="popover" title="There are issues in this column" data-content="{{ checks['header_issues'][header] }}">{{ header }}</th>
+                {% else %}
+                    <th class="table-light">{{ header }}</th>
+                {% endif %}
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for row_num in checks['rows'] %}
+                <tr>
+                <td>{{row_num + 1}}</td>
+                {% for cols in checks['headers'] %}
+                    {% if (row_num+1) in checks['missing'].keys() and cols in checks['missing'][(row_num+1)]%}
+                    <td class="table-danger" data-toggle="popover" title="Empty cell" data-content="Please fill in cell">{{ t.get(cols)[row_num] }}</td>
+                    {% elif t.get(cols)[row_num] in checks['mismatch'].keys() and cols == checks['mismatch'][t.get(cols)[row_num]] %}
+                    <td class="table-danger" data-toggle="popover" title="Wrong formatting" data-content="Please use the correct formatting specified above">{{ t.get(cols)[row_num] }}</td>
+                    {% elif t.get(cols)[row_num] in checks['repeating'].keys() and cols == checks['repeating'][t.get(cols)[row_num]] %}
+                    <td class="table-danger" data-toggle="popover" title="Repeated values" data-content="Please use unique values">{{ t.get(cols)[row_num] }}</td>
+                    {% elif t.get(cols)[row_num] in checks['not_allowed'].keys() and cols == checks['not_allowed'][t.get(cols)[row_num]] %}
+                    <td class="table-danger" data-toggle="popover" title="Choose from pre-selected list" data-content="Please use only pre-selected {{cols}}">{{ t.get(cols)[row_num] }}</td>
+                    {% else %}
+                    <td>{{ t.get(cols)[row_num] }}</td>
+                    {% endif %}
+                {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{% endmacro %}

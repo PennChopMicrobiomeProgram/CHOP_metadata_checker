@@ -1,22 +1,37 @@
 import datetime
 import io
 from flask import flash
-from flask_sqlalchemy import SQLAlchemy
 from tablemusthave import Table, musthave
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from metadatalib.consts import REGEX_TRANSLATE
-from metadatalib.models import Annotation, Project, Sample, Submission
-from metadatalib.utils import specification
+from flask_sqlalchemy import SQLAlchemy
+from tablemusthave import Table
+from app.metadatalib.src.metadatalib.consts import (
+    DEFAULT_SAMPLE_FIELDS,
+    REGEX_TRANSLATE,
+)
+from app.metadatalib.src.metadatalib.models import (
+    Annotation,
+    Project,
+    Sample,
+    Submission,
+)
+from app.metadatalib.src.metadatalib.utils import specification
 
 
-def post_review(
+def get_nullable_field(t: Table, i: int, field: str) -> str:
+    try:
+        return t.get(field)[i]
+    except IndexError:
+        return None
+
+
+### NOTE ###
+# These functions are here because they use the flask_sqlalchemy db client
+# Everything in metadatalib uses the standard sqlalchemy client
+def import_table(
     t: Table, db: SQLAlchemy, project_code: str, comment: str
 ) -> Submission:
-    ### NOTE ###
-    # The db object in this function is an instance from flask_sqlalchemy, unlike
-    # any other functions in this library
-
     # Create submission
     project_id = (
         db.session.query(Project)
@@ -33,7 +48,7 @@ def post_review(
     submission = Submission(
         project_id=project_id,
         version=version,
-        time_submitted=datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        time_submitted=datetime.datetime.now().strftime("%m-%d-%Y, %H:%M:%S"),
         comment=comment,
     )
     db.session.add(submission)
@@ -41,13 +56,8 @@ def post_review(
 
     # Create samples
     cols = t.colnames()
-    indeces = [
-        cols.index("SampleID"),
-        cols.index("sample_type"),
-        cols.index("subject_id"),
-        cols.index("host_species"),
-    ]
-    num_samples = len(t.get(cols[indeces[0]]))
+
+    num_samples = len(t.get(cols[cols.index("SampleID")]))
     samples: list[Sample] = []
     annotations: list[Annotation] = []
 
@@ -56,19 +66,21 @@ def post_review(
             Sample(
                 sample_name=t.get("SampleID")[i],
                 submission_id=submission.submission_id,
-                sample_type=t.get("sample_type")[i],
-                subject_id=t.get("subject_id")[i],
-                host_species=t.get("host_species")[i],
+                sample_type=get_nullable_field(t, i, "sample_type"),
+                subject_id=get_nullable_field(t, i, "subject_id"),
+                host_species=get_nullable_field(t, i, "host_species"),
             )
         )
 
     db.session.add_all(samples)
     db.session.commit()
 
+    # Create annotations after samples are commited to get sample_accession
+    # If accessed before commit, sample_accession will be None
     for i in range(num_samples):
-        for j, _ in enumerate(cols):
+        for j, col_name in enumerate(cols):
             # Create annotations
-            if j not in indeces:
+            if col_name not in DEFAULT_SAMPLE_FIELDS:
                 if t.get(cols[j])[i] is not None:
                     annotations.append(
                         Annotation(
@@ -84,7 +96,53 @@ def post_review(
     return submission
 
 
-def run_checks(file_fp: FileStorage) -> tuple:
+def export_table(db: SQLAlchemy, submission_id: int) -> Table:
+    samples = (
+        db.session.query(Sample).filter(Sample.submission_id == submission_id).all()
+    )
+
+    annotations = (
+        db.session.query(Annotation)
+        .filter(
+            Annotation.sample_accession.in_(
+                [sample.sample_accession for sample in samples]
+            )
+        )
+        .all()
+    )
+
+    cols = DEFAULT_SAMPLE_FIELDS.copy()
+    for annotation in annotations:
+        if annotation.attr not in cols:
+            cols.append(annotation.attr)
+
+    rows = []
+    for sample in samples:
+        row = [
+            sample.sample_name,
+            sample.sample_type,
+            sample.subject_id,
+            sample.host_species,
+        ]
+
+        for col in [c for c in cols if c not in DEFAULT_SAMPLE_FIELDS]:
+            row.append(
+                next(
+                    (
+                        a.val
+                        for a in annotations
+                        if a.attr == col
+                        and a.sample_accession == sample.sample_accession
+                    ),
+                    None,
+                )
+            )
+        rows.append(row)
+
+    return Table(cols, rows)
+
+
+def table_from_file(file_fp: FileStorage) -> Table:
     filename = secure_filename(file_fp.filename)
     delim = ","
 
@@ -93,8 +151,10 @@ def run_checks(file_fp: FileStorage) -> tuple:
     if filename.rsplit(".", 1)[1].lower() in ["tsv", "txt"]:
         delim = "\t"
 
-    t = Table.from_csv(string_io, delimiter=delim)
+    return Table.from_csv(string_io, delimiter=delim)
 
+
+def run_checks(t: Table) -> tuple[Table, dict]:
     # Get metadata table to print on webpage
     headers = t.colnames()
     sample_num = len(t.get(t.colnames()[0]))
@@ -198,12 +258,14 @@ def run_checks(file_fp: FileStorage) -> tuple:
 
     return (
         t,
-        headers,
-        rows,
-        highlight_missing,
-        highlight_mismatch,
-        highlight_repeating,
-        highlight_not_allowed,
-        header_issues,
-        checks_passed,
+        {
+            "headers": headers,
+            "rows": rows,
+            "missing": highlight_missing,
+            "mismatch": highlight_mismatch,
+            "repeating": highlight_repeating,
+            "not_allowed": highlight_not_allowed,
+            "header_issues": header_issues,
+            "passed": checks_passed,
+        },
     )

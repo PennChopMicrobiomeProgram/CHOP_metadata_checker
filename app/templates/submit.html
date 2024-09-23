@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% import 'macros.jinja' as macros %}
 
 {% block head %}
 {% endblock %}
@@ -26,63 +27,14 @@
           </div>
         </div>
       </form>
-     
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <ul class=flashes>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      {% endwith %}
-
-      {% if checks_passed %}
-        <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
+    
+    {% if checks is defined %}
+      {% if checks['passed'] %}
+      <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
       {% endif %}
-    </div>
-    <div class="container-fluid" style="min-height:95%; ">
-      <div class="mt-2">
-        {% if request.method == 'POST' %}
-          <div class="table-responsive text-nowrap">
-            <table class="table table-hover" style="width: 100%">
-              <thead>
-                <tr>
-                  <th class="table-light">Row #</th>
-                  {% for headers in headers %}
-                    {% if headers in header_issues.keys() %}
-                      <th class="table-danger" data-toggle="popover" title="There are issues in this column" data-content="{{header_issues[headers]}}">{{headers}}</th>
-                    {% else %}
-                      <th class="table-light">{{headers}}</th>
-                    {% endif %}
-                  {% endfor %}
-                </tr>
-              </thead>
-              <tbody>
-                {% for row_num in rows %}
-                  <tr>
-                    <td>{{row_num + 1}}</td>
-                    {% for cols in headers %}
-                      {% if (row_num+1) in missing.keys() and cols in missing[(row_num+1)]%}
-                        <td class="table-danger" data-toggle="popover" title="Empty cell" data-content="Please fill in cell">{{table.get(cols)[row_num]}}</td>
-                      {% elif table.get(cols)[row_num] in mismatch.keys() and cols == mismatch[table.get(cols)[row_num]] %}
-                        <td class="table-danger" data-toggle="popover" title="Wrong formatting" data-content="Please use the correct formatting specified above">{{table.get(cols)[row_num]}}</td>
-                      {% elif table.get(cols)[row_num] in repeating.keys() and cols == repeating[table.get(cols)[row_num]] %}
-                        <td class="table-danger" data-toggle="popover" title="Repeated values" data-content="Please use unique values">{{table.get(cols)[row_num]}}</td>
-                      {% elif table.get(cols)[row_num] in not_allowed.keys() and cols == not_allowed[table.get(cols)[row_num]] %}
-                        <td class="table-danger" data-toggle="popover" title="Choose from pre-selected list" data-content="Please use only pre-selected {{cols}}">{{table.get(cols)[row_num]}}</td>
-                      {% else %}
-                        <td>{{table.get(cols)[row_num]}}</td>
-                      {% endif %}
-                    {% endfor %}
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% endif %}
-      </div>
-    </div>
+
+      {{ macros.table(table, checks) }}
+    {% endif %}
   </div>
 </body>
 {% endblock %}

@@ -17,9 +17,9 @@ jobs:
           python-version: 3.12
       - name: Install project
         run: |
-          pip install app/metadatalib/ pytest pytest-cov
           pip install -r requirements.txt
           pip install -r dev-requirements.txt
+          pip install app/metadatalib/
       - name: Run tests
         run: pytest -s -vvvv -l --tb=long app/metadatalib/tests
       - name: Generate coverage report
@@ -54,9 +54,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install project
         run: |
-          python -m pip install app/metadatalib/
           python -m pip install -r requirements.txt
           python -m pip install -r dev-requirements.txt
+          python -m pip install app/metadatalib/
       - name: Run tests
         run: pytest -s -vvvv -l --tb=long app/metadatalib/tests
 

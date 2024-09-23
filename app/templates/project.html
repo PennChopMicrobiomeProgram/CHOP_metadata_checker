@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="card m-3">
+    <h2 class="m-3">{{project.project_name}}</h2>
+    <h3 class="m-3">{{project.contact_name}} :-: {{project.contact_email}}</h3>
+</div>
+
+<table class="display" id="submissions">
+    <thead>
+      <tr>
+        <th>Submission ID</th>
+        <th>Version</th>
+        <th>Time Submitted</th>
+        <th>Comment</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for submission in submissions %}
+        <tr>
+          <td><a href="{{ url_for('show_submission', submission_id=submission.submission_id) }}">{{ submission.submission_id }}</a></td>
+          <td>{{ submission.version }}</td>
+          <td>{{ submission.time_submitted }}</td>
+          <td>{{ submission.comment }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <script type="text/javascript">
+  $(document).ready(function () {
+      /* Initialize the DataTable */
+      oTable = $('#submissions').dataTable({
+          "bSort": false,
+          "iDisplayLength": 20,
+          "bLengthChange": false,
+          "sPaginationType": "full_numbers",
+          "bStateSave": true,
+      });
+  
+      /* Move search box to bottom of summary area */
+      $("#submissions_filter").appendTo('#submissions_summary');
+  
+      /* Snap pagination info to grid */
+      $("#submissions_info").addClass("span-12");
+      $("#submissions_paginate").addClass("span-12 last")
+  
+      /* Moving the search box breaks the state saving routine */
+      /* Redraw manually */
+      oTable.fnDraw();
+  });
+  </script>
+{% endblock %}
