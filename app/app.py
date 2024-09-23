@@ -1,5 +1,6 @@
+import json
 import os
-from app.src.utils import export_table, import_table, run_checks
+from app.src.utils import export_table, import_table, run_checks, table_from_file
 from app.metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
 from app.metadatalib.src.metadatalib.models import (
     Annotation,
@@ -17,11 +18,13 @@ from flask import (
     redirect,
     flash,
     send_from_directory,
+    session,
 )
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
 from tablemusthave import Table
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
@@ -37,8 +40,6 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
-
-t = Table([], [])
 
 
 @app.route("/favicon.ico")
@@ -82,7 +83,7 @@ def show_submission(submission_id):
     )
 
     if not submission:
-        return render_template("dne.html", ticket_code=project.ticket_code)
+        return render_template("dne.html", submission_id=submission_id)
 
     project = (
         db.session.query(Project)
@@ -90,7 +91,13 @@ def show_submission(submission_id):
         .first()
     )
 
-    global t
+    if not project:
+        return render_template(
+            "dne.html",
+            project_id=submission.project_id,
+            message=f"Project {submission.project_id} with submission {submission_id} does not exist",
+        )
+
     t = export_table(db, submission_id)
     t, checks = run_checks(t=t)
 
@@ -121,6 +128,8 @@ def download(submission_id):
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
 def review(ticket_code):
     if request.method == "POST":
+        table_data = session.get("table_data", {"cols": [], "rows": []})
+        t = Table(table_data["cols"], table_data["rows"])
         import_table(t, db, ticket_code, request.form["comment"])
 
     return render_template("final.html", ticket_code=ticket_code)
@@ -161,8 +170,13 @@ def submit(ticket_code):
             return redirect(url_for("submit", ticket_code=project.ticket_code))
 
         if file_fp and allowed_file(file_fp.filename):
-            global t
-            t, checks = run_checks(file_fp=file_fp)
+            t, checks = run_checks(table_from_file(file_fp))
+            print(t.data.keys())
+            print(list(zip(*t.data.values())))
+            session["table_data"] = {
+                "cols": list(t.data.keys()),
+                "rows": list(zip(*t.data.values())),
+            }
 
             return render_template(
                 "submit.html",

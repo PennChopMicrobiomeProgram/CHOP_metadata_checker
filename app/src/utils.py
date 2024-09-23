@@ -111,12 +111,12 @@ def export_table(db: SQLAlchemy, submission_id: int) -> Table:
         .all()
     )
 
-    cols = DEFAULT_SAMPLE_FIELDS
+    cols = DEFAULT_SAMPLE_FIELDS.copy()
     for annotation in annotations:
         if annotation.attr not in cols:
             cols.append(annotation.attr)
 
-    t = Table(cols, [])
+    rows = []
     for sample in samples:
         row = [
             sample.sample_name,
@@ -124,29 +124,37 @@ def export_table(db: SQLAlchemy, submission_id: int) -> Table:
             sample.subject_id,
             sample.host_species,
         ]
-        for annotation in annotations:
-            if annotation.sample_accession == sample.sample_accession:
-                row.append(annotation.val)
-        t.add_row(row)
 
-    return t
+        for col in [c for c in cols if c not in DEFAULT_SAMPLE_FIELDS]:
+            row.append(
+                next(
+                    (
+                        a.val
+                        for a in annotations
+                        if a.attr == col
+                        and a.sample_accession == sample.sample_accession
+                    ),
+                    None,
+                )
+            )
+        rows.append(row)
+
+    return Table(cols, rows)
 
 
-def run_checks(file_fp: FileStorage = None, t: Table = None) -> tuple[Table, dict]:
-    if t is None:
-        if file_fp is None:
-            raise ValueError("Either file_fp or t must be provided")
+def table_from_file(file_fp: FileStorage) -> Table:
+    filename = secure_filename(file_fp.filename)
+    delim = ","
 
-        filename = secure_filename(file_fp.filename)
-        delim = ","
+    # Convert FileStorage to StringIO to read as csv/tsv object
+    string_io = io.StringIO(file_fp.read().decode("utf-8-sig"), newline=None)
+    if filename.rsplit(".", 1)[1].lower() in ["tsv", "txt"]:
+        delim = "\t"
 
-        # Convert FileStorage to StringIO to read as csv/tsv object
-        string_io = io.StringIO(file_fp.read().decode("utf-8-sig"), newline=None)
-        if filename.rsplit(".", 1)[1].lower() in ["tsv", "txt"]:
-            delim = "\t"
+    return Table.from_csv(string_io, delimiter=delim)
 
-        t = Table.from_csv(string_io, delimiter=delim)
 
+def run_checks(t: Table) -> tuple[Table, dict]:
     # Get metadata table to print on webpage
     headers = t.colnames()
     sample_num = len(t.get(t.colnames()[0]))
