@@ -1,4 +1,4 @@
-import json
+import csv
 import os
 from app.src.utils import export_table, import_table, run_checks, table_from_file
 from app.metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
@@ -12,6 +12,7 @@ from app.metadatalib.src.metadatalib.models import (
 from app.metadatalib.src.metadatalib.utils import allowed_file
 from flask import (
     Flask,
+    make_response,
     render_template,
     url_for,
     request,
@@ -21,6 +22,7 @@ from flask import (
     session,
 )
 from flask_sqlalchemy import SQLAlchemy
+from io import StringIO
 from pathlib import Path
 from tablemusthave import Table
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -110,7 +112,7 @@ def show_submission(submission_id):
     )
 
 
-@app.route("/download/<submission_id>")
+@app.route("/download/<submission_id>", methods=["GET", "POST"])
 def download(submission_id):
     submission = (
         db.session.query(Submission)
@@ -121,14 +123,40 @@ def download(submission_id):
     if not submission:
         return render_template("dne.html", submission_id=submission_id)
 
+    project = (
+        db.session.query(Project)
+        .filter(Project.project_id == submission.project_id)
+        .first()
+    )
+
+    if not project:
+        return render_template(
+            "dne.html",
+            project_id=submission.project_id,
+            message=f"Project {submission.project_id} with submission {submission_id} does not exist",
+        )
+
     t = export_table(db, submission_id)
-    return t.to_csv()
+
+    csv_file = StringIO()
+    writer = csv.writer(csv_file)
+    writer.writerow(t.data.keys())
+    for row in zip(*t.data.values()):
+        writer.writerow(row)
+
+    # Create the response and set the appropriate headers
+    response = make_response(csv_file.getvalue())
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename={project.contact_name}-{project.project_name}_{submission.version}.csv"
+    )
+    response.headers["Content-type"] = "text/csv"
+    return response
 
 
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
 def review(ticket_code):
     if request.method == "POST":
-        table_data = session.get("table_data", {"cols": [], "rows": []})
+        table_data = session.pop("table_data", {"cols": [], "rows": []})
         t = Table(table_data["cols"], table_data["rows"])
         import_table(t, db, ticket_code, request.form["comment"])
 
