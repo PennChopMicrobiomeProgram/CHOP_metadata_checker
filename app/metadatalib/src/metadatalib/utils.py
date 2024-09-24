@@ -55,6 +55,7 @@ specification: MustHave = MustHave(
     values_matching("forward_barcode_location", "^[A-H][0-9]{2}$"),
 )
 
+uniq_comb(specification, "tube_id", "box_id")
 uniq_comb(specification, "box_id", "box_position")
 uniq_comb(specification, "reverse_barcode_plate", "reverse_barcode_location")
 uniq_comb(specification, "forward_barcode_plate", "forward_barcode_location")
