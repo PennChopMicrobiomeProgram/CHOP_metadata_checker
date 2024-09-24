@@ -54,7 +54,7 @@ col_names = [
     "host_species",
     "investigator",
     "project_name",
-    "tube_barcode",
+    "tube_id",
     "box_id",
     "box_position",
     "study_group",
