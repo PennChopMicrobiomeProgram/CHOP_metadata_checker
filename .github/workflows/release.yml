@@ -22,7 +22,7 @@ jobs:
         uses: battila7/get-version-action@v2
       - name: Check version
         run: |
-          LIBRARY_VERSION=$(sample_registry_version 2> /dev/null)
+          LIBRARY_VERSION=$(metadatacli --version 2> /dev/null)
           GITHUB_VERSION=${{ steps.get_version.outputs.version-without-v }}
           if [[ $LIBRARY_VERSION == $GITHUB_VERSION ]]; then
             echo "Versions match, continuing..."
