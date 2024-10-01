@@ -1,3 +1,4 @@
+import collections
 from tablemusthave import (
     unique_values_for,
     some_value_for,
@@ -7,6 +8,10 @@ from tablemusthave import (
     values_matching,
     values_in_set,
 )
+from tablemusthave.musthave import (
+    DoesntApply,
+    must_have_result,
+)
 from metadatalib.consts import (
     ALLOWED_EXTENSIONS,
     CHOP_MANDATORY_TUBE,
@@ -14,6 +19,25 @@ from metadatalib.consts import (
     SAMPLE_TYPE_LIST,
     HOST_SPECIES_LIST,
 )
+
+
+class no_leading_trailing_whitespace:
+    def __init__(self, *colnames):
+        self.colnames = list(colnames)
+        assert len(self.colnames) >= 1
+
+    def description(self):
+        desc = "Values of {0} must not have leading or trailing whitespace."
+        return desc.format(self.colnames)
+
+    def check(self, t):
+        missing = [c for c in self.colnames if c not in t]
+        if missing:
+            return DoesntApply(*missing)
+        vals = zip(*(t.get(c) for c in self.colnames))
+        print(vals)
+        bad_format = [v for v in vals if any(v.strip() != v)]
+        return must_have_result(bad_format=bad_format)
 
 
 # check if period in filename and has correct extensions
@@ -30,6 +54,7 @@ def uniq_comb(spec: MustHave, col1: str, col2: str):
 
 ##specification is an object of MustHave class which contains other classes that checks table by calling a function that returns AllGood or StillNeeds class (DoesntApply class is called if no such column exists in the input)
 specification: MustHave = MustHave(
+    # no_leading_trailing_whitespace(),
     columns_named(CHOP_MANDATORY_TUBE),  ##must contain these columns
     columns_matching("^[0-9A-Za-z_.]+$"),  ##column names must satisfy this regex
     values_matching("SampleID", "^[A-Za-z]"),  ##columns must satisfy this regex
