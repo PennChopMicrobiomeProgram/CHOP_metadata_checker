@@ -25,7 +25,6 @@ def allowed_file(filename: str) -> bool:
 def uniq_comb(spec: MustHave, col1: str, col2: str):
     spec.append(unique_values_for(col1, col2))
     spec.append(some_value_for(col1, col2))
-    spec.append(unique_values_for(col2, col1))
     spec.append(some_value_for(col2, col1))
 
 
