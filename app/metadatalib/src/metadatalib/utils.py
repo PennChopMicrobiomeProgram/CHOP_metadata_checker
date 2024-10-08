@@ -1,4 +1,3 @@
-import collections
 from tablemusthave import (
     unique_values_for,
     some_value_for,
@@ -22,22 +21,19 @@ from metadatalib.consts import (
 
 
 class no_leading_trailing_whitespace:
-    def __init__(self, *colnames):
-        self.colnames = list(colnames)
-        assert len(self.colnames) >= 1
+    def __init__(self, colname):
+        self.colname = colname
 
     def description(self):
         desc = "Values of {0} must not have leading or trailing whitespace."
-        return desc.format(self.colnames)
+        return desc.format(self.colname)
 
     def check(self, t):
-        missing = [c for c in self.colnames if c not in t]
-        if missing:
-            return DoesntApply(*missing)
-        vals = zip(*(t.get(c) for c in self.colnames))
-        print(vals)
-        bad_format = [v for v in vals if any(v.strip() != v)]
-        return must_have_result(bad_format=bad_format)
+        if self.colname not in t:
+            return DoesntApply(self.colname)
+        vals = t.get(self.colname)
+        not_matching = [v for v in vals if v and v.strip() != v]
+        return must_have_result(not_matching=not_matching)
 
 
 # check if period in filename and has correct extensions
