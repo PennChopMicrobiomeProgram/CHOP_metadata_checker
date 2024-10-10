@@ -2,6 +2,7 @@ import csv
 import os
 from .src.utils import export_table, import_table, run_checks, table_from_file
 from .metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
+from .metadatalib.src.metadatalib.consts import ALLOWED_EXTENSIONS
 from .metadatalib.src.metadatalib.models import (
     Annotation,
     Base,
@@ -192,14 +193,12 @@ def submit(ticket_code):
         # Check if file was submitted and if it has correct extensions
         if file_fp and not allowed_file(file_fp.filename):
             flash(
-                "Please use the allowed file extensions for the metadata {.tsv, .csv}"
+                f"Please use the allowed file extensions for the metadata {ALLOWED_EXTENSIONS}"
             )
             return redirect(url_for("submit", ticket_code=project.ticket_code))
 
         if file_fp and allowed_file(file_fp.filename):
             t, checks = run_checks(table_from_file(file_fp))
-            print(t.data.keys())
-            print(list(zip(*t.data.values())))
             session["table_data"] = {
                 "cols": list(t.data.keys()),
                 "rows": list(zip(*t.data.values())),
@@ -229,7 +228,6 @@ def index():
             )
         )
 
-    print(db.session.query(Project).all())
     return render_template("index.html", projects=db.session.query(Project).all())
 
 
