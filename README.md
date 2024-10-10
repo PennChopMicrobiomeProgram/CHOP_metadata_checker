@@ -25,6 +25,19 @@ export FLASK_DEBUG=1 && flask --app app/app run
 
 `create_metadata_test_db` will create a couple projects with ids `1` and `2`. Feel free to `sqlite3 metadata.sqlite3` to examine the test data more closely.
 
+### Development with Docker
+
+To run the app locally in a docker container instead:
+
+```
+git clone https://github.com/PennChopMicrobiomeProgram/CHOP_metadata_checker.git
+cd CHOP_metadata_checker
+docker build -t myrepo/metadata_checker:dev -f Dockerfile .
+docker run --rm -p 8080:80 myrepo/metadata_checker:dev
+```
+
+You should then be able to access the site at http://localhost:8080. The downside to this method of development is that you have to rebuild the container to see changes (or else do you dev work within the container as well, see VS Code Dev Containers), but it can act as a good check that your changes will work in the dockerized version of your deployment before you push to a docker-based hosting environment.
+
 ## Deployment
 
 How you want to deploy this will depend on your needs, facilities, and ability. We have it deployed by a Kubernetes cluster but you could also 1) just run it in development mode from a lab computer or 2) setup Nginx/Apache on a dedicated server or 3) run it serverlessly in the cloud (e.g. with [Zappa](https://github.com/zappa/Zappa) on AWS) or 4) do something else. There are lots of well documented examples of deploying Flask sites out there, look around and find what works best for you.

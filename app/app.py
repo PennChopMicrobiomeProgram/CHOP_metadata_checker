@@ -1,15 +1,15 @@
 import csv
 import os
-from app.src.utils import export_table, import_table, run_checks, table_from_file
-from app.metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
-from app.metadatalib.src.metadatalib.models import (
+from .src.utils import export_table, import_table, run_checks, table_from_file
+from .metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
+from .metadatalib.src.metadatalib.models import (
     Annotation,
     Base,
     Project,
     Sample,
     Submission,
 )
-from app.metadatalib.src.metadatalib.utils import allowed_file
+from .metadatalib.src.metadatalib.utils import allowed_file
 from flask import (
     Flask,
     make_response,
@@ -26,7 +26,6 @@ from io import StringIO
 from pathlib import Path
 from tablemusthave import Table
 from werkzeug.middleware.proxy_fix import ProxyFix
-from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
@@ -230,8 +229,9 @@ def index():
             )
         )
 
+    print(db.session.query(Project).all())
     return render_template("index.html", projects=db.session.query(Project).all())
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    app.run()

@@ -14,8 +14,13 @@ RUN pip install -r requirements.txt
 RUN pip install -r dev-requirements.txt
 RUN pip install /app/app/metadatalib/
 
-# Until this faces third parties, it's easier to just provide debug info to users on crashes than have it just show a 500 errror
+# Until this faces third parties, it's easier to just provide debug info to users on crashes than have it just show a 500 error
 ENV FLASK_DEBUG=1
+ENV FLASK_APP=/app/app/app
+ENV SQLALCHEMY_ECHO=True
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_RUN_PORT=80
 
-ENTRYPOINT [ "python" ]
-CMD [ "app/app.py" ]
+EXPOSE 80
+
+CMD [ "flask", "run" ]

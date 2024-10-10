@@ -16,7 +16,10 @@ from app.metadatalib.src.metadatalib.models import (
     Sample,
     Submission,
 )
-from app.metadatalib.src.metadatalib.utils import specification
+from app.metadatalib.src.metadatalib.utils import (
+    no_leading_trailing_whitespace,
+    specification,
+)
 
 
 def get_nullable_field(t: Table, i: int, field: str) -> str:
@@ -159,6 +162,9 @@ def run_checks(t: Table) -> tuple[Table, dict]:
     headers = t.colnames()
     sample_num = len(t.get(t.colnames()[0]))
     rows = list(range(0, sample_num))
+
+    for h in headers:
+        specification.append(no_leading_trailing_whitespace(h))
 
     # Overall check to see if metadata satisfies all requirements
     checks = specification.check(t)
