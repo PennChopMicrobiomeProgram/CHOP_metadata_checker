@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 try:
     db_host = os.environ["METADATA_DB_HOST"]
