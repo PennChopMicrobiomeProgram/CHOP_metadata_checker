@@ -27,12 +27,19 @@
           </div>
         </div>
       </form>
-    
-    {% if checks is defined %}
-      {% if checks['passed'] %}
-      <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
-      {% endif %}
 
+      {% if checks is defined %}
+        {% if checks['passed'] %}
+          <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
+        {% else %}
+          <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-warning" onclick="return confirm('There are still issues in your metadata. Are you sure you want to submit with these issues?')">Submit Metadata</a>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+    
+  <div>
+    {% if checks is defined and table is defined %}
       {{ macros.table(table, checks) }}
     {% endif %}
   </div>
