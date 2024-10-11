@@ -215,6 +215,15 @@ def submit(ticket_code):
         return redirect(url_for("submit", ticket_code=project.ticket_code))
 
 
+@app.route("/summary")
+def summary():
+    return render_template(
+        "summary.html",
+        projects=db.session.query(Project).all(),
+        submissions=db.session.query(Submission).all(),
+    )
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
