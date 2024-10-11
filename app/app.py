@@ -164,6 +164,13 @@ def submit(ticket_code):
     project = (
         db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
     )
+    recent_submissions = (
+        db.session.query(Submission)
+        .filter(Submission.project_id == project.project_id)
+        .order_by(Submission.time_submitted.desc())
+        .limit(3)
+        .all()
+    )
 
     if not project:
         return render_template("dne.html", ticket_code=ticket_code)
@@ -173,6 +180,7 @@ def submit(ticket_code):
             "submit.html",
             filename="Select file ...",
             project=project,
+            submissions=recent_submissions,
         )
     elif request.method == "POST":
         # Check if post request has a file
@@ -204,6 +212,7 @@ def submit(ticket_code):
                 "submit.html",
                 filename=file_fp.filename,
                 project=project,
+                submissions=recent_submissions,
                 table=t,
                 checks=checks,
                 is_importable=is_importable(t),

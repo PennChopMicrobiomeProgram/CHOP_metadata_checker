@@ -9,7 +9,7 @@ A Flask site for validating metadata sheets per the standards of the PCMP and an
 
 ## Development
 
-To start with local development:
+This is a Flask app leveraging with bootstrap, jquery, and datatables (via CDN). To start with local development:
 
 ```
 git clone https://github.com/PennChopMicrobiomeProgram/CHOP_metadata_checker.git

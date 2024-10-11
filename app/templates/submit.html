@@ -1,43 +1,84 @@
 {% extends 'base.html' %}
 {% import 'macros.jinja' as macros %}
 
-{% block head %}
-{% endblock %}
-
 {% block body %}
 
 <body>
-  <div class="card m-3">
-    <h2 class="m-3">{{project.project_name}}</h2>
-    <h3 class="m-3">{{project.contact_name}} :-: {{project.contact_email}}</h3>
-    <div class="card-body">
-      <form action="{{ '/submit/' + project.ticket_code }}" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-          <label>Select metadata file</label>
-          <div class="row">
-            <div class="col-sm">
-              <div class="custom-file">
+  <div class="flex card m-3">
+    <div class="container-fluid p-4 card-body">
+      <div class="row">
+        <div class="col-lg">
+          <h2 class="m-3">{{project.project_name}}</h2>
+          <h3 class="m-3">{{project.contact_name}} :-: {{project.contact_email}}</h3>
+          <form action="{{ '/submit/' + project.ticket_code }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+              <label>Select metadata file</label>
+              <div class="custom-file py-2">
                 <input type="file" class="custom-file-input" name="metadata_upload" id="metadata_upload">
                 <label class="custom-file-label" for="metadata_upload" id="filename">{{ filename }}</label>
               </div>
-            </div>
-            <div class="col-sm">
               <button type="submit" class="btn btn-success">Upload metadata</button>
             </div>
+          </form>
+
+          <div class="py-4">
+          {% if checks is defined %}
+            {% if checks['passed'] %}
+              <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
+            {% elif is_importable %}
+              <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-warning" onclick="return confirm('There are still issues in your metadata. Are you sure you want to submit with these issues?')">Submit Metadata</a>
+              <i class="max-w-prose">There are still issues flagged by the checker but you can submit if you want.</i>
+            {% else %}
+              <i class="max-w-prose">There are schema-breaking issues flagged by the checker. You must resolve these issues before you can submit.</i>
+            {% endif %}
+          {% endif %}
           </div>
         </div>
-      </form>
 
-      {% if checks is defined %}
-        {% if checks['passed'] %}
-          <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
-        {% elif is_importable %}
-          <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-warning" onclick="return confirm('There are still issues in your metadata. Are you sure you want to submit with these issues?')">Submit Metadata</a>
-          <i>There are still issues flagged by the checker but you can submit if you want.</i>
-        {% else %}
-          <i>There are schema-breaking issues flagged by the checker. You must resolve these issues before you can submit.</i>
-        {% endif %}
-      {% endif %}
+        <div class="col-md">
+          <h4>Recent Submissions</h4>
+          <table class="display" id="submissions">
+            <thead>
+              <tr>
+                <th>Submission ID</th>
+                <th>Version</th>
+                <th>Time Submitted</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for submission in submissions %}
+                <tr>
+                  <td><a href="{{ url_for('show_submission', submission_id=submission.submission_id) }}">{{ submission.submission_id }}</a></td>
+                  <td>{{ submission.version }}</td>
+                  <td>{{ submission.time_submitted }}</td>
+                  <td>{{ submission.comment }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+            
+            <script type="text/javascript">
+            $(document).ready(function () {
+              /* Initialize the DataTable without the search bar and pagination */
+              oTable = $('#submissions').dataTable({
+                "bSort": false,
+                "iDisplayLength": 20,
+                "bLengthChange": false,
+                "bPaginate": false, // Disable pagination
+                "bStateSave": true,
+                "bFilter": false, // Disable the search bar
+              });
+
+              /* Snap pagination info to grid */
+              $("#submissions_info").addClass("span-12");
+
+              /* Redraw manually */
+              oTable.fnDraw();
+            });
+            </script>
+        </div>
+      </div>
     </div>
   </div>
     
