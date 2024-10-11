@@ -7,6 +7,7 @@ from werkzeug.datastructures import FileStorage
 from flask_sqlalchemy import SQLAlchemy
 from tablemusthave import Table
 from app.metadatalib.src.metadatalib.consts import (
+    CHOP_MANDATORY_TUBE,
     DEFAULT_SAMPLE_FIELDS,
     REGEX_TRANSLATE,
 )
@@ -97,6 +98,10 @@ def import_table(
     db.session.commit()
 
     return submission
+
+
+def is_importable(t: Table) -> bool:
+    return all(col in t.colnames() for col in CHOP_MANDATORY_TUBE)
 
 
 def export_table(db: SQLAlchemy, submission_id: int) -> Table:

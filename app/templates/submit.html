@@ -31,8 +31,11 @@
       {% if checks is defined %}
         {% if checks['passed'] %}
           <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
-        {% else %}
+        {% elif is_importable %}
           <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-warning" onclick="return confirm('There are still issues in your metadata. Are you sure you want to submit with these issues?')">Submit Metadata</a>
+          <i>There are still issues flagged by the checker but you can submit if you want.</i>
+        {% else %}
+          <i>There are schema-breaking issues flagged by the checker. You must resolve these issues before you can submit.</i>
         {% endif %}
       {% endif %}
     </div>
