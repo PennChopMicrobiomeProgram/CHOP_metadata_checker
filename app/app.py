@@ -1,6 +1,12 @@
 import csv
 import os
-from .src.utils import export_table, import_table, run_checks, table_from_file
+from .src.utils import (
+    export_table,
+    import_table,
+    is_importable,
+    run_checks,
+    table_from_file,
+)
 from .metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
 from .metadatalib.src.metadatalib.consts import ALLOWED_EXTENSIONS
 from .metadatalib.src.metadatalib.models import (
@@ -153,20 +159,17 @@ def download(submission_id):
     return response
 
 
-@app.route("/review/<ticket_code>", methods=["GET", "POST"])
-def review(ticket_code):
-    if request.method == "POST":
-        table_data = session.pop("table_data", {"cols": [], "rows": []})
-        t = Table(table_data["cols"], table_data["rows"])
-        import_table(t, db, ticket_code, request.form["comment"])
-
-    return render_template("final.html", ticket_code=ticket_code)
-
-
 @app.route("/submit/<ticket_code>", methods=["GET", "POST"])
 def submit(ticket_code):
     project = (
         db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
+    )
+    recent_submissions = (
+        db.session.query(Submission)
+        .filter(Submission.project_id == project.project_id)
+        .order_by(Submission.time_submitted.desc())
+        .limit(3)
+        .all()
     )
 
     if not project:
@@ -177,6 +180,7 @@ def submit(ticket_code):
             "submit.html",
             filename="Select file ...",
             project=project,
+            submissions=recent_submissions,
         )
     elif request.method == "POST":
         # Check if post request has a file
@@ -208,11 +212,28 @@ def submit(ticket_code):
                 "submit.html",
                 filename=file_fp.filename,
                 project=project,
+                submissions=recent_submissions,
                 table=t,
                 checks=checks,
+                is_importable=is_importable(t),
             )
 
         return redirect(url_for("submit", ticket_code=project.ticket_code))
+
+
+@app.route("/review/<ticket_code>", methods=["GET", "POST"])
+def review(ticket_code):
+    if request.method == "POST":
+        table_data = session.pop("table_data", {"cols": [], "rows": []})
+        if table_data == {"cols": [], "rows": []}:
+            flash(
+                "Something went wrong! There's no metadata in the system to submit. Please try again and be sure not to reload or go back in your browser."
+            )
+            return redirect(url_for("submit", ticket_code=ticket_code))
+        t = Table(table_data["cols"], table_data["rows"])
+        import_table(t, db, ticket_code, request.form["comment"])
+
+    return render_template("final.html", ticket_code=ticket_code)
 
 
 @app.route("/summary")
