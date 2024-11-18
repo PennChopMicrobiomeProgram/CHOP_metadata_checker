@@ -12,7 +12,7 @@ try:
     SQLALCHEMY_DATABASE_URI = os.environ["METADATA_DB_URI"]
 except KeyError:
     sys.stderr.write(
-        "Missing SQLALCHEMY_DATABASE_URI in environment, using test SQLite database.\n"
+        "Missing METADATA_DB_URI in environment, using test SQLite database.\n"
     )
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{Path(__file__).parent.parent.parent.parent.parent.resolve()}/metadata.sqlite3"
 
