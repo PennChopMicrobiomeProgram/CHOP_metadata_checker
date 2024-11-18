@@ -36,14 +36,14 @@ docker build -t myrepo/metadata_checker:dev -f Dockerfile .
 docker run --rm -p 8080:80 myrepo/metadata_checker:dev
 ```
 
-You should then be able to access the site at http://localhost:8080. The downside to this method of development is that you have to rebuild the container to see changes (or else do you dev work within the container as well, see VS Code Dev Containers), but it can act as a good check that your changes will work in the dockerized version of your deployment before you push to a docker-based hosting environment.
+You should then be able to access the site at http://localhost:8080. The downside to this method of development is that you have to rebuild the container to see changes (or else do your dev work within the container as well, see VS Code Dev Containers), but it can act as a good check that your changes will work in the dockerized version of your deployment before you push to a docker-based hosting environment.
 
 ## Deployment
 
 How you want to deploy this will depend on your needs, facilities, and ability. We have it deployed by a Kubernetes cluster but you could also 1) just run it in development mode from a lab computer or 2) setup Nginx/Apache on a dedicated server or 3) run it serverlessly in the cloud (e.g. with [Zappa](https://github.com/zappa/Zappa) on AWS) or 4) do something else. There are lots of well documented examples of deploying Flask sites out there, look around and find what works best for you.
 
-When running, it will default to using a SQLite3 database located in the root of this repository (automatically created if it doesn't already exist). You can change to a PostgreSQL backend by providing the environment variables METADATA_DB_HOST, METADATA_DB_NAME, METADATA_DB_USER, and METADATA_DB_PSWD. If you want to use a different backend, you'll have to do a bit of modification to ``app/metadatalib/src/metadatalib/__init__.py`` and be somewhat familiar with SQLAlchemy URI strings.
+When running, it will default to using a SQLite3 database located in the root of this repository (automatically created if it doesn't already exist). You can update it to use whatever backend you want by setting the ``METADATA_DB_URI`` environment variable before running the app. This URI is a SQL Alchemy connection URI, so you may want to do some research to figure out what you need to specify to connect to your preferred database instance. For another SQLite instance, for example, use ``export METADATA_DB_URI=sqlite:////path/to/db.sqlite3``. For more complex databases you may have to install helper libraries for SQL Alchemy to establish the connection.
 
 ## Using the library
 
-The `metadatalib` library can be installed and run anywhere by following the instructions in Development (you don't need to do the `create_metadata_test_db` and running the site (bottom two commands)). To connect it to a Postgres backend, you'll need to also set the environment variables `METADATA_DB_HOST`, `METADATA_DB_USER`, `METADATA_DB_NAME`, and `METADATA_DB_PSWD`.
+The `metadatalib` library can be installed and run anywhere by following the instructions in Development (you don't need to do the `create_metadata_test_db` and running the site (bottom two commands)). To connect to a non-dev backend, see the above on SQL Alchemy URIs.
