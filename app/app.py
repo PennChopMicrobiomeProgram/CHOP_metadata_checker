@@ -7,6 +7,11 @@ from .src.utils import (
     run_checks,
     table_from_file,
 )
+from .src.views import (
+    ShowProject,
+    ShowSubmission,
+    Download,
+)
 from .metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
 from .metadatalib.src.metadatalib.consts import ALLOWED_EXTENSIONS
 from .metadatalib.src.metadatalib.models import (
@@ -67,43 +72,28 @@ def wiki():
 
 @app.route("/project/<ticket_code>")
 def show_project(ticket_code):
-    project = (
-        db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
-    )
-    submissions = (
-        db.session.query(Submission)
-        .filter(Submission.project_id == project.project_id)
-        .all()
-    )
+    sp = ShowProject(db, ticket_code)
 
-    if not project:
+    if not sp.project:
         return render_template("dne.html", ticket_code=ticket_code)
 
-    return render_template("project.html", project=project, submissions=submissions)
+    return render_template(
+        "project.html", project=sp.project, submissions=sp.submissions
+    )
 
 
 @app.route("/submission/<submission_id>")
 def show_submission(submission_id):
-    submission = (
-        db.session.query(Submission)
-        .filter(Submission.submission_id == submission_id)
-        .first()
-    )
+    ss = ShowSubmission(db, submission_id)
 
-    if not submission:
+    if not ss.submission:
         return render_template("dne.html", submission_id=submission_id)
 
-    project = (
-        db.session.query(Project)
-        .filter(Project.project_id == submission.project_id)
-        .first()
-    )
-
-    if not project:
+    if not ss.project:
         return render_template(
             "dne.html",
-            project_id=submission.project_id,
-            message=f"Project {submission.project_id} with submission {submission_id} does not exist",
+            project_id=ss.submission.project_id,
+            message=f"Project {ss.submission.project_id} with submission {submission_id} does not exist",
         )
 
     t = export_table(db, submission_id)
@@ -111,8 +101,8 @@ def show_submission(submission_id):
 
     return render_template(
         "submission.html",
-        submission=submission,
-        project=project,
+        submission=ss.submission,
+        project=ss.project,
         table=t,
         checks=checks,
     )
@@ -120,26 +110,16 @@ def show_submission(submission_id):
 
 @app.route("/download/<submission_id>", methods=["GET", "POST"])
 def download(submission_id):
-    submission = (
-        db.session.query(Submission)
-        .filter(Submission.submission_id == submission_id)
-        .first()
-    )
+    d = Download(db, submission_id)
 
-    if not submission:
+    if not d.submission:
         return render_template("dne.html", submission_id=submission_id)
 
-    project = (
-        db.session.query(Project)
-        .filter(Project.project_id == submission.project_id)
-        .first()
-    )
-
-    if not project:
+    if not d.project:
         return render_template(
             "dne.html",
-            project_id=submission.project_id,
-            message=f"Project {submission.project_id} with submission {submission_id} does not exist",
+            project_id=d.submission.project_id,
+            message=f"Project {d.submission.project_id} with submission {submission_id} does not exist",
         )
 
     t = export_table(db, submission_id)
@@ -153,7 +133,7 @@ def download(submission_id):
     # Create the response and set the appropriate headers
     response = make_response(csv_file.getvalue())
     response.headers["Content-Disposition"] = (
-        f"attachment; filename={project.contact_name}-{project.project_name}_{submission.version}.csv"
+        f"attachment; filename={d.project.contact_name}-{d.project.project_name}_{d.submission.version}.csv"
     )
     response.headers["Content-type"] = "text/csv"
     return response
