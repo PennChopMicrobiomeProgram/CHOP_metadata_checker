@@ -41,6 +41,7 @@ app.secret_key = os.urandom(12)
 # whatever production server you are using instead. It's ok to leave this in when running the dev server.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
+app.config["SESSION_TYPE"] = "filesystem"
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 print(SQLALCHEMY_DATABASE_URI)
 db = SQLAlchemy(model_class=Base)
