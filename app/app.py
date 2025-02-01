@@ -245,6 +245,24 @@ def summary():
     )
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("dne.html"), 404
+
+
+@app.errorhandler(500)
+@app.errorhandler(Exception)
+def internal_server_error(e):
+    # Figure out best method for alert on error
+    return (
+        render_template(
+            "dne.html",
+            message="Sorry! Something went wrong on our end. We've been notified and are working to fix it.",
+        ),
+        500,
+    )
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
