@@ -41,6 +41,7 @@ app.secret_key = os.urandom(12)
 # whatever production server you are using instead. It's ok to leave this in when running the dev server.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
+# Allows for larger file uploads, necessary for realistic metadata files
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 print(SQLALCHEMY_DATABASE_URI)
@@ -179,28 +180,43 @@ def submit(ticket_code):
         # Display submission page for ticket_code
         return render_template(
             "submit.html",
-            filename="Select file ...",
             project=project,
             submissions=recent_submissions,
+            filename=request.args.get("filename", None),
+            message=request.args.get("message", None),
         )
     elif request.method == "POST":
         # Check if post request has a file
         if "metadata_upload" not in request.files:
-            flash("Please select a file")
-            return redirect(url_for("submit", ticket_code=project.ticket_code))
+            return redirect(
+                url_for(
+                    "submit",
+                    ticket_code=project.ticket_code,
+                    message="Please select a file",
+                )
+            )
         file_fp = request.files["metadata_upload"]
 
         # Check if user submitted a file
         if file_fp.filename == "":
-            flash("No file selected")
-            return redirect(url_for("submit", ticket_code=project.ticket_code))
+            return redirect(
+                url_for(
+                    "submit",
+                    ticket_code=project.ticket_code,
+                    message="No file selected",
+                )
+            )
 
         # Check if file was submitted and if it has correct extensions
         if file_fp and not allowed_file(file_fp.filename):
-            flash(
-                f"Please use the allowed file extensions for the metadata {ALLOWED_EXTENSIONS}"
+            return redirect(
+                url_for(
+                    "submit",
+                    ticket_code=project.ticket_code,
+                    filename=file_fp.filename,
+                    message=f"Please use the allowed file extensions for the metadata {ALLOWED_EXTENSIONS}",
+                )
             )
-            return redirect(url_for("submit", ticket_code=project.ticket_code))
 
         if file_fp and allowed_file(file_fp.filename):
             t, checks = run_checks(table_from_file(file_fp))

@@ -10,28 +10,52 @@
         <div class="col-lg">
           <h2 class="m-3">{{project.project_name}}</h2>
           <h3 class="m-3">{{project.contact_name}} :-: {{project.contact_email}}</h3>
-          <form action="{{ '/submit/' + project.ticket_code }}" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-              <label>Select metadata file</label>
-              <div class="custom-file py-2">
-                <input type="file" class="custom-file-input" name="metadata_upload" id="metadata_upload">
-                <label class="custom-file-label" for="metadata_upload" id="filename">{{ filename }}</label>
+
+          {% if message or not filename %}
+            <form action="{{ '/submit/' + project.ticket_code }}" method="POST" enctype="multipart/form-data">
+              <div class="form-group">
+                <label>Select metadata file</label>
+                <div class="custom-file py-2">
+                <input type="file" class="custom-file-input" name="metadata_upload" id="metadata_upload" onchange="toggleUploadButton()">
+                </div>
+                <button type="submit" class="btn btn-success" id="uploadButton" disabled>Upload Metadata</button>
               </div>
-              <button type="submit" class="btn btn-success">Upload Metadata</button>
-            </div>
-          </form>
+
+              <script type="text/javascript">
+                function toggleUploadButton() {
+                  var fileInput = document.getElementById('metadata_upload');
+                  var uploadButton = document.getElementById('uploadButton');
+                  if (fileInput.files.length > 0) {
+                    uploadButton.disabled = false;
+                  } else {
+                    uploadButton.disabled = true;
+                  }
+                }
+              </script>
+            </form>
+          {% else %}
+            <a href="{{ url_for('submit', ticket_code=project.ticket_code) }}" class="btn btn-secondary">Change Upload</a>
+          {% endif %}
 
           <div class="py-4">
-          {% if checks is defined %}
-            {% if checks['passed'] %}
-              <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
-            {% elif is_importable %}
-              <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-warning" onclick="return confirm('There are still issues in your metadata. Are you sure you want to submit with these issues?')">Submit Metadata</a>
-              <i class="max-w-prose">There are still issues flagged by the checker but you can submit if you want.</i>
-            {% else %}
-              <i class="max-w-prose">There are schema-breaking issues flagged by the checker. You must resolve these issues before you can submit.</i>
+            {% if message %}
+              <div class="alert alert-info" role="alert">
+                {{ message }}
+              </div>
             {% endif %}
-          {% endif %}
+            {% if filename %}
+              <h4 class="mb-3" id="filename">{{ filename }}</h4>
+            {% endif %}
+            {% if checks is defined %}
+              {% if checks['passed'] %}
+                <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-success">Submit Metadata</a>
+              {% elif is_importable %}
+                <a href="{{ url_for('review', ticket_code=project.ticket_code) }}" class="btn btn-warning" onclick="return confirm('There are still issues in your metadata. Are you sure you want to submit with these issues?')">Submit Metadata</a><br />
+                <i class="max-w-prose">There are still issues flagged by the checker but you can submit if you want.</i>
+              {% else %}
+                <i class="max-w-prose">There are schema-breaking issues flagged by the checker. You must resolve these issues before you can submit.</i>
+              {% endif %}
+            {% endif %}
           </div>
         </div>
 
