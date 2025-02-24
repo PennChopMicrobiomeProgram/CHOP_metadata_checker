@@ -6,3 +6,6 @@ logs/
 *.egg-info/
 build
 env/
+
+.sessions/
+.vscode/

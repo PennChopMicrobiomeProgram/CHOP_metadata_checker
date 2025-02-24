@@ -4,8 +4,6 @@ from .src.utils import (
     export_table,
     import_table,
     is_importable,
-    run_checks,
-    table_from_file,
 )
 from .metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
 from .metadatalib.src.metadatalib.consts import ALLOWED_EXTENSIONS
@@ -16,7 +14,12 @@ from .metadatalib.src.metadatalib.models import (
     Sample,
     Submission,
 )
-from .metadatalib.src.metadatalib.utils import allowed_file
+from .metadatalib.src.metadatalib.spec import allowed_file
+from .metadatalib.src.metadatalib.table import (
+    run_checks,
+    run_fixes,
+    table_from_file,
+)
 from flask import (
     Flask,
     make_response,
@@ -28,6 +31,8 @@ from flask import (
     send_from_directory,
     session,
 )
+from flask_session import Session
+from cachelib.file import FileSystemCache
 from flask_sqlalchemy import SQLAlchemy
 from io import StringIO
 from pathlib import Path
@@ -37,12 +42,17 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
 
+SESSION_TYPE = "cachelib"
+SESSION_SERIALIZATION_FORMAT = "json"
+SESSION_CACHELIB = FileSystemCache(threshold=500, cache_dir=".sessions/")
+app.config.from_object(__name__)
+Session(app)
+
 # This line is only used in production mode on a nginx server, follow instructions to setup forwarding for
 # whatever production server you are using instead. It's ok to leave this in when running the dev server.
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
-# Allows for larger file uploads, necessary for realistic metadata files
-app.config["SESSION_TYPE"] = "filesystem"
+app.config["FLASK_DEBUG"] = os.environ.get("FLASK_DEBUG", False)
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
 print(SQLALCHEMY_DATABASE_URI)
 db = SQLAlchemy(model_class=Base)
@@ -161,8 +171,8 @@ def download(submission_id):
     return response
 
 
-@app.route("/submit/<ticket_code>", methods=["GET", "POST"])
-def submit(ticket_code):
+@app.route("/upload/<ticket_code>", methods=["GET", "POST"])
+def upload(ticket_code):
     project = (
         db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
     )
@@ -177,41 +187,37 @@ def submit(ticket_code):
     if not project:
         return render_template("dne.html", ticket_code=ticket_code)
     elif request.method == "GET":
-        # Display submission page for ticket_code
         return render_template(
-            "submit.html",
+            "upload.html",
             project=project,
             submissions=recent_submissions,
             filename=request.args.get("filename", None),
             message=request.args.get("message", None),
         )
     elif request.method == "POST":
-        # Check if post request has a file
         if "metadata_upload" not in request.files:
             return redirect(
                 url_for(
-                    "submit",
+                    "upload",
                     ticket_code=project.ticket_code,
                     message="Please select a file",
                 )
             )
         file_fp = request.files["metadata_upload"]
 
-        # Check if user submitted a file
         if file_fp.filename == "":
             return redirect(
                 url_for(
-                    "submit",
+                    "upload",
                     ticket_code=project.ticket_code,
                     message="No file selected",
                 )
             )
 
-        # Check if file was submitted and if it has correct extensions
         if file_fp and not allowed_file(file_fp.filename):
             return redirect(
                 url_for(
-                    "submit",
+                    "upload",
                     ticket_code=project.ticket_code,
                     filename=file_fp.filename,
                     message=f"Please use the allowed file extensions for the metadata {ALLOWED_EXTENSIONS}",
@@ -219,23 +225,53 @@ def submit(ticket_code):
             )
 
         if file_fp and allowed_file(file_fp.filename):
-            t, checks = run_checks(table_from_file(file_fp))
+            t = table_from_file(file_fp)
             session["table_data"] = {
                 "cols": list(t.data.keys()),
                 "rows": list(zip(*t.data.values())),
             }
 
-            return render_template(
-                "submit.html",
-                filename=file_fp.filename,
-                project=project,
-                submissions=recent_submissions,
-                table=t,
-                checks=checks,
-                is_importable=is_importable(t),
-            )
+            return redirect(url_for("submit", ticket_code=project.ticket_code))
 
-        return redirect(url_for("submit", ticket_code=project.ticket_code))
+        return redirect(url_for("upload", ticket_code=project.ticket_code))
+
+
+@app.route("/submit/<ticket_code>")
+def submit(ticket_code):
+    project = (
+        db.session.query(Project).filter(Project.ticket_code == ticket_code).first()
+    )
+    recent_submissions = (
+        db.session.query(Submission)
+        .filter(Submission.project_id == project.project_id)
+        .order_by(Submission.time_submitted.desc())
+        .limit(3)
+        .all()
+    )
+
+    if not project:
+        return render_template("dne.html", ticket_code=ticket_code)
+
+    if request.args.get("fix", False, bool):
+        table_data = session.get("table_data", {"cols": [], "rows": []})
+        t = Table(table_data["cols"], table_data["rows"])
+        run_fixes(t)
+        session["table_data"] = {
+            "cols": list(t.data.keys()),
+            "rows": list(zip(*t.data.values())),
+        }
+
+    table_data = session.get("table_data", {"cols": [], "rows": []})
+    t, checks = run_checks(Table(table_data["cols"], table_data["rows"]))
+
+    return render_template(
+        "submit.html",
+        project=project,
+        submissions=recent_submissions,
+        table=t,
+        checks=checks,
+        is_importable=is_importable(t),
+    )
 
 
 @app.route("/review/<ticket_code>", methods=["GET", "POST"])
@@ -262,22 +298,24 @@ def summary():
     )
 
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("dne.html"), 404
+if not app.config["FLASK_DEBUG"]:
 
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template("dne.html"), 404
 
-@app.errorhandler(500)
-@app.errorhandler(Exception)
-def internal_server_error(e):
-    # Figure out best method for alert on error
-    return (
-        render_template(
-            "dne.html",
-            message="Sorry! Something went wrong on our end. We've been notified and are working to fix it.",
-        ),
-        500,
-    )
+    @app.errorhandler(500)
+    @app.errorhandler(Exception)
+    def internal_server_error(e):
+        # Figure out best method for alert on error
+        # This should probably contact someone to let them know something went wrong
+        return (
+            render_template(
+                "dne.html",
+                message="Sorry! Something went wrong on our end. We've been notified and are working to fix it.",
+            ),
+            500,
+        )
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -288,12 +326,12 @@ def index():
         )
         return redirect(
             url_for(
-                "submit",
+                "upload",
                 ticket_code=sanitized_ticket_code,
             )
         )
 
-    return render_template("index.html", projects=db.session.query(Project).all())
+    return render_template("index.html")
 
 
 if __name__ == "__main__":

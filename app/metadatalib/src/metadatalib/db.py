@@ -1,8 +1,6 @@
 import datetime
 import sys
-from sqlalchemy import delete
 from sqlalchemy.orm import Session
-from metadatalib import SQLALCHEMY_DATABASE_URI
 from metadatalib.models import Annotation, Base, Project, Sample, Submission
 
 
