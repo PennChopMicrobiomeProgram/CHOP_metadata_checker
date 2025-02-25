@@ -1,6 +1,6 @@
 from tablemusthave import Table
 from tablemusthave.musthave import AllGood, DoesntApply, StillNeeds
-from app.metadatalib.src.metadatalib.spec import allowed_file, specification
+from src.metadatalib.spec import allowed_file, specification
 
 
 def test_allowed_file():
