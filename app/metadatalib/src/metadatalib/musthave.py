@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from tablemusthave import Table
 
@@ -61,3 +62,8 @@ def fix_sample_start(t: Table, colname: str, pattern: str):
 
 def fix_subject_start(t: Table, colname: str, pattern: str):
     t.data[colname] = [f"SB{v}" for v in t.get(colname)]
+
+
+def fix_disallowed_sample_chars(t: Table, colname: str, pattern: str):
+    raw_expression = re.sub(r"[\^\$\[\]\+]", "", pattern)
+    t.data[colname] = [re.sub(f"[^{raw_expression}]", ".", v) for v in t.get(colname)]

@@ -17,6 +17,7 @@ from metadatalib.consts import (
 )
 from metadatalib.musthave import (
     fix_date_collected,
+    fix_disallowed_sample_chars,
     fix_sample_start,
     fix_subject_start,
     fix_time_collected,
@@ -63,13 +64,15 @@ specification: MustHave = MustHave(
     values_matching(
         "SampleID", "^[A-Za-z]", fix_fn=fix_sample_start
     ),  ##columns must satisfy this regex
-    values_matching("SampleID", "^[0-9A-Za-z._]+$"),
+    values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
     unique_values_for("SampleID"),
     values_in_set(
         "sample_type", SAMPLE_TYPE_LIST
     ),  ##sample_type column can only contain values specified in SAMPLE_TYPE_LIST
     values_matching("subject_id", "^[A-Za-z]", fix_fn=fix_subject_start),
-    values_matching("subject_id", "^[0-9A-Za-z._-]+$"),
+    values_matching(
+        "subject_id", "^[0-9A-Za-z._-]+$", fix_fn=fix_disallowed_sample_chars
+    ),
     values_in_set("host_species", HOST_SPECIES_LIST),
     some_value_for("host_species", "subject_id"),
     some_value_for("subject_id", "host_species"),
