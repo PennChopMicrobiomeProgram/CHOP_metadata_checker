@@ -7,16 +7,20 @@ from tablemusthave import (
     values_matching,
     values_in_set,
 )
-from tablemusthave.musthave import (
-    DoesntApply,
-    must_have_result,
-)
+from tablemusthave.musthave import must_have_result, DoesntApply
 from metadatalib.consts import (
     ALLOWED_EXTENSIONS,
     CHOP_MANDATORY_TUBE,
     CHOP_SUGGESTED,
     SAMPLE_TYPE_LIST,
     HOST_SPECIES_LIST,
+)
+from metadatalib.musthave import (
+    fix_date_collected,
+    fix_disallowed_sample_chars,
+    fix_sample_start,
+    fix_subject_start,
+    fix_time_collected,
 )
 
 
@@ -34,6 +38,10 @@ class no_leading_trailing_whitespace:
         vals = t.get(self.colname)
         not_matching = [v for v in vals if v and v.strip() != v]
         return must_have_result(not_matching=not_matching)
+
+    def fix(self, t):
+        if t.get(self.colname):
+            t.data[self.colname] = [v.strip() if v else v for v in t.get(self.colname)]
 
 
 # check if period in filename and has correct extensions
@@ -53,22 +61,30 @@ specification: MustHave = MustHave(
     # no_leading_trailing_whitespace(),
     columns_named(CHOP_MANDATORY_TUBE),  ##must contain these columns
     columns_matching("^[0-9A-Za-z_.]+$"),  ##column names must satisfy this regex
-    values_matching("SampleID", "^[A-Za-z]"),  ##columns must satisfy this regex
-    values_matching("SampleID", "^[0-9A-Za-z._]+$"),
+    values_matching(
+        "SampleID", "^[A-Za-z]", fix_fn=fix_sample_start
+    ),  ##columns must satisfy this regex
+    values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
     unique_values_for("SampleID"),
     values_in_set(
         "sample_type", SAMPLE_TYPE_LIST
     ),  ##sample_type column can only contain values specified in SAMPLE_TYPE_LIST
-    values_matching("subject_id", "^[A-Za-z]"),
-    values_matching("subject_id", "^[0-9A-Za-z._-]+$"),
+    values_matching("subject_id", "^[A-Za-z]", fix_fn=fix_subject_start),
+    values_matching(
+        "subject_id", "^[0-9A-Za-z._-]+$", fix_fn=fix_disallowed_sample_chars
+    ),
     values_in_set("host_species", HOST_SPECIES_LIST),
     some_value_for("host_species", "subject_id"),
     some_value_for("subject_id", "host_species"),
     some_value_for(
         "mouse_strain", "cage_id"
     ),  ##if mouse_strain is given, a cage_id for that sample must be provided
-    values_matching("date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$"),
-    values_matching("time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"),
+    values_matching(
+        "date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", fix_fn=fix_date_collected
+    ),
+    values_matching(
+        "time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$", fix_fn=fix_time_collected
+    ),
     unique_values_for("barcode"),
     values_matching("barcode", "^[ATCGURYKMSWBDHVN]+$"),
     values_matching("reverse_barcode_location", "^[A-H][0-9]{2}$"),

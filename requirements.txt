@@ -1,5 +1,6 @@
 flask
 flask-sqlalchemy
+flask-session
 sqlalchemy
 psycopg2-binary
 git+https://github.com/kylebittinger/tablemusthave.git

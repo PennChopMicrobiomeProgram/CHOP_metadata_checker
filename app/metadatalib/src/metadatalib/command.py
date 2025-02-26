@@ -3,7 +3,6 @@ import os
 import random
 import sys
 from datetime import datetime
-
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
 from metadatalib.models import Project
