@@ -1,22 +1,14 @@
-import io
-from flask import flash
 from tablemusthave import Table, musthave
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 from metadatalib.spec import no_leading_trailing_whitespace, specification
 from metadatalib.consts import REGEX_TRANSLATE
 
 
-def table_from_file(file_fp: FileStorage) -> Table:
-    filename = secure_filename(file_fp.filename)
-    delim = ","
+try:
+    from flask import flash
+except ImportError:
 
-    # Convert FileStorage to StringIO to read as csv/tsv object
-    string_io = io.StringIO(file_fp.read().decode("utf-8-sig"), newline=None)
-    if filename.rsplit(".", 1)[1].lower() in ["tsv", "txt"]:
-        delim = "\t"
-
-    return Table.from_csv(string_io, delimiter=delim)
+    def flash(msg):
+        pass
 
 
 def run_checks(t: Table) -> tuple[Table, dict]:
@@ -118,6 +110,7 @@ def run_checks(t: Table) -> tuple[Table, dict]:
                     modified_descrip = (
                         modified_descrip.split("match")[0] + REGEX_TRANSLATE[keys]
                     )
+
             flash(modified_descrip + ": " + res.message())
 
     return (
