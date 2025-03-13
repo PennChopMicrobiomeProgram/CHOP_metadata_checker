@@ -1,3 +1,4 @@
+import io
 from tablemusthave import (
     unique_values_for,
     some_value_for,
@@ -8,6 +9,9 @@ from tablemusthave import (
     values_in_set,
 )
 from tablemusthave.musthave import must_have_result, DoesntApply
+from tablemusthave.table import Table
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 from metadatalib.consts import (
     ALLOWED_EXTENSIONS,
     CHOP_MANDATORY_TUBE,
@@ -42,6 +46,18 @@ class no_leading_trailing_whitespace:
     def fix(self, t):
         if t.get(self.colname):
             t.data[self.colname] = [v.strip() if v else v for v in t.get(self.colname)]
+
+
+def table_from_file(file_fp: FileStorage) -> Table:
+    filename = secure_filename(file_fp.filename)
+    delim = ","
+
+    # Convert FileStorage to StringIO to read as csv/tsv object
+    string_io = io.StringIO(file_fp.read().decode("utf-8-sig"), newline=None)
+    if filename.rsplit(".", 1)[1].lower() in ["tsv", "txt"]:
+        delim = "\t"
+
+    return Table.from_csv(string_io, delimiter=delim)
 
 
 # check if period in filename and has correct extensions
