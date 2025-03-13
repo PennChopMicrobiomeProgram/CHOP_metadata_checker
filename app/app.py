@@ -14,11 +14,12 @@ from .metadatalib.src.metadatalib.models import (
     Sample,
     Submission,
 )
-from .metadatalib.src.metadatalib.spec import allowed_file, table_from_file
+from .metadatalib.src.metadatalib.spec import allowed_file
 from .metadatalib.src.metadatalib.table import (
     run_checks,
     run_fixes,
 )
+from .metadatalib.src.metadatalib.table_flask import table_from_file
 from flask import (
     Flask,
     make_response,
