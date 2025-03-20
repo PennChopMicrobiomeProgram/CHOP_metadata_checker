@@ -8,6 +8,7 @@ def fix_date_collected(t: Table, colname: str, pattern: str):
         "%Y-%m-%d",  # 2024-02-24 (ISO format)
         "%d-%m-%Y",  # 24-02-2024
         "%m/%d/%Y",  # 02/24/2024 (US format)
+        "%m/%d/%y",
         "%B %d, %Y",  # February 24, 2024
         "%b %d, %Y",  # Feb 24, 2024
         "%d %B %Y",  # 24 February 2024
