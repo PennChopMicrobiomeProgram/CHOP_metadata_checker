@@ -28,7 +28,7 @@ def fix_date_collected(t: Table, colname: str, pattern: str):
             try:
                 return datetime.strptime(date_string, fmt).strftime("%m-%d-%y")
             except ValueError:
-                continue
+                pass
         return date_string
 
     t.data[colname] = [convert_date(v) for v in t.get(colname)]
@@ -51,7 +51,7 @@ def fix_time_collected(t: Table, colname: str, pattern: str):
             try:
                 return datetime.strptime(time_string, fmt).strftime("%H:%M:%S")
             except ValueError:
-                continue
+                pass
         return time_string
 
     t.data[colname] = [convert_time(v) for v in t.get(colname)]
