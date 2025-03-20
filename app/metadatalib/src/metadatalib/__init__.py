@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 try:
     SQLALCHEMY_DATABASE_URI = os.environ["METADATA_DB_URI"]
