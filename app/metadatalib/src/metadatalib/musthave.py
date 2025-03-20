@@ -25,7 +25,6 @@ def fix_date_collected(t: Table, colname: str, pattern: str):
         if not date_string:
             return date_string
         for fmt in formats:
-            print("Trying ", fmt)
             try:
                 return datetime.strptime(date_string, fmt).strftime("%m-%d-%y")
             except ValueError:
@@ -59,7 +58,6 @@ def fix_time_collected(t: Table, colname: str, pattern: str):
 
 
 def fix_sample_start(t: Table, colname: str, pattern: str):
-    print("FIXING")
     t.data[colname] = [f"S{v}" for v in t.get(colname)]
 
 
