@@ -59,6 +59,7 @@ def fix_time_collected(t: Table, colname: str, pattern: str):
 
 
 def fix_sample_start(t: Table, colname: str, pattern: str):
+    print("FIXING")
     t.data[colname] = [f"S{v}" for v in t.get(colname)]
 
 
