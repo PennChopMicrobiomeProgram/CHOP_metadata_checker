@@ -39,6 +39,7 @@ SAMPLE_TYPE_LIST = [
     "Cheek swab",
     "Crop",
     "Dental plaque",
+    "DNA-free water",
     "Duodenum",
     "Dust",
     "Elution buffer",
