@@ -1,4 +1,4 @@
-from tablemusthave import Table, musthave
+from tablemusthave import Table, StillNeeds, MustHave
 from metadatalib.spec import no_leading_trailing_whitespace, specification
 from metadatalib.consts import REGEX_TRANSLATE
 
@@ -11,7 +11,7 @@ except ImportError:
         pass
 
 
-def run_checks(t: Table) -> tuple[Table, dict]:
+def run_checks(t: Table, specification: MustHave = specification) -> tuple[Table, dict]:
     # Get metadata table to print on webpage
     headers = t.colnames()
     sample_num = len(t.get(t.colnames()[0]))
@@ -36,7 +36,7 @@ def run_checks(t: Table) -> tuple[Table, dict]:
 
     ##print requirements and save the errors in the dictionarys to highlight in table
     for req, res in specification.check(t):
-        if isinstance(res, musthave.StillNeeds):
+        if isinstance(res, StillNeeds):
             ##print(req.__dict__)
             ##print(res.__dict__)
             ##populate missing dictionary with empty cells
@@ -128,5 +128,5 @@ def run_checks(t: Table) -> tuple[Table, dict]:
     )
 
 
-def run_fixes(t: Table):
+def run_fixes(t: Table, specification: MustHave = specification):
     specification.fix(t)
