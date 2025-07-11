@@ -1,4 +1,5 @@
 from tablemusthave import Table, StillNeeds, MustHave
+from Typing import Callable
 from metadatalib.spec import no_leading_trailing_whitespace, specification
 from metadatalib.consts import REGEX_TRANSLATE
 
@@ -11,7 +12,7 @@ except ImportError:
         pass
 
 
-def run_checks(t: Table, specification: MustHave = specification) -> tuple[Table, dict]:
+def run_checks(t: Table, specification: MustHave = specification, flash: Callable[[str], None] = flash) -> tuple[Table, dict]:
     # Get metadata table to print on webpage
     headers = t.colnames()
     sample_num = len(t.get(t.colnames()[0]))
