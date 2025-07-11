@@ -11,7 +11,7 @@ except ImportError:
         pass
 
 
-def run_checks(t: Table, specification: MustHave = specification) -> tuple[Table, dict]:
+def run_checks(t: Table, specification: MustHave = specification, flash: callable = flash) -> tuple[Table, dict]:
     # Get metadata table to print on webpage
     headers = t.colnames()
     sample_num = len(t.get(t.colnames()[0]))
