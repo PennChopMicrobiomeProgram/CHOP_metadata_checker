@@ -1,6 +1,7 @@
 from tablemusthave import Table
 from tablemusthave.musthave import AllGood, DoesntApply, StillNeeds
 from src.metadatalib.spec import allowed_file, specification
+from src.metadatalib.table import run_fixes
 
 
 def test_allowed_file():
@@ -24,7 +25,22 @@ def test_empty_metadata():
     for req, res in specification.check(
         Table(
             col_names,
-            [[None, None, None, None, None, None, None, None, None, None, None]],
+            [
+                [
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ]
+            ],
         )
     ):
         print(req.description())
@@ -36,15 +52,22 @@ def test_empty_metadata():
 
 
 def test_bad_column_name():
-    for req, res in specification.check(
-        Table(col_names + ["bad_column*%^"], [g + [""] for g in good_samples])
-    ):
-        print(req.description())
-        print(res.message())
-        if isinstance(res, StillNeeds):
-            return
+    for bad in ["bad_column*%^", "bad.column"]:
+        for req, res in specification.check(
+            Table(col_names + [bad], [g + [""] for g in good_samples])
+        ):
+            print(req.description())
+            print(res.message())
+            if isinstance(res, StillNeeds):
+                break
+        else:
+            assert False
 
-    assert False
+
+def test_fix_column_name():
+    t = Table(col_names + ["bad.column"], [g + ["val1"] for g in good_samples])
+    run_fixes(t)
+    assert "badcolumn" in t.colnames()
 
 
 col_names = [
@@ -59,6 +82,7 @@ col_names = [
     "box_position",
     "study_group",
     "date_collected",
+    "time_collected",
 ]
 
 good_samples = [
@@ -74,6 +98,7 @@ good_samples = [
         "position1",
         "group1",
         "01-04-21",
+        "12:00:00",
     ],
     [
         "AnotherOne",
@@ -87,5 +112,6 @@ good_samples = [
         "position2",
         "group2",
         "06-07-23",
+        "12:00:00",
     ],
 ]
