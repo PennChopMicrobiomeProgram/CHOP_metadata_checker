@@ -18,6 +18,7 @@ from metadatalib.consts import (
 from metadatalib.musthave import (
     fix_date_collected,
     fix_disallowed_sample_chars,
+    fix_column_names,
     fix_sample_start,
     fix_subject_start,
     fix_time_collected,
@@ -50,7 +51,7 @@ def allowed_file(filename: str) -> bool:
 
 
 common_specs = [
-    columns_matching("^[0-9A-Za-z_.]+$"),
+    columns_matching("^[0-9A-Za-z_-]+$", fix_fn=fix_column_names),
     values_matching("SampleID", "^[A-Za-z]", fix_fn=fix_sample_start),
     values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
     unique_values_for("SampleID"),
