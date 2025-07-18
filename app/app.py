@@ -5,7 +5,7 @@ from .src.utils import (
     import_table,
     is_importable,
 )
-from .metadatalib.src.metadatalib import SQLALCHEMY_DATABASE_URI
+from .metadatalib.src.metadatalib import __version__, SQLALCHEMY_DATABASE_URI
 from .metadatalib.src.metadatalib.consts import ALLOWED_EXTENSIONS
 from .metadatalib.src.metadatalib.models import (
     Annotation,
@@ -296,6 +296,11 @@ def summary():
         projects=db.session.query(Project).all(),
         submissions=db.session.query(Submission).all(),
     )
+
+
+@app.route("/ready")
+def ready():
+    return render_template("ready.html", version=__version__)
 
 
 if not app.config["FLASK_DEBUG"]:
