@@ -2,6 +2,7 @@ from tablemusthave import Table
 from tablemusthave.musthave import AllGood, DoesntApply, StillNeeds
 from src.metadatalib.spec import allowed_file, specification
 from src.metadatalib.table import run_fixes
+import warnings
 
 
 def test_allowed_file():
@@ -68,6 +69,24 @@ def test_fix_column_name():
     t = Table(col_names + ["bad.column"], [g + ["val1"] for g in good_samples])
     run_fixes(t)
     assert "badcolumn" in t.colnames()
+
+
+def test_empty_column_name_fix():
+    t = Table(col_names + ["!!!"], [g + ["val1"] for g in good_samples])
+    run_fixes(t)
+    assert "unnamed_column" in t.colnames()
+
+
+def test_overwrite_column_name_warning():
+    t = Table(
+        col_names + ["bad.column", "badcolumn"],
+        [g + ["new1", "old1"] for g in good_samples],
+    )
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        run_fixes(t)
+        assert any("overwrites" in str(warn.message) for warn in w)
+    assert t.get("badcolumn") == ["new1", "new1"]
 
 
 col_names = [

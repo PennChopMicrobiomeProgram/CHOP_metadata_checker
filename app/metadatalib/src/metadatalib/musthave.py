@@ -1,4 +1,5 @@
 import re
+import warnings
 from datetime import datetime
 from tablemusthave import Table
 
@@ -77,5 +78,11 @@ def fix_column_names(t: Table):
     """Sanitize column names to include only alphanumeric characters, ``_`` and ``-``."""
     for col in list(t.colnames()):
         new_col = re.sub(r"[^0-9A-Za-z_-]", "", col)
+        if not new_col:
+            new_col = "unnamed_column"
         if new_col != col:
+            if new_col in t.data:
+                warnings.warn(
+                    f"Renaming column '{col}' to '{new_col}' overwrites existing column"
+                )
             t.data[new_col] = t.data.pop(col)
