@@ -134,4 +134,6 @@ def run_checks(
 
 
 def run_fixes(t: Table, specification: MustHave = specification):
+    for h in t.colnames():
+        specification.append(no_leading_trailing_whitespace(h))
     specification.fix(t)
