@@ -50,7 +50,16 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-common_specs = [
+specs_common = [
+    columns_named(
+        [
+            "SampleID",
+            "subject_id",
+            "date_collected",
+            "time_collected",
+            "BarcodeSequence",
+        ]
+    ),
     columns_matching("^[0-9A-Za-z_-]+$", fix_fn=fix_column_names),
     values_matching("SampleID", "^[A-Za-z]", fix_fn=fix_sample_start),
     values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
@@ -65,10 +74,29 @@ common_specs = [
     values_matching(
         "time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$", fix_fn=fix_time_collected
     ),
-    unique_values_for("barcode"),
-    values_matching("barcode", "^[ATCGURYKMSWBDHVN]+$"),
-    values_matching("reverse_barcode_location", "^[A-H][0-9]{2}$"),
-    values_matching("forward_barcode_location", "^[A-H][0-9]{2}$"),
+    unique_values_for("BarcodeSequence"),
+    values_matching("BarcodeSequence", "^[ATCGURYKMSWBDHVN]+$"),
+]
+
+specs_16S = [
+    columns_named([""]),
+]
+
+specs_UDI = [
+    columns_named(
+        [
+            "Primer_version",
+            "barcode_index_set",
+            "barcode_coord",
+        ]
+    ),
+    values_in_set("Primer_version", ["v1", "v2", "v3", "v4"]),
+    values_matching("barcode_index_set", "^UDI Set [A-D]$"),
+    values_matching("barcode_coord", "^[A-H][0-9]{1,2}$"),
+]
+
+specs_ITS = [
+    columns_named([]),
 ]
 
 tube_specs = [
