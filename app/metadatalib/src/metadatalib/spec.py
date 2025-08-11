@@ -98,7 +98,16 @@ specs_common_strict = [
 ]
 
 specs_16S = [
-    columns_named([]),
+    columns_named(
+        [
+            "reverse_barcode_plate",
+            "reverse_barcode_location",
+            "forward_barcode",
+        ]
+    ),
+    values_matching("reverse_barcode_plate", "^[A-Z][0-9]{1,2}$"),
+    some_value_for("reverse_barcode_location"),
+    some_value_for("forward_barcode"),
 ]
 
 specs_UDI = [
@@ -115,7 +124,16 @@ specs_UDI = [
 ]
 
 specs_ITS = [
-    columns_named([]),
+    columns_named(
+        [
+            "reverse_barcode_plate",
+            "reverse_barcode_location",
+            "forward_barcode",
+        ]
+    ),
+    values_matching("reverse_barcode_plate", "^[A-Z][0-9]{1,2}$"),
+    some_value_for("reverse_barcode_location"),
+    some_value_for("forward_barcode"),
 ]
 
 specification = MustHave(*specs_common, *specs_common_strict)
