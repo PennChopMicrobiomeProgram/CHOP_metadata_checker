@@ -97,8 +97,8 @@ tube_specs = [
     ),
 ]
 
-# Looser checks for internal samples, used in automation for munging metadata and merging barcodes
-internal_specs = [
+# Looser checks for UDI metadata sheets
+udi_specs = [
     columns_named(["SampleID", "sample_type"]),
     unique_values_for("plate", "plate_row", "plate_column"),
     some_value_for("plate", "plate_row"),
@@ -106,5 +106,11 @@ internal_specs = [
 ]
 
 
-specification = MustHave(*common_specs, *tube_specs)
-internal_specification = MustHave(*common_specs, *internal_specs)
+# Specifications for different metadata types
+specification_16s = MustHave(*common_specs, *tube_specs)
+specification_its = MustHave(*common_specs, *tube_specs)
+specification_udi = MustHave(*common_specs, *udi_specs)
+
+# Backwards compatibility
+specification = specification_16s
+internal_specification = specification_udi

@@ -1,6 +1,9 @@
 from tablemusthave import Table, StillNeeds, MustHave
 from typing import Callable
-from metadatalib.spec import no_leading_trailing_whitespace, specification
+from metadatalib.spec import (
+    no_leading_trailing_whitespace,
+    specification_16s,
+)
 from metadatalib.consts import REGEX_TRANSLATE
 
 
@@ -14,7 +17,7 @@ except ImportError:
 
 def run_checks(
     t: Table,
-    specification: MustHave = specification,
+    specification: MustHave = specification_16s,
     flash: Callable[[str], None] = flash,
 ) -> tuple[Table, dict]:
     # Get metadata table to print on webpage
@@ -133,7 +136,7 @@ def run_checks(
     )
 
 
-def run_fixes(t: Table, specification: MustHave = specification):
+def run_fixes(t: Table, specification: MustHave = specification_16s):
     for h in t.colnames():
         specification.append(no_leading_trailing_whitespace(h))
     specification.fix(t)

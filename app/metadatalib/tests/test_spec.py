@@ -1,6 +1,6 @@
 from tablemusthave import Table
 from tablemusthave.musthave import AllGood, DoesntApply, StillNeeds
-from src.metadatalib.spec import allowed_file, specification
+from src.metadatalib.spec import allowed_file, specification_16s
 from src.metadatalib.table import run_fixes
 import warnings
 
@@ -16,14 +16,14 @@ def test_allowed_file():
 
 # Tests for the specification are not even close to comprehensive, in this case I think it's better to just be very attentive to the code given its declarative nature instead of having a million tests that need to be rewritten every time the specification changes
 def test_specification():
-    for req, res in specification.check(Table(col_names, good_samples)):
+    for req, res in specification_16s.check(Table(col_names, good_samples)):
         print(req.description())
         print(res.message())
         assert isinstance(res, AllGood) or isinstance(res, DoesntApply)
 
 
 def test_empty_metadata():
-    for req, res in specification.check(
+    for req, res in specification_16s.check(
         Table(
             col_names,
             [
@@ -54,7 +54,7 @@ def test_empty_metadata():
 
 def test_bad_column_name():
     for bad in ["bad_column*%^", "bad.column"]:
-        for req, res in specification.check(
+        for req, res in specification_16s.check(
             Table(col_names + [bad], [g + [""] for g in good_samples])
         ):
             print(req.description())
