@@ -110,19 +110,6 @@ specs_16S = [
     some_value_for("forward_barcode"),
 ]
 
-specs_UDI = [
-    columns_named(
-        [
-            "Primer_version",
-            "barcode_index_set",
-            "barcode_coord",
-        ]
-    ),
-    values_in_set("Primer_version", ["v1", "v2", "v3", "v4"]),
-    values_matching("barcode_index_set", "^UDI Set [A-D]$"),
-    values_matching("barcode_coord", "^[A-H][0-9]{1,2}$"),
-]
-
 specs_ITS = [
     columns_named(
         [
@@ -134,6 +121,19 @@ specs_ITS = [
     values_matching("reverse_barcode_plate", "^[A-Z][0-9]{1,2}$"),
     some_value_for("reverse_barcode_location"),
     some_value_for("forward_barcode"),
+]
+
+specs_UDI = [
+    columns_named(
+        [
+            "Primer_version",
+            "barcode_index_set",
+            "barcode_coord",
+        ]
+    ),
+    values_in_set("Primer_version", ["v1", "v2", "v3", "v4"]),
+    values_matching("barcode_index_set", "^UDI Set [A-D]$"),
+    values_matching("barcode_coord", "^[A-H][0-9]{1,2}$"),
 ]
 
 specification = MustHave(*specs_common, *specs_common_strict)
