@@ -64,7 +64,7 @@ specs_common = [
             "BarcodeSequence",
         ]
     ),
-    columns_matching("^[0-9A-Za-z_-]+$", fix_fn=fix_column_names),
+    columns_matching("^[0-9A-Za-z_.-]+$", fix_fn=fix_column_names),
     values_matching("SampleID", "^[A-Za-z]", fix_fn=fix_sample_start),
     values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
     unique_values_for("SampleID"),
