@@ -75,9 +75,9 @@ def fix_disallowed_sample_chars(t: Table, colname: str, pattern: str):
 
 
 def fix_column_names(t: Table):
-    """Sanitize column names to include only alphanumeric characters, ``_`` and ``-``."""
+    """Sanitize column names to include only alphanumeric characters, ``_``, ``-``, and ``.``."""
     for col in list(t.colnames()):
-        new_col = re.sub(r"[^0-9A-Za-z_-]", "", col)
+        new_col = re.sub(r"[^0-9A-Za-z_.-]", "", col)
         if not new_col:
             new_col = "unnamed_column"
         if new_col != col:
