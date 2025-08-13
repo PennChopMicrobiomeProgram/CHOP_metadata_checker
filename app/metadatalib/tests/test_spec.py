@@ -39,7 +39,6 @@ def test_empty_metadata():
                     None,
                     None,
                     None,
-                    None,
                 ]
             ],
         )
@@ -53,7 +52,7 @@ def test_empty_metadata():
 
 
 def test_bad_column_name():
-    for bad in ["bad_column*%^", "bad.column"]:
+    for bad in ["bad_column*%^", "bad,column"]:
         for req, res in specification.check(
             Table(col_names + [bad], [g + [""] for g in good_samples])
         ):
@@ -66,7 +65,7 @@ def test_bad_column_name():
 
 
 def test_fix_column_name():
-    t = Table(col_names + ["bad.column"], [g + ["val1"] for g in good_samples])
+    t = Table(col_names + ["bad,column"], [g + ["val1"] for g in good_samples])
     run_fixes(t)
     assert "badcolumn" in t.colnames()
 
@@ -79,7 +78,7 @@ def test_empty_column_name_fix():
 
 def test_overwrite_column_name_warning():
     t = Table(
-        col_names + ["bad.column", "badcolumn"],
+        col_names + ["bad,column", "badcolumn"],
         [g + ["new1", "old1"] for g in good_samples],
     )
     with warnings.catch_warnings(record=True) as w:
@@ -95,13 +94,12 @@ col_names = [
     "subject_id",
     "host_species",
     "investigator",
-    "project_name",
-    "tube_id",
-    "box_id",
-    "box_position",
-    "study_group",
+    "plate",
+    "plate_row",
+    "plate_column",
     "date_collected",
     "time_collected",
+    "BarcodeSequence",
 ]
 
 good_samples = [
@@ -111,13 +109,12 @@ good_samples = [
         "subject1",
         "Dog",
         "investigator1",
-        "project1",
-        "tube1",
-        "box1",
-        "position1",
-        "group1",
+        "plate1",
+        "A",
+        "1",
         "01-04-21",
         "12:00:00",
+        "ATCG",
     ],
     [
         "AnotherOne",
@@ -125,12 +122,11 @@ good_samples = [
         "subject2",
         "Fruit fly",
         "investigator2",
-        "project2",
-        "tube2",
-        "box2",
-        "position2",
-        "group2",
+        "plate1",
+        "A",
+        "2",
         "06-07-23",
         "12:00:00",
+        "TCGA",
     ],
 ]
