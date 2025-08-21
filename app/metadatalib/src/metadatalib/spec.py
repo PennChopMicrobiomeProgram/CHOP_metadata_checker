@@ -72,7 +72,6 @@ specs_common = [
     values_matching(
         "subject_id", "^[0-9A-Za-z._-]+$", fix_fn=fix_disallowed_sample_chars
     ),
-    unique_values_for("subject_id"),
     unique_values_for("plate", "plate_row", "plate_column"),
     values_matching(
         "date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", fix_fn=fix_date_collected
@@ -138,3 +137,4 @@ specs_UDI = [
 
 specification = MustHave(*specs_common, *specs_common_strict)
 internal_specification = MustHave(*specs_common)
+
