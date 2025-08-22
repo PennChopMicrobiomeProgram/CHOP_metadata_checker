@@ -137,4 +137,3 @@ specs_UDI = [
 
 specification = MustHave(*specs_common, *specs_common_strict)
 internal_specification = MustHave(*specs_common)
-
