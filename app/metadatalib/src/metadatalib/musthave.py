@@ -66,7 +66,10 @@ def fix_sample_start(t: Table, colname: str, pattern: str):
 
 
 def fix_subject_start(t: Table, colname: str, pattern: str):
-    t.data[colname] = [f"SB{v}" for v in t.get(colname)]
+    regex = re.compile(pattern)
+    t.data[colname] = [
+        f"SB{v}" if v and not regex.match(v) else v for v in t.get(colname)
+    ]
 
 
 def fix_disallowed_sample_chars(t: Table, colname: str, pattern: str):
