@@ -54,7 +54,6 @@ specs_common = [
     columns_named(
         [
             "SampleID",
-            "subject_id",
             "investigator",
             "plate",
             "plate_row",
@@ -92,7 +91,6 @@ specs_common_strict = [
     ),
     values_in_set("sample_type", SAMPLE_TYPE_LIST),
     values_in_set("host_species", HOST_SPECIES_LIST),
-    some_value_for("host_species", "subject_id"),
     some_value_for("subject_id", "host_species"),
 ]
 
