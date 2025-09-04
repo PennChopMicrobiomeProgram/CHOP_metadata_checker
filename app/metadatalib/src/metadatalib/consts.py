@@ -74,6 +74,7 @@ SAMPLE_TYPE_LIST = [
     "PCR water",
     "Peripheral retina",
     "Placenta",
+    "Plaque",
     "Plasma",
     "Rectal biopsy",
     "Rectal swab",
@@ -125,3 +126,4 @@ REGEX_TRANSLATE = {
     "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
     "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols",
 }
+
