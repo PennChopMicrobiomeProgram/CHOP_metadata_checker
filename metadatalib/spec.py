@@ -8,6 +8,7 @@ from tablemusthave import (
     values_in_set,
 )
 from tablemusthave.musthave import must_have_result, DoesntApply
+from tablemusthave.table import Table
 from metadatalib.consts import (
     ALLOWED_EXTENSIONS,
     CHOP_MANDATORY_TUBE,
@@ -26,21 +27,21 @@ from metadatalib.musthave import (
 
 
 class no_leading_trailing_whitespace:
-    def __init__(self, colname):
+    def __init__(self, colname: str):
         self.colname = colname
 
     def description(self):
         desc = "Values of {0} must not have leading or trailing whitespace."
         return desc.format(self.colname)
 
-    def check(self, t):
+    def check(self, t: Table):
         if self.colname not in t:
             return DoesntApply(self.colname)
         vals = t.get(self.colname)
         not_matching = [v for v in vals if v and v.strip() != v]
         return must_have_result(not_matching=not_matching)
 
-    def fix(self, t):
+    def fix(self, t: Table):
         if t.get(self.colname):
             t.data[self.colname] = [v.strip() if v else v for v in t.get(self.colname)]
 

@@ -6,7 +6,7 @@ from werkzeug.datastructures import FileStorage
 
 
 def table_from_file(file_fp: FileStorage) -> Table:
-    filename = secure_filename(file_fp.filename)
+    filename = secure_filename(str(file_fp.filename))
     delim = ","
 
     # Convert FileStorage to StringIO to read as csv/tsv object

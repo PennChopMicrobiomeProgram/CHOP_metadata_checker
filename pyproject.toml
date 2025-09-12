@@ -1,9 +1,9 @@
 [project]
 name = "metadatalib"
 dynamic = ["version"]
-description = "Utils and CLI for CHOP Metadata Checker service"
+description = "Utils, DB, and interface for CHOP Metadata Checker service"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 authors = [
   {name = "Charlie Bushman", email = "ctbushman@gmail.com"}
 ]
@@ -14,25 +14,27 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3 :: Only",
 ]
-dependencies = []
+dependencies = [
+  "sqlalchemy~=2.0",
+  "tablemusthave @ git+https://github.com/kylebittinger/tablemusthave.git",
+]
 
 [project.optional-dependencies]
-dev = ["black"]
-test = ["pytest", "pytest-cov"]
+dev = [
+  "black~=25.1",
+  "pytest~=8.4",
+  "pytest-cov~=7.0",
+]
 web = [
-  "flask",
-  "flask-sqlalchemy",
-  "flask-session",
-  "sqlalchemy",
-  "psycopg2-binary",
-  "tablemusthave @ git+https://github.com/kylebittinger/tablemusthave.git"
+  "flask~=3.1",
+  "flask-sqlalchemy~=3.1",
+  "flask-session~=0.8",
 ]
 
 [project.urls]

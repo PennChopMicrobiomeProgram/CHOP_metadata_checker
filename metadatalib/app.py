@@ -1,25 +1,25 @@
 import csv
 import os
-from .utils import (
-    export_table,
-    import_table,
-    is_importable,
-)
-from . import __version__, SQLALCHEMY_DATABASE_URI
-from .consts import ALLOWED_EXTENSIONS
-from .models import (
+from metadatalib import __version__, SQLALCHEMY_DATABASE_URI
+from metadatalib.consts import ALLOWED_EXTENSIONS
+from metadatalib.models import (
     Annotation,
     Base,
     Project,
     Sample,
     Submission,
 )
-from .spec import allowed_file
-from .table import (
+from metadatalib.spec import allowed_file
+from metadatalib.table import (
     run_checks,
     run_fixes,
 )
-from .table_flask import table_from_file
+from metadatalib.table_flask import table_from_file
+from metadatalib.utils import (
+    export_table,
+    import_table,
+    is_importable,
+)
 from flask import (
     Flask,
     make_response,
@@ -340,4 +340,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

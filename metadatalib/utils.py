@@ -1,11 +1,12 @@
 import datetime
+from typing import Optional
 from tablemusthave import Table
 from flask_sqlalchemy import SQLAlchemy
-from .consts import (
+from metadatalib.consts import (
     CHOP_MANDATORY_TUBE,
     DEFAULT_SAMPLE_FIELDS,
 )
-from .models import (
+from metadatalib.models import (
     Annotation,
     Project,
     Sample,
@@ -13,7 +14,7 @@ from .models import (
 )
 
 
-def get_nullable_field(t: Table, i: int, field: str) -> str:
+def get_nullable_field(t: Table, i: int, field: str) -> Optional[str]:
     try:
         return t.get(field)[i]
     except IndexError:

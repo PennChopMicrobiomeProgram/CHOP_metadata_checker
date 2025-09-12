@@ -3,13 +3,16 @@ import os
 import random
 import sys
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
 from metadatalib.models import Project
 from metadatalib import __version__, session, SQLALCHEMY_DATABASE_URI
 
 
-def _create_project(args, session: Session):
+def _create_project(
+    project_name: str, customer_name: str, customer_email: str, session: Session
+) -> str:
     code = "%030x" % random.randrange(16**30)
     while session.scalar(select(Project).filter(Project.ticket_code == code)):
         code = "%030x" % random.randrange(16**30)
@@ -19,9 +22,9 @@ def _create_project(args, session: Session):
         .returning(Project.ticket_code)
         .values(
             {
-                "project_name": " ".join(args.project_name),
-                "contact_name": " ".join(args.customer_name),
-                "contact_email": " ".join(args.customer_email),
+                "project_name": project_name,
+                "contact_name": customer_name,
+                "contact_email": customer_email,
                 "ticket_code": code,
             }
         )
@@ -33,7 +36,7 @@ def _create_project(args, session: Session):
     return code
 
 
-def main(argv=None, session: Session = session) -> str:
+def main(argv: Optional[list[str]] = None, session: Session = session) -> str:
     p = argparse.ArgumentParser()
     p.add_argument(
         "-p", "--project_name", nargs="+", default=[], help="Name of the project"
@@ -65,7 +68,12 @@ def main(argv=None, session: Session = session) -> str:
         )
         sys.exit(0)
 
-    code = _create_project(args, session)
+    code = _create_project(
+        project_name=" ".join(args.project_name),
+        customer_name=" ".join(args.customer_name),
+        customer_email=" ".join(args.customer_email),
+        session=session,
+    )
     print(
         f"{datetime.now()}\nProject code: {code}\nProject name: {args.project_name}\nClient name: {args.customer_name}\n"
     )

@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
 
 DEFAULT_SAMPLE_FIELDS = [
@@ -100,7 +103,7 @@ SAMPLE_TYPE_LIST = [
     "Large intestine lumen",
 ]
 
-HOST_SPECIES_LIST = [
+HOST_SPECIES_LIST: list[Optional[str]] = [
     "Dog",
     "Fruit fly",
     "Human",

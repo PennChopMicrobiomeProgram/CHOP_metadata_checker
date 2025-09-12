@@ -2,12 +2,13 @@ import datetime
 import sys
 from sqlalchemy.orm import Session
 from metadatalib.models import Annotation, Base, Project, Sample, Submission
+from typing import Optional
 
 
-def create_test_db(session: Session = None):
+def create_test_db(session: Optional[Session] = None):
     if not session:
-        from . import engine
-        from . import session as imported_session
+        from metadatalib import engine
+        from metadatalib import session as imported_session
 
         session = imported_session
         Base.metadata.create_all(engine)
