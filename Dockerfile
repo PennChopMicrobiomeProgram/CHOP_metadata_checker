@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # Need `git` to install `tablemusthave` as long as it's not on PyPi
 RUN apt-get clean && apt-get -y update
@@ -10,13 +10,11 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip install -r requirements.txt
-RUN pip install -r dev-requirements.txt
-RUN pip install /app/app/metadatalib/
+RUN pip install /app/[web]
 
 # Until this faces third parties, it's easier to just provide debug info to users on crashes than have it just show a 500 error
 ENV FLASK_DEBUG=1
-ENV FLASK_APP=/app/app/app
+ENV FLASK_APP=/app/metadatalib/app
 ENV SQLALCHEMY_ECHO=True
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=80
