@@ -46,6 +46,9 @@ Source = "https://github.research.chop.edu/MicrobiomeCenter/CHOP_metadata_checke
 metadatacli = "metadatalib.command:main"
 create_metadata_test_db = "metadatalib.db:create_test_db"
 
+[tool.setuptools]
+packages = ["metadatalib"]
+
 [tool.setuptools.package-data]
 metadatalib = ["static/*", "templates/*"]
 
