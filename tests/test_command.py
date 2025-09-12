@@ -1,9 +1,10 @@
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Generator
-from src.metadatalib.db import create_test_db
-from src.metadatalib.models import Base, Project
+from metadatalib.command import main
+from metadatalib.db import create_test_db
+from metadatalib.models import Base, Project
 
 
 @pytest.fixture()
@@ -24,5 +25,15 @@ def db() -> Generator[Session, None, None]:
     session.close()
 
 
-def test_create_test_db(db):
-    assert db.query(Project).count() == 2
+def test_create_project(db):
+    args = [
+        "--project_name",
+        "Test Project 3",
+        "--customer_name",
+        "Test Contact 3",
+        "--customer_email",
+        "test@test.edu",
+    ]
+
+    code = main(args, db)
+    assert db.scalar(select(Project).filter(Project.ticket_code == code))

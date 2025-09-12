@@ -1,5 +1,5 @@
 from tablemusthave import Table
-from src.metadatalib.musthave import (
+from metadatalib.musthave import (
     fix_disallowed_sample_chars,
     fix_subject_start,
     fix_sample_start,
