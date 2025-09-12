@@ -1,7 +1,7 @@
 from tablemusthave import Table
 from tablemusthave.musthave import AllGood, DoesntApply, StillNeeds
-from src.metadatalib.spec import allowed_file, specification
-from src.metadatalib.table import run_fixes
+from metadatalib.spec import allowed_file, specification
+from metadatalib.table import run_fixes
 import warnings
 
 

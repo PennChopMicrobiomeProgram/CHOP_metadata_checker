@@ -1,12 +1,11 @@
 import datetime
 from tablemusthave import Table
 from flask_sqlalchemy import SQLAlchemy
-from tablemusthave import Table
-from app.metadatalib.src.metadatalib.consts import (
+from .consts import (
     CHOP_MANDATORY_TUBE,
     DEFAULT_SAMPLE_FIELDS,
 )
-from app.metadatalib.src.metadatalib.models import (
+from .models import (
     Annotation,
     Project,
     Sample,

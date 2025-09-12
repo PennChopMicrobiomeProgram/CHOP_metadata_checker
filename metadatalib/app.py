@@ -1,25 +1,25 @@
 import csv
 import os
-from .src.utils import (
+from .utils import (
     export_table,
     import_table,
     is_importable,
 )
-from .metadatalib.src.metadatalib import __version__, SQLALCHEMY_DATABASE_URI
-from .metadatalib.src.metadatalib.consts import ALLOWED_EXTENSIONS
-from .metadatalib.src.metadatalib.models import (
+from . import __version__, SQLALCHEMY_DATABASE_URI
+from .consts import ALLOWED_EXTENSIONS
+from .models import (
     Annotation,
     Base,
     Project,
     Sample,
     Submission,
 )
-from .metadatalib.src.metadatalib.spec import allowed_file
-from .metadatalib.src.metadatalib.table import (
+from .spec import allowed_file
+from .table import (
     run_checks,
     run_fixes,
 )
-from .metadatalib.src.metadatalib.table_flask import table_from_file
+from .table_flask import table_from_file
 from flask import (
     Flask,
     make_response,

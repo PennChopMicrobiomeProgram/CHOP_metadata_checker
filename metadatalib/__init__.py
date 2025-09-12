@@ -14,7 +14,9 @@ except KeyError:
     sys.stderr.write(
         "Missing METADATA_DB_URI in environment, using test SQLite database.\n"
     )
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{Path(__file__).parent.parent.parent.parent.parent.resolve()}/metadata.sqlite3"
+    SQLALCHEMY_DATABASE_URI = (
+        f"sqlite:///{Path(__file__).resolve().parent.parent / 'metadata.sqlite3'}"
+    )
 
 try:
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
