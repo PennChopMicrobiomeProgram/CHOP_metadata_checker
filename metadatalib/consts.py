@@ -61,6 +61,8 @@ SAMPLE_TYPE_LIST = [
     "Ileum",
     "Kveim reagent",
     "Lab water",
+    "Large intestine mucosa",
+    "Large intestine lumen",
     "Macular Retina",
     "Meconium",
     "Medium",
@@ -96,11 +98,10 @@ SAMPLE_TYPE_LIST = [
     "Tracheal control",
     "Urethral swab",
     "Urine",
+    "Vaginal swab",
     "Water",
     "Weighing paper",
     "Whole gut",
-    "Large intestine mucosa",
-    "Large intestine lumen",
 ]
 
 HOST_SPECIES_LIST: list[Optional[str]] = [
@@ -129,3 +130,4 @@ REGEX_TRANSLATE = {
     "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
     "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols",
 }
+
