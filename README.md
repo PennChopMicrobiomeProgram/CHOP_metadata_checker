@@ -53,3 +53,28 @@ When running, it will default to using a SQLite3 database located in the root of
 ## Using the library
 
 The `metadatalib` library can be installed and run anywhere by following the instructions in Development (you don't need to do the `create_metadata_test_db` and running the site (bottom two commands)). To connect to a non-dev backend, see the above on SQL Alchemy URIs.
+
+If you want to run a specification directly against a metadata sheet, you can do it like this:
+
+```
+from metadatalib.spec import specification
+from metadatalib.table import run_checks, run_fixes
+from tablemusthave import Table
+
+with open("/path/to/metadata.tsv") as f:
+  t = Table.from_csv(f, delimiter="\t")
+
+run_checks(t, specification, print)
+
+# Run automated fixes and write to file
+run_fixes(t, specification)
+
+# Convert to row format
+rows = list(zip(*t.data.values()))
+columns = t.data.keys()
+
+with open("output.tsv", "w") as f:
+    writer = csv.writer(f, delimiter="\t")
+    writer.writerow(columns)
+    writer.writerows(rows)
+```
