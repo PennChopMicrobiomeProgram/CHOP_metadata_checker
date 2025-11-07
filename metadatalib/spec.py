@@ -62,6 +62,7 @@ specs_common = [
             "date_collected",
             "time_collected",
             "BarcodeSequence",
+            "flow_cell_lane",
         ]
     ),
     columns_matching("^[0-9A-Za-z_.-]+$", fix_fn=fix_column_names),
@@ -72,14 +73,14 @@ specs_common = [
     values_matching(
         "subject_id", "^[0-9A-Za-z._-]+$", fix_fn=fix_disallowed_sample_chars
     ),
-    unique_values_for("plate", "plate_row", "plate_column"),
+    unique_values_for("plate", "plate_row", "plate_column", "flow_cell_lane"),
     values_matching(
         "date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", fix_fn=fix_date_collected
     ),
     values_matching(
         "time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$", fix_fn=fix_time_collected
     ),
-    unique_values_for("BarcodeSequence"),
+    unique_values_for("BarcodeSequence", "flow_cell_lane"),
     values_matching("BarcodeSequence", "^[ATCGURYKMSWBDHVN]+$"),
 ]
 
@@ -136,3 +137,4 @@ specs_UDI = [
 
 specification = MustHave(*specs_common, *specs_common_strict)
 internal_specification = MustHave(*specs_common)
+
