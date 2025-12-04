@@ -36,6 +36,7 @@ SAMPLE_TYPE_LIST = [
     "Blood",
     "Breast milk",
     "Buffer",
+    "Cecal content",
     "Cecum",
     "Cell lysate",
     "Cervical swab",
@@ -130,3 +131,4 @@ REGEX_TRANSLATE = {
     "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
     "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols",
 }
+
