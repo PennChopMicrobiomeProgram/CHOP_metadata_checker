@@ -43,6 +43,7 @@ SAMPLE_TYPE_LIST = [
     "Cheek swab",
     "Crop",
     "Dental plaque",
+    "Dental suture",
     "DNA-free water",
     "Duodenum",
     "Dust",
@@ -97,6 +98,7 @@ SAMPLE_TYPE_LIST = [
     "Tonsil",
     "Tracheal aspirate",
     "Tracheal control",
+    "Tracheal lavage",
     "Urethral swab",
     "Urine",
     "Vaginal swab",
@@ -131,3 +133,4 @@ REGEX_TRANSLATE = {
     "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
     "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols",
 }
+
