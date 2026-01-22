@@ -85,6 +85,7 @@ SAMPLE_TYPE_LIST = [
     "Plasma",
     "Rectal biopsy",
     "Rectal swab",
+    "Rumen fluid",
     "Saline",
     "Saliva",
     "Sediment",
@@ -108,6 +109,7 @@ SAMPLE_TYPE_LIST = [
 ]
 
 HOST_SPECIES_LIST: list[Optional[str]] = [
+    "Cow",
     "Dog",
     "Fruit fly",
     "Human",
@@ -118,6 +120,7 @@ HOST_SPECIES_LIST: list[Optional[str]] = [
     "Rabbit",
     "Rat",
     "Rhesus macaque",
+    "Sheep",
     None,
 ]
 
@@ -133,4 +136,5 @@ REGEX_TRANSLATE = {
     "^[A-H][0-9]{2}$": " only contain a letter from A-H and a number 1-12",
     "^[ATCGURYKMSWBDHVN]+$": " only contain nucleotide symbols",
 }
+
 
