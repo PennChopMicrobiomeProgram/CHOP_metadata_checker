@@ -4,10 +4,14 @@ import random
 import sys
 from datetime import datetime
 from typing import Optional
+
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
+
+from metadatalib import __version__
+from metadatalib.config import get_database_uri
+from metadatalib.db_connection import get_session
 from metadatalib.models import Project
-from metadatalib import __version__, session, SQLALCHEMY_DATABASE_URI
 
 
 def _create_project(
@@ -36,7 +40,7 @@ def _create_project(
     return code
 
 
-def main(argv: Optional[list[str]] = None, session: Session = session) -> str:
+def main(argv: Optional[list[str]] = None, session: Optional[Session] = None) -> str:
     p = argparse.ArgumentParser()
     p.add_argument(
         "-p", "--project_name", nargs="+", default=[], help="Name of the project"
@@ -59,7 +63,7 @@ def main(argv: Optional[list[str]] = None, session: Session = session) -> str:
     args = p.parse_args(argv)
 
     if args.show_db:
-        print(SQLALCHEMY_DATABASE_URI)
+        print(get_database_uri())
         sys.exit(0)
 
     if args.project_name == [] or args.customer_name == [] or args.customer_email == []:
@@ -68,11 +72,12 @@ def main(argv: Optional[list[str]] = None, session: Session = session) -> str:
         )
         sys.exit(0)
 
+    active_session = session or get_session()
     code = _create_project(
         project_name=" ".join(args.project_name),
         customer_name=" ".join(args.customer_name),
         customer_email=" ".join(args.customer_email),
-        session=session,
+        session=active_session,
     )
     print(
         f"{datetime.now()}\nProject code: {code}\nProject name: {args.project_name}\nClient name: {args.customer_name}\n"
