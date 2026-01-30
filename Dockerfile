@@ -12,14 +12,8 @@ COPY . .
 
 RUN pip install /app/[web]
 
-# Until this faces third parties, it's easier to just provide debug info to users on crashes than have it just show a 500 error
-ENV FLASK_DEBUG=1
-ENV FLASK_APP=/app/metadatalib/app
-ENV SQLALCHEMY_ECHO=True
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=80
 ENV METADATA_APP_MODE=full
 
 EXPOSE 80
 
-CMD [ "flask", "run" ]
+CMD [ "gunicorn", "metadatalib.app:application", "--bind", "0.0.0.0:80" ]
