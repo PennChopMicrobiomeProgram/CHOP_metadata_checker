@@ -1,6 +1,5 @@
 from typing import Optional
 
-
 ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
 
 DEFAULT_SAMPLE_FIELDS = [
