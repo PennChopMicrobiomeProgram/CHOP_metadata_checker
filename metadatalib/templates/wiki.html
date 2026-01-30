@@ -1832,7 +1832,7 @@ summary {
 
 
 <h1 class="title toc-ignore">CHOP metadata checker</h1>
-<h4><a href="/">Go To Home</a></h4>
+<h4><a href="{{ url_for('home') }}">Go To Home</a></h4>
 <h4 class="author">PennCHOP Microbiome Program</h4>
 
 </div>
@@ -1858,7 +1858,14 @@ $(document).ready(function(){
 </script>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>This <a href="/">website</a> is used to validate your metadata spreadsheet used in bioinformatics analyses for the PennCHOP Microbiome Center. This checker will parse your spreadsheet to ensure it fulfills the specifications listed below and highlight and display error messages for cells that do not meet these specifications. All that is required is a tab or comma separatated file (tsv/csv) to be uploaded.<br />
+<p>
+  This <a href="{{ url_for('home') }}">website</a> is used to validate your metadata
+  spreadsheet used in bioinformatics analyses for the PennCHOP Microbiome Center.
+  This checker will parse your spreadsheet to ensure it fulfills the specifications
+  listed below and highlight and display error messages for cells that do not meet
+  these specifications. All that is required is a tab or comma separatated file
+  (tsv/csv) to be uploaded.<br />
+</p>
 <br />
 </p>
 </div>
@@ -2456,7 +2463,7 @@ A3
 </tbody>
 </table>
 <div id="return-to-checker" class="section level4">
-<h4><a href="/">Go to Home</a></h4>
+<h4><a href="{{ url_for('home') }}">Go to Home</a></h4>
 </div>
 </div>
 
