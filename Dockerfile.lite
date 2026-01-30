@@ -12,7 +12,8 @@ COPY . .
 
 RUN pip install /app/[web]
 
-ENV METADATA_APP_MODE=full
+# Lite deployment runs the app without database integration
+ENV METADATA_APP_MODE=lite
 
 EXPOSE 80
 

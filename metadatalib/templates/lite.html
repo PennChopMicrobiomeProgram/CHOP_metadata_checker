@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% import 'macros.jinja' as macros %}
+
+{% block body %}
+
+<body>
+  <div class="flex card m-3">
+    <div class="container-fluid p-4 card-body">
+      <div class="row">
+        <div class="col-lg">
+          <h2 class="m-3">Metadata checker</h2>
+          <p class="m-3">Upload a metadata file to validate it against the spec.</p>
+
+          <form action="{{ '/' }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+              <label>Select metadata file</label>
+              <div class="custom-file py-2">
+                <input type="file" class="custom-file-input" name="metadata_upload" id="metadata_upload" onchange="toggleUploadButton()">
+              </div>
+              <button type="submit" class="btn btn-success" id="uploadButton" disabled>Upload Metadata</button>
+            </div>
+
+            <script type="text/javascript">
+              function toggleUploadButton() {
+                var fileInput = document.getElementById('metadata_upload');
+                var uploadButton = document.getElementById('uploadButton');
+                if (fileInput.files.length > 0) {
+                  uploadButton.disabled = false;
+                } else {
+                  uploadButton.disabled = true;
+                }
+              }
+            </script>
+          </form>
+
+          <div class="py-4">
+            {% if message %}
+              <div class="alert alert-info" role="alert">
+                {{ message }}
+              </div>
+            {% endif %}
+            {% if filename %}
+              <h4 class="mb-3" id="filename">{{ filename }}</h4>
+            {% endif %}
+            {% if checks is defined and checks %}
+              {% if checks['passed'] %}
+                <div class="alert alert-success" role="alert">
+                  All checks passed.
+                </div>
+              {% else %}
+                <div class="alert alert-warning" role="alert">
+                  Issues were detected. You can fix some items automatically.
+                </div>
+                <a href="{{ url_for('lite_index', fix=True) }}" class="btn btn-primary">Fix Metadata</a>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    {% if checks is defined and table is defined and checks %}
+      {{ macros.table(table, checks) }}
+    {% endif %}
+  </div>
+</body>
+{% endblock %}
