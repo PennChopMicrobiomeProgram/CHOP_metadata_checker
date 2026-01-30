@@ -17,14 +17,12 @@ from flask import (
 )
 from flask_session import Session
 from tablemusthave import Table
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
 from metadatalib import __version__
 from metadatalib.consts import ALLOWED_EXTENSIONS
 from metadatalib.spec import allowed_file
 from metadatalib.table import run_checks, run_fixes
 from metadatalib.table_flask import table_from_file
-
 
 SESSION_TYPE = "cachelib"
 SESSION_SERIALIZATION_FORMAT = "json"
@@ -48,8 +46,6 @@ def _configure_app(app: Flask) -> None:
     app.config["SESSION_TYPE"] = SESSION_TYPE
     app.config["SESSION_SERIALIZATION_FORMAT"] = SESSION_SERIALIZATION_FORMAT
     app.config["SESSION_CACHELIB"] = SESSION_CACHELIB
-    app.config["FLASK_DEBUG"] = os.environ.get("FLASK_DEBUG", False)
-    app.config["APPLICATION_ROOT"] = os.environ.get("FLASK_APPLICATION_ROOT", "/")
     Session(app)
 
     # This line is only used in production mode on a nginx server, follow instructions to setup forwarding for
@@ -77,9 +73,6 @@ def _register_common_routes(app: Flask) -> None:
 
 
 def _register_error_handlers(app: Flask) -> None:
-    if app.config["FLASK_DEBUG"]:
-        return
-
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template("dne.html"), 404
@@ -99,7 +92,7 @@ def _register_error_handlers(app: Flask) -> None:
 
 
 def _register_lite_routes(app: Flask) -> None:
-    @app.route("/", methods=["GET", "POST"])
+    @app.route("/", methods=["GET", "POST"], endpoint="home")
     def lite_index():
         message = None
         filename = None
@@ -363,7 +356,7 @@ def _register_full_routes(app: Flask) -> None:
             submissions=db.session.query(Submission).all(),
         )
 
-    @app.route("/", methods=["GET", "POST"])
+    @app.route("/", methods=["GET", "POST"], endpoint="home")
     def index():
         if request.method == "POST":
             sanitized_ticket_code = "".join(
@@ -397,8 +390,6 @@ def create_app(mode: str | None = None) -> Flask:
 
 
 app = create_app()
-
-application = DispatcherMiddleware(Flask("root"), {"/metadata_checker": app})
 
 
 if __name__ == "__main__":

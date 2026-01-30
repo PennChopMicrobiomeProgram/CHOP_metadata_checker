@@ -3,7 +3,6 @@ from typing import Callable
 from metadatalib.spec import no_leading_trailing_whitespace, specification
 from metadatalib.consts import REGEX_TRANSLATE
 
-
 try:
     from flask import flash
 except ImportError:

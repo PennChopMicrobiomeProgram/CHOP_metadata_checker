@@ -16,4 +16,6 @@ ENV METADATA_APP_MODE=full
 
 EXPOSE 80
 
-CMD [ "gunicorn", "metadatalib.app:application", "--bind", "0.0.0.0:80" ]
+# This one should be run with gunicorn (probably facing customers)
+# but it might take some fiddling to get it to work behind a proxy
+CMD [ "gunicorn", "metadatalib.app:app", "--bind", "0.0.0.0:80" ]
