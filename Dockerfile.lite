@@ -13,12 +13,8 @@ COPY . .
 RUN pip install /app/[web]
 
 # Lite deployment runs the app without database integration
-ENV FLASK_DEBUG=1
-ENV FLASK_APP=/app/metadatalib/app
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_RUN_PORT=80
 ENV METADATA_APP_MODE=lite
 
 EXPOSE 80
 
-CMD [ "flask", "run" ]
+CMD [ "gunicorn", "metadatalib.app:application", "--bind", "0.0.0.0:80" ]

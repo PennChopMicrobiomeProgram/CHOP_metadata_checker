@@ -17,8 +17,8 @@ from flask import (
 )
 from flask_session import Session
 from tablemusthave import Table
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.middleware.proxy_fix import ProxyFix
-
 from metadatalib import __version__
 from metadatalib.consts import ALLOWED_EXTENSIONS
 from metadatalib.spec import allowed_file
@@ -49,6 +49,7 @@ def _configure_app(app: Flask) -> None:
     app.config["SESSION_SERIALIZATION_FORMAT"] = SESSION_SERIALIZATION_FORMAT
     app.config["SESSION_CACHELIB"] = SESSION_CACHELIB
     app.config["FLASK_DEBUG"] = os.environ.get("FLASK_DEBUG", False)
+    app.config["APPLICATION_ROOT"] = os.environ.get("FLASK_APPLICATION_ROOT", "/")
     Session(app)
 
     # This line is only used in production mode on a nginx server, follow instructions to setup forwarding for
@@ -118,9 +119,7 @@ def _register_lite_routes(app: Flask) -> None:
                 if file_fp.filename == "":
                     message = "No file selected"
                 elif not allowed_file(file_fp.filename):
-                    message = (
-                        f"Please use the allowed file extensions for the metadata {ALLOWED_EXTENSIONS}"
-                    )
+                    message = f"Please use the allowed file extensions for the metadata {ALLOWED_EXTENSIONS}"
                 else:
                     table = table_from_file(file_fp)
                     _store_table_in_session(table)
@@ -398,6 +397,8 @@ def create_app(mode: str | None = None) -> Flask:
 
 
 app = create_app()
+
+application = DispatcherMiddleware(Flask("root"), {"/metadata_checker": app})
 
 
 if __name__ == "__main__":
