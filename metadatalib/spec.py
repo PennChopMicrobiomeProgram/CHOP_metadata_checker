@@ -136,3 +136,37 @@ specs_UDI = [
 
 specification = MustHave(*specs_common, *specs_common_strict)
 internal_specification = MustHave(*specs_common)
+
+# Pre-wet lab specs (no plate/barcode info)
+specs_lite = [
+    columns_named(
+        [
+            "SampleID",
+            "investigator",
+            "date_collected",
+            "time_collected",
+            "subject_id",
+            "host_species",
+            "sample_type",
+        ]
+    ),
+    columns_matching("^[0-9A-Za-z_.-]+$", fix_fn=fix_column_names),
+    values_matching("SampleID", "^[A-Za-z]", fix_fn=fix_sample_start),
+    values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
+    unique_values_for("SampleID"),
+    values_matching(
+        "date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", fix_fn=fix_date_collected
+    ),
+    values_matching(
+        "time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$", fix_fn=fix_time_collected
+    ),
+    values_matching("subject_id", "^[A-Za-z]", fix_fn=fix_subject_start),
+    values_matching(
+        "subject_id", "^[0-9A-Za-z._-]+$", fix_fn=fix_disallowed_sample_chars
+    ),
+    values_in_set("sample_type", SAMPLE_TYPE_LIST),
+    values_in_set("host_species", HOST_SPECIES_LIST),
+    some_value_for("subject_id", "host_species"),
+]
+
+lite_specification = MustHave(*specs_lite)

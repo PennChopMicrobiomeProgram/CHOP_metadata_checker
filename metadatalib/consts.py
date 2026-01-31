@@ -1,23 +1,24 @@
 import csv
 import io
 import urllib.request
+from typing import Optional
 
-ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
+ALLOWED_EXTENSIONS: set[str] = {"tsv", "csv", "txt"}
 
-DEFAULT_SAMPLE_FIELDS = [
+DEFAULT_SAMPLE_FIELDS: list[str] = [
     "SampleID",
     "sample_type",
     "subject_id",
     "host_species",
 ]
 
-CHOP_MANDATORY_TUBE = [
+CHOP_MANDATORY_TUBE: list[str] = [
     "SampleID",
     "investigator",
     "sample_type",
 ]
 
-CHOP_SUGGESTED = [
+CHOP_SUGGESTED: list[str] = [
     "subject_id",
     "host_species",
     "study_day",
@@ -57,11 +58,13 @@ def _fetch_tsv_column(url: str, column_name: str) -> list[str]:
     return values
 
 
-SAMPLE_TYPE_LIST = _fetch_tsv_column(SAMPLE_TYPES_URL, "sample_type")
-HOST_SPECIES_LIST = _fetch_tsv_column(HOST_SPECIES_URL, "host_species")
+SAMPLE_TYPE_LIST: list[str] = _fetch_tsv_column(SAMPLE_TYPES_URL, "sample_type")
+optional_host_species = _fetch_tsv_column(HOST_SPECIES_URL, "host_species")
+optional_host_species.append(None)
+HOST_SPECIES_LIST: Optional[list[str]] = optional_host_species
 
 ##table to translate what these regex patterns mean
-REGEX_TRANSLATE = {
+REGEX_TRANSLATE: dict[str, str] = {
     "^[0-9A-Za-z._]+$": " only contain numbers, letters, underscores, and periods",
     "^[0-9A-Za-z_]+$": " only contain numbers, letters, and underscores",
     "^[A-Za-z]": " only start with capital or lowercase letters",

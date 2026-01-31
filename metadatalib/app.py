@@ -20,7 +20,7 @@ from tablemusthave import Table
 from werkzeug.middleware.proxy_fix import ProxyFix
 from metadatalib import __version__
 from metadatalib.consts import ALLOWED_EXTENSIONS
-from metadatalib.spec import allowed_file
+from metadatalib.spec import allowed_file, lite_specification
 from metadatalib.table import run_checks, run_fixes
 from metadatalib.table_flask import table_from_file
 
@@ -100,7 +100,7 @@ def _register_lite_routes(app: Flask) -> None:
         if request.args.get("fix"):
             table = _table_from_session()
             if table.colnames():
-                run_fixes(table)
+                run_fixes(table, specification=lite_specification)
                 _store_table_in_session(table)
 
         if request.method == "POST":
@@ -121,7 +121,7 @@ def _register_lite_routes(app: Flask) -> None:
         table = _table_from_session()
         checks = None
         if table.colnames():
-            table, checks = run_checks(table)
+            table, checks = run_checks(table, specification=lite_specification)
 
         return render_template(
             "lite.html",
