@@ -1,4 +1,6 @@
-from typing import Optional
+import csv
+import io
+import urllib.request
 
 ALLOWED_EXTENSIONS = {"tsv", "csv", "txt"}
 
@@ -25,103 +27,38 @@ CHOP_SUGGESTED = [
     "mouse_strain",
 ]
 
-SAMPLE_TYPE_LIST = [
-    "Amniotic fluid",
-    "BAL",
-    "Bedding",
-    "Biofilm",
-    "Bioreactor",
-    "Blank swab",
-    "Blood",
-    "Breast milk",
-    "Buffer",
-    "Cecal content",
-    "Cecum",
-    "Cell lysate",
-    "Cervical swab",
-    "Cheek swab",
-    "Crop",
-    "Dental plaque",
-    "Dental suture",
-    "DNA-free water",
-    "Duodenum",
-    "Dust",
-    "Elution buffer",
-    "Empty well",
-    "Endometrial swab",
-    "Environmental control",
-    "Esophageal biopsy",
-    "Esophagus",
-    "Feces",
-    "Feed",
-    "Fistula",
-    "Fistula swab",
-    "Fly food",
-    "Fruit fly",
-    "Ileostomy fluid",
-    "Ileum",
-    "Kveim reagent",
-    "Lab water",
-    "Large intestine mucosa",
-    "Large intestine lumen",
-    "Macular Retina",
-    "Meconium",
-    "Medium",
-    "Microbial culture",
-    "Mock DNA",
-    "Mouse chow",
-    "Nasal swab",
-    "Nasopharyngeal swab",
-    "Oral swab",
-    "Oral wash",
-    "Oropharyngeal swab",
-    "Ostomy fluid",
-    "Pancreatic fluid",
-    "PCR water",
-    "Peripheral retina",
-    "Placenta",
-    "Plaque",
-    "Plasma",
-    "Rectal biopsy",
-    "Rectal swab",
-    "Rumen fluid",
-    "Saline",
-    "Saliva",
-    "Sediment",
-    "Serum",
-    "Skin swab",
-    "Small intestine",
-    "Soil",
-    "Sputum",
-    "Surface swab",
-    "Tongue swab",
-    "Tonsil",
-    "Tracheal aspirate",
-    "Tracheal control",
-    "Tracheal lavage",
-    "Urethral swab",
-    "Urine",
-    "Vaginal swab",
-    "Water",
-    "Weighing paper",
-    "Whole gut",
-]
+SAMPLE_TYPES_URL = (
+    "https://raw.githubusercontent.com/PennChopMicrobiomeProgram/"
+    "SampleRegistry/master/sample_registry/data/standard_sample_types.tsv"
+)
+HOST_SPECIES_URL = (
+    "https://raw.githubusercontent.com/PennChopMicrobiomeProgram/"
+    "SampleRegistry/master/sample_registry/data/standard_host_species.tsv"
+)
 
-HOST_SPECIES_LIST: list[Optional[str]] = [
-    "Cow",
-    "Dog",
-    "Fruit fly",
-    "Human",
-    "Mouse",
-    "Naked mole rat",
-    "Pig",
-    "Pigeon",
-    "Rabbit",
-    "Rat",
-    "Rhesus macaque",
-    "Sheep",
-    None,
-]
+
+def _fetch_tsv_column(url: str, column_name: str) -> list[str]:
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            content = response.read().decode("utf-8")
+    except Exception as exc:
+        print(f"Warning: failed to fetch {url}: {exc}")
+        return []
+    reader = csv.DictReader(io.StringIO(content), delimiter="\t")
+    values = []
+    for row in reader:
+        value = row.get(column_name)
+        if value is None:
+            continue
+        value = value.strip()
+        if not value:
+            continue
+        values.append(value)
+    return values
+
+
+SAMPLE_TYPE_LIST = _fetch_tsv_column(SAMPLE_TYPES_URL, "sample_type")
+HOST_SPECIES_LIST = _fetch_tsv_column(HOST_SPECIES_URL, "host_species")
 
 ##table to translate what these regex patterns mean
 REGEX_TRANSLATE = {
