@@ -3,7 +3,7 @@
 {% block body %}
   <div class="card m-3">
     <h5 class="m-3">Please submit your project id below to get to the metadata submission page.</h5>
-    <form action="{{ '/' }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
       <div class="row m-3">
         <div class="form-group">
           <label for="ticket_code">Project ID</label>

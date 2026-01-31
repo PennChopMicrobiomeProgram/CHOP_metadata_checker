@@ -67,9 +67,9 @@ def _register_common_routes(app: Flask) -> None:
         app.logger.info("Rendering wiki.html.\n")
         return render_template("wiki.html")
 
-    @app.route("/ready")
-    def ready():
-        return render_template("ready.html", version=__version__)
+    @app.route("/health")
+    def health():
+        return {"status": "ready"}, 200
 
 
 def _register_error_handlers(app: Flask) -> None:
@@ -92,7 +92,7 @@ def _register_error_handlers(app: Flask) -> None:
 
 
 def _register_lite_routes(app: Flask) -> None:
-    @app.route("/", methods=["GET", "POST"], endpoint="home")
+    @app.route("/", methods=["GET", "POST"], endpoint="index")
     def lite_index():
         message = None
         filename = None
@@ -356,7 +356,7 @@ def _register_full_routes(app: Flask) -> None:
             submissions=db.session.query(Submission).all(),
         )
 
-    @app.route("/", methods=["GET", "POST"], endpoint="home")
+    @app.route("/", methods=["GET", "POST"], endpoint="index")
     def index():
         if request.method == "POST":
             sanitized_ticket_code = "".join(
