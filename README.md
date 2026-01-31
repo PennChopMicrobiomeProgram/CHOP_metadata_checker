@@ -59,6 +59,20 @@ When running, it will default to using a SQLite3 database located in the root of
 
 If you want to deploy the simplified version without database persistence, set `METADATA_APP_MODE=lite`. This runs the app in a single-page mode where users can upload metadata and run validation without project IDs or submission storage. The default mode is `full`, which includes project tracking and versioned submissions.
 
+### Reverse proxy (nginx)
+
+The Flask app is configured to respect `X-Forwarded-*` headers (including `X-Forwarded-Prefix`) via `ProxyFix`, so you can mount it under a sub-path like `/metadata_checker/`. When you run it behind nginx, make sure nginx can actually reach the container network address, not just the host port mapping.
+
+If nginx is running in a container, it must be on the same network as the app container (for example, connect it to an external `appnet` network) so that `proxy_pass http://metadata-checker:80/;` resolves and routes correctly. If nginx is running on the host network instead, point `proxy_pass` at the host port mapping (for example, `http://127.0.0.1:8082/`) rather than the container name.
+
+To verify connectivity from the nginx container, exec a curl against the upstream:
+
+```
+podman exec -it nginx curl -f http://metadata-checker/
+```
+
+If that fails, connect the nginx container to the shared network (for example, `podman network connect appnet nginx`) or update `proxy_pass` to use the host-mapped port instead.
+
 ## Using the library
 
 The `metadatalib` library can be installed and run anywhere by following the instructions in Development (you don't need to do the `create_metadata_test_db` and running the site (bottom two commands)). To connect to a non-dev backend, see the above on SQL Alchemy URIs.
