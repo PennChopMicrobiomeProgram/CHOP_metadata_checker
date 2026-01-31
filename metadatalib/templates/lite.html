@@ -54,6 +54,9 @@
                 <a href="{{ url_for('index', fix=True) }}" class="btn btn-primary">Fix Metadata</a>
               {% endif %}
             {% endif %}
+            {% if has_download %}
+              <a href="{{ url_for('lite_download') }}" class="btn btn-outline-success ms-2">Download Metadata</a>
+            {% endif %}
           </div>
         </div>
       </div>
