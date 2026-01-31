@@ -11,7 +11,7 @@
           <h2 class="m-3">Metadata checker</h2>
           <p class="m-3">Upload a metadata file to validate it against the spec.</p>
 
-          <form action="{{ '/' }}" method="POST" enctype="multipart/form-data">
+          <form action="{{ url_for('index') }}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
               <label>Select metadata file</label>
               <div class="custom-file py-2">
@@ -51,7 +51,7 @@
                 <div class="alert alert-warning" role="alert">
                   Issues were detected. You can fix some items automatically.
                 </div>
-                <a href="{{ url_for('lite_index', fix=True) }}" class="btn btn-primary">Fix Metadata</a>
+                <a href="{{ url_for('index', fix=True) }}" class="btn btn-primary">Fix Metadata</a>
               {% endif %}
             {% endif %}
           </div>

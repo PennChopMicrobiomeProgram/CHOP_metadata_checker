@@ -67,9 +67,9 @@ def _register_common_routes(app: Flask) -> None:
         app.logger.info("Rendering wiki.html.\n")
         return render_template("wiki.html")
 
-    @app.route("/ready")
-    def ready():
-        return render_template("ready.html", version=__version__)
+    @app.route("/health")
+    def health():
+        return {"status": "ready"}, 200
 
 
 def _register_error_handlers(app: Flask) -> None:
