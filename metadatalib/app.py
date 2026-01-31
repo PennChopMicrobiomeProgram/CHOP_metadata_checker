@@ -94,7 +94,7 @@ def _register_error_handlers(app: Flask) -> None:
 def _register_lite_routes(app: Flask) -> None:
     @app.route("/", methods=["GET", "POST"], endpoint="index")
     def lite_index():
-        message = None
+        message = request.args.get("message")
         filename = None
 
         if request.args.get("fix"):
@@ -119,6 +119,7 @@ def _register_lite_routes(app: Flask) -> None:
                     filename = file_fp.filename
 
         table = _table_from_session()
+        has_download = bool(table.colnames())
         checks = None
         if table.colnames():
             table, checks = run_checks(table, specification=lite_specification)
@@ -129,7 +130,29 @@ def _register_lite_routes(app: Flask) -> None:
             message=message,
             table=table if checks else None,
             checks=checks,
+            has_download=has_download,
         )
+
+    @app.route("/download", methods=["GET"], endpoint="lite_download")
+    def lite_download():
+        table = _table_from_session()
+        if not table.colnames():
+            return redirect(
+                url_for("index", message="No metadata available to download yet.")
+            )
+
+        csv_file = StringIO()
+        writer = csv.writer(csv_file)
+        writer.writerow(table.data.keys())
+        for row in zip(*table.data.values()):
+            writer.writerow(row)
+
+        response = make_response(csv_file.getvalue())
+        response.headers["Content-Disposition"] = (
+            "attachment; filename=metadata-session.csv"
+        )
+        response.headers["Content-type"] = "text/csv"
+        return response
 
 
 def _register_full_routes(app: Flask) -> None:
