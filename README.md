@@ -5,7 +5,7 @@ A Flask site for validating metadata sheets per the standards of the PCMP and an
 [![Tests](https://github.com/PennChopMicrobiomeProgram/CHOP_metadata_checker/actions/workflows/pr.yml/badge.svg)](https://github.com/PennChopMicrobiomeProgram/CHOP_metadata_checker/actions/workflows/pr.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/e0812479727e432fab23e154338f6acb)](https://app.codacy.com/gh/PennChopMicrobiomeProgram/CHOP_metadata_checker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![codecov](https://codecov.io/gh/PennChopMicrobiomeProgram/CHOP_metadata_checker/graph/badge.svg?token=RZKFJ87M6U)](https://codecov.io/gh/PennChopMicrobiomeProgram/CHOP_metadata_checker)
-[![DockerHub](https://img.shields.io/docker/pulls/ctbushman/metadata_checker)](https://hub.docker.com/repository/docker/ctbushman/metadata_checker/)
+[![DockerHub](https://img.shields.io/docker/pulls/chopmicrobiome/metadata_checker)](https://hub.docker.com/repository/docker/chopmicrobiome/metadata_checker/)
 
 ## Development
 
@@ -30,7 +30,7 @@ python metadatalib/app.py
 To run the app locally in a docker container instead:
 
 ```
-docker run --rm -p 8080:80 ctbushman/metadata_checker:latest
+docker run --rm -p 8080:80 chopmicrobiome/metadata_checker:latest
 ```
 
 You should then be able to access the site at http://localhost:8080. To build your own container:
