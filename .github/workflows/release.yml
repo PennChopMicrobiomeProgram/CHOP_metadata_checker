@@ -30,13 +30,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ctbushman/metadata_checker
+          images: chopmicrobiome/metadata_checker
 
       - name: Extract metadata (tags, labels) for lite Docker image
         id: meta_lite
         uses: docker/metadata-action@v5
         with:
-          images: ctbushman/metadata_checker
+          images: chopmicrobiome/metadata_checker
           tags: |
             type=semver,pattern={{version}}-lite
       
