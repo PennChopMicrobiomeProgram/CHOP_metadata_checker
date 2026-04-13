@@ -29,7 +29,7 @@ dependencies = [
 dev = [
   "black~=26.1",
   "pytest~=9.0",
-  "pytest-cov~=7.0",
+  "pytest-cov~=7.1",
 ]
 web = [
   "flask~=3.1",
