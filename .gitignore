@@ -9,3 +9,6 @@ env/
 
 .sessions/
 .vscode/
+# Local Google OAuth credentials
+.clasprc.json
+.clasprc.*.json

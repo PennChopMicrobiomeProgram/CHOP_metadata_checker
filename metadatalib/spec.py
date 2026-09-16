@@ -17,7 +17,6 @@ from metadatalib.consts import (
     HOST_SPECIES_LIST,
 )
 from metadatalib.musthave import (
-    fix_date_collected,
     fix_disallowed_sample_chars,
     fix_column_names,
     fix_sample_start,
@@ -59,7 +58,7 @@ specs_common = [
             "plate",
             "plate_row",
             "plate_column",
-            "date_collected",
+            "year_collected",
             "time_collected",
             "BarcodeSequence",
         ]
@@ -73,9 +72,7 @@ specs_common = [
         "subject_id", "^[0-9A-Za-z._-]+$", fix_fn=fix_disallowed_sample_chars
     ),
     unique_values_for("plate", "plate_row", "plate_column"),
-    values_matching(
-        "date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", fix_fn=fix_date_collected
-    ),
+    values_matching("year_collected", "^[0-9]{4}$"),
     values_matching(
         "time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$", fix_fn=fix_time_collected
     ),
@@ -143,7 +140,7 @@ specs_lite = [
         [
             "SampleID",
             "investigator",
-            "date_collected",
+            "year_collected",
             "time_collected",
             "subject_id",
             "host_species",
@@ -154,9 +151,7 @@ specs_lite = [
     values_matching("SampleID", "^[A-Za-z]", fix_fn=fix_sample_start),
     values_matching("SampleID", "^[0-9A-Za-z._]+$", fix_fn=fix_disallowed_sample_chars),
     unique_values_for("SampleID"),
-    values_matching(
-        "date_collected", "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", fix_fn=fix_date_collected
-    ),
+    values_matching("year_collected", "^[0-9]{4}$"),
     values_matching(
         "time_collected", "^[0-9]{2}:[0-9]{2}:[0-9]{2}$", fix_fn=fix_time_collected
     ),

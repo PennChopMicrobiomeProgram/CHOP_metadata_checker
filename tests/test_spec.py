@@ -97,7 +97,7 @@ col_names = [
     "plate",
     "plate_row",
     "plate_column",
-    "date_collected",
+    "year_collected",
     "time_collected",
     "BarcodeSequence",
 ]
@@ -112,7 +112,7 @@ good_samples = [
         "plate1",
         "A",
         "1",
-        "01-04-21",
+        "2021",
         "12:00:00",
         "ATCG",
     ],
@@ -125,8 +125,30 @@ good_samples = [
         "plate1",
         "A",
         "2",
-        "06-07-23",
+        "2023",
         "12:00:00",
         "TCGA",
     ],
 ]
+
+
+def test_year_collected_format():
+    from metadatalib.spec import lite_specification
+
+    for year, valid in [
+        ("2024", True),
+        ("0000", True),
+        ("24", False),
+        ("20245", False),
+        ("20ab", False),
+        ("05-17-24", False),
+    ]:
+        samples = [good_samples[0].copy()]
+        samples[0][col_names.index("year_collected")] = year
+        results = list(lite_specification.check(Table(col_names, samples)))
+        year_results = [
+            res
+            for rule, res in results
+            if getattr(rule, "colname", None) == "year_collected"
+        ]
+        assert all(isinstance(res, AllGood) for res in year_results) == valid

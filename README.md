@@ -7,7 +7,17 @@ A Flask site for validating metadata sheets per the standards of the PCMP and an
 [![codecov](https://codecov.io/gh/PennChopMicrobiomeProgram/CHOP_metadata_checker/graph/badge.svg?token=RZKFJ87M6U)](https://codecov.io/gh/PennChopMicrobiomeProgram/CHOP_metadata_checker)
 [![DockerHub](https://img.shields.io/docker/pulls/chopmicrobiome/metadata_checker)](https://hub.docker.com/repository/docker/chopmicrobiome/metadata_checker/)
 
-## Development
+## Google Sheets workflow
+
+Wet lab teams can validate metadata directly in their shared Google Sheet using
+the [Google Sheets Editor add-on](google_sheets/README.md). It provides dropdowns,
+feedback after edits, cell notes, and a sidebar with correction guidance. Rules
+are generated from this application's Python specification, with the merged add_controls workflow,
+internal, 16S, ITS, and UDI profiles. The add_controls action preserves a submission
+copy and generates metadata and plate-review tabs using plate_review.R placement logic. Publish the add-on once for your organization, then enable it in each project’s
+existing shared Google Sheet. See the linked deployment instructions.
+
+## Local development
 
 This is a Flask app leveraging with bootstrap, jquery, and datatables (via CDN). To start with local development:
 

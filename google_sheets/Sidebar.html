@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html><head><base target="_top"><style>
+body{font:14px system-ui,sans-serif;color:#17324d;padding:14px}button,select{font:inherit;padding:9px;margin:4px 0;max-width:100%}button{background:#135e74;color:white;border:0;border-radius:5px;cursor:pointer}button:disabled{opacity:.5}select{width:100%}.issue{border-left:3px solid #c65c22;background:#fff7ee;padding:10px;margin:12px 0;overflow-wrap:anywhere}.hint{color:#526372;font-size:12px}.ok{background:#e5f4eb;padding:12px}#status{white-space:pre-wrap}h2{font-size:18px}
+
+[hidden]{display:none!important}.tabs{display:flex;gap:6px;margin:12px 0}.tabs button{flex:1;min-width:0;padding:10px 4px;border:2px solid transparent;font-weight:600}.tabs button[aria-selected="true"]{border-color:currentColor;box-shadow:0 2px 0 currentColor}.tabs button:focus-visible{outline:3px solid #17324d;outline-offset:2px}
+#controls-tab{background:#d8efed;color:#145b56}#barcode-tab{background:#e9dff5;color:#633c85}.subtabs{gap:4px;flex-wrap:wrap}.subtabs button{font-size:11px;padding:7px 3px}.subtabs button:nth-child(1){background:#dceafb;color:#204f83}.subtabs button:nth-child(2){background:#fce5ce;color:#834509}.subtabs button:nth-child(3){background:#f5ddeb;color:#803858}.subtabs button:nth-child(4){background:#e6ebce;color:#526019}.placeholder{border:1px solid #d6c5e8;border-radius:8px;background:#faf7fd;padding:14px}.badge{font-size:11px;font-weight:700;color:#633c85}.placeholder h3{margin:8px 0}h1{font-size:20px;margin-bottom:4px}
+#shotgun-tab{background:#ccf1e7;color:#125b4b}#amplicon-tab{background:#ffe0e0;color:#8b303a}
+.reset{background:#edf0f3;color:#39495a;border:1px solid #b9c3cd} .preparation-actions{display:flex;align-items:center;gap:6px}.preparation-actions .tabs{flex:1}
+</style></head><body>
+<h1>MetaReady</h1>
+<div class="tabs" role="tablist" aria-label="Workflow">
+<button id="controls-tab" role="tab" aria-selected="true" aria-controls="controls-panel" onclick="selectTab('workflow','controls')">addControls</button>
+<button id="barcode-tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="barcode-panel" onclick="selectTab('workflow','barcode')">addBarcodes</button>
+</div>
+<section id="controls-panel" role="tabpanel" aria-labelledby="controls-tab">
+<h2>Check before sharing</h2>
+<p>Keep using this project's shared Google Sheet. Errors share a color by type. Hover over the first affected cell in each column for an explanation. Highlights refresh after edits.</p>
+<p id="project" class="hint">Loading current project…</p>
+
+<p id="format" class="hint">Format is detected automatically from the active tab.</p>
+
+<hr><h2>Plate preparation</h2>
+<div class="preparation-actions"><div class="tabs subtabs" role="tablist" aria-label="Plate preparation">
+<button id="shotgun-tab" role="tab" aria-selected="true" aria-controls="shotgun-panel" onclick="prepareFromTab('shotgun')">Shotgun</button>
+<button id="amplicon-tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="amplicon-panel" onclick="prepareFromTab('amplicon')">Amplicon</button>
+</div><button class="reset" onclick="resetControls()">Reset</button></div>
+<p class="hint">Reset deletes generated metadata and plate-view tabs, including edits made there. It keeps metadata_originally_submitted. Click Shotgun or Amplicon when ready to start again.</p>
+<div id="shotgun-panel" role="tabpanel" aria-labelledby="shotgun-tab"><p class="hint">Click Shotgun to check the current tab and prepare plates (including WGS).</p></div>
+<div id="amplicon-panel" role="tabpanel" aria-labelledby="amplicon-tab" hidden><p class="hint">Click Amplicon to check the current tab and prepare plates.</p></div>
+<p class="hint">Add four controls where space permits; plates with 93–94 samples receive DNA-free water and mock DNA only. The first check preserves your submitted tab as metadata_originally_submitted and checks a separate metadata copy. Preparation adds controls to metadata and creates plate_review. Existing tabs are never overwritten. Sample IDs in the output are cleaned using the R template; the submission copy is preserved. Use year_collected with four digits. Already-plated submissions are checked without adding or moving controls; they use the same preserved submission and metadata copy, and create plate_view.</p>
+<p class="hint">Plate views are snapshots. Checks refresh after edits and when you click Shotgun or Amplicon. The category tabs only switch sections. Correct highlighted errors, then click Shotgun or Amplicon to prepare plates. Suggestions need your review.</p>
+<p id="status" role="status" aria-live="polite">Checking the active tab automatically…</p><div id="issues"></div>
+</section>
+<section id="barcode-panel" role="tabpanel" aria-labelledby="barcode-tab" hidden>
+<h2>Add barcodes</h2>
+<button class="reset" onclick="resetBarcodes()">Reset</button>
+<p id="barcode-status" class="hint" role="status" aria-live="polite">Reset clears the assay selection. Barcode rules are not configured yet.</p>
+<p class="hint">Choose an assay. Barcode rules will be added after the workflow instructions are provided.</p>
+<div class="tabs subtabs" role="tablist" aria-label="Barcode assay">
+<button id="v1v2-tab" role="tab" aria-selected="true" aria-controls="v1v2-panel" onclick="selectTab('assay','v1v2')">16SV1V2</button>
+<button id="its-tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="its-panel" onclick="selectTab('assay','its')">ITS</button>
+<button id="udi-tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="udi-panel" onclick="selectTab('assay','udi')">UDI</button>
+<button id="rna-tab" role="tab" aria-selected="false" tabindex="-1" aria-controls="rna-panel" onclick="selectTab('assay','rna')">RNA</button>
+</div>
+<section class="placeholder" id="v1v2-panel" role="tabpanel" aria-labelledby="v1v2-tab"><span class="badge">NOT CONFIGURED</span><h3>16SV1V2</h3><p>Placeholder for 16SV1V2 barcode assignment and checks.</p><p class="hint">No barcode checks or changes run from this tab yet.</p></section>
+<section class="placeholder" id="its-panel" role="tabpanel" aria-labelledby="its-tab" hidden><span class="badge">NOT CONFIGURED</span><h3>ITS</h3><p>Placeholder for ITS barcode assignment and checks.</p><p class="hint">No barcode checks or changes run from this tab yet.</p></section>
+<section class="placeholder" id="udi-panel" role="tabpanel" aria-labelledby="udi-tab" hidden><span class="badge">NOT CONFIGURED</span><h3>UDI</h3><p>Placeholder for UDI barcode assignment and checks.</p><p class="hint">No barcode checks or changes run from this tab yet.</p></section>
+<section class="placeholder" id="rna-panel" role="tabpanel" aria-labelledby="rna-tab" hidden><span class="badge">NOT CONFIGURED</span><h3>RNA</h3><p>Placeholder for RNA barcode assignment and checks.</p><p class="hint">No barcode checks or changes run from this tab yet.</p></section>
+</section>
+<script>
+let selectedRunType='Shotgun';
+const tabGroups={workflow:['controls','barcode'],assay:['v1v2','its','udi','rna'],preparation:['shotgun','amplicon']};
+function selectTab(group,id){
+ if(group==='preparation')selectedRunType=id==='amplicon'?'Amplicon':'Shotgun';
+ tabGroups[group].forEach(key=>{
+  const selected=key===id, button=document.getElementById(key+'-tab');
+  button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;
+  document.getElementById(key+'-panel').hidden=!selected;
+ });
+
+}
+Object.entries(tabGroups).forEach(([group,ids])=>ids.forEach((id,index)=>{
+ document.getElementById(id+'-tab').addEventListener('keydown',event=>{
+  let next=index;
+  if(event.key==='ArrowRight')next=(index+1)%ids.length;
+  else if(event.key==='ArrowLeft')next=(index+ids.length-1)%ids.length;
+  else if(event.key==='Home')next=0;
+  else if(event.key==='End')next=ids.length-1;
+  else return;
+  event.preventDefault();selectTab(group,ids[next]);document.getElementById(ids[next]+'-tab').focus();
+ });
+}));
+let currentSheetId=null, inFlight=false, lastToken=null, pendingCheck=false, pendingPreparation=null, checkingPaused=false, restartRequested=false;
+function resetBarcodes(){
+ tabGroups.assay.forEach((id,index)=>{
+  const button=document.getElementById(id+'-tab');
+  button.setAttribute('aria-selected','false');button.tabIndex=index===0?0:-1;
+  document.getElementById(id+'-panel').hidden=true;
+ });
+ document.getElementById('barcode-status').textContent='Selection reset. Choose a barcode assay. No spreadsheet data was changed.';
+}
+function resetControls(){
+ if(inFlight){document.getElementById('status').textContent='Please wait for the current operation to finish, then click Reset.';return;}
+ pendingPreparation=null;pendingCheck=false;
+ if(typeof google==='undefined'||!google.script){document.getElementById('status').textContent='Preview only. Reset deletes generated outputs and keeps metadata_originally_submitted when opened in Google Sheets.';return;}
+ busy(true);
+ google.script.run.withFailureHandler(fail).withSuccessHandler(r=>{
+  busy(false);currentSheetId=null;lastToken=null;checkingPaused=!!r.paused;
+  document.getElementById('issues').replaceChildren();
+  document.getElementById('status').className='';
+  document.getElementById('status').textContent=r.message;
+ }).chopResetControls();
+}
+function prepareFromTab(id){
+ if(pendingPreparation!==null)return;
+ pendingPreparation=id==='amplicon'?'Amplicon':'Shotgun';
+ selectTab('preparation',id);
+ check();
+}
+function loadState(){
+ if(checkingPaused || inFlight || document.hidden || document.getElementById('controls-panel').hidden)return;
+ if(typeof google==='undefined'||!google.script){
+  pendingPreparation=null;
+  document.getElementById('status').textContent='Preview only. Automatic checks start when opened in Google Sheets.';return;
+ }
+ const restartForThisCheck=restartRequested;restartRequested=false;
+ inFlight=true;
+ google.script.run.withFailureHandler(fail).withSuccessHandler(r=>{
+  inFlight=false;
+  try {
+  // A click during polling belongs to the next request, not this stale response.
+  if(pendingCheck)return;
+  if(!r){if(restartForThisCheck)restartRequested=true;return;}lastToken=r.token;
+  document.getElementById('project').textContent=r.projectName+' / '+r.sheetName;
+  if(r.skipped){
+   pendingPreparation=null;currentSheetId=null;document.getElementById('format').textContent='Automatic checking skipped';
+   document.getElementById('status').className='';
+   document.getElementById('status').textContent=r.skipReason;
+   document.getElementById('issues').replaceChildren();return;
+  }
+  show(r);
+  if(pendingPreparation!==null&&!pendingCheck){
+   const runType=pendingPreparation;pendingPreparation=null;
+   if(r.passed)addControls(runType);
+   else {
+    const message='Please correct the errors first and then click corresponding addControls option';
+    document.getElementById('status').textContent=message+'\n'+document.getElementById('status').textContent;
+    window.alert(message);
+   }
+  }
+  } finally {
+   if(pendingCheck){pendingCheck=false;lastToken=null;loadState();}
+  }
+ }).chopAutoCheck(lastToken,restartForThisCheck);
+}
+function busy(on){inFlight=on;document.querySelectorAll('#controls-panel button, #controls-panel select').forEach(b=>b.disabled=on);}
+function fail(e){pendingPreparation=null;pendingCheck=false;busy(false);document.getElementById('status').textContent='Check incomplete: '+e.message;document.getElementById('issues').replaceChildren();}
+function runner(){busy(true);document.getElementById('status').textContent='Checking…';document.getElementById('issues').replaceChildren();return google.script.run.withFailureHandler(fail).withSuccessHandler(show);}
+function check(){restartRequested=true;checkingPaused=false;lastToken=null;if(inFlight){pendingCheck=true;return;}loadState();}
+function addControls(runType){
+ if(currentSheetId===null){document.getElementById('status').textContent='Select a metadata input tab and wait for its automatic check.';return;}
+ busy(true);document.getElementById('status').className='';
+ document.getElementById('status').textContent='Preparing plates…';document.getElementById('issues').replaceChildren();
+ google.script.run.withFailureHandler(fail).withSuccessHandler(r=>{
+  busy(false);currentSheetId=null;lastToken=null;
+  document.getElementById('status').textContent=r.alreadyPlated ? 'Created plate_view from metadata. Original submission preserved. '+r.sampleCount+' existing samples/controls on '+r.plateCount+' plates. No samples, controls or positions were changed.' : 'Updated metadata and created plate_review. Original submission preserved. '+r.sampleCount+' samples + '+r.controlCount+' controls on '+r.plateCount+' plates. '+r.changedIds+' sample IDs cleaned in the output. Metadata is now active and will be checked automatically. Plate review is a snapshot.';
+  if(r.warning){document.getElementById('status').textContent+='\n'+r.warning;window.alert(r.warning);}
+ }).chopAddControls(runType,currentSheetId);
+}
+function show(r){
+ busy(false);const status=document.getElementById('status');status.className=r.passed?'ok':'';
+ currentSheetId=r.sheetId;document.getElementById('format').textContent='Detected: '+(r.profile==='plate_template'?'Already plated — keep existing controls and positions':'Tube format — add controls during preparation');
+ status.textContent=(r.passed?'Checks passed':'Needs corrections: '+r.groupCount+' error groups')+'\n'+r.sheetName+' · '+r.profile+' · '+r.samples+' rows\nChecked '+new Date(r.checkedAt).toLocaleTimeString()+'\nAllowed values refreshed: '+(r.vocabularyUpdated?new Date(r.vocabularyUpdated).toLocaleDateString():'not loaded');
+ const root=document.getElementById('issues');root.replaceChildren();
+ r.issues.forEach(i=>{const card=document.createElement('div');card.className='issue';card.style.backgroundColor=i.color;const button=document.createElement('button');button.textContent=i.field+' · '+i.count+' affected cell(s) · first row '+i.row;button.onclick=()=>google.script.run.withFailureHandler(fail).chopGoTo(r.sheetId,i.row,i.col);card.append(button);const msg=document.createElement('p');msg.textContent=i.message;card.append(msg);if(i.suggestions.length){const hint=document.createElement('p');hint.textContent='Suggested for the first cell: '+i.suggestions.join(', ')+'. Verify against your records, then edit the cell.';card.append(hint);}root.append(card);});
+ if(r.groupCount>r.issues.length){const p=document.createElement('p');p.textContent='Showing the first 200 error groups. Hover over the first affected cell in each column for its explanation.';root.append(p);}
+}
+loadState();
+setInterval(loadState,5000);
+</script></body></html>
