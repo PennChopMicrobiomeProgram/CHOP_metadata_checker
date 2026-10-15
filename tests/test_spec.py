@@ -39,6 +39,7 @@ def test_empty_metadata():
                     None,
                     None,
                     None,
+                    None,
                 ]
             ],
         )
@@ -100,6 +101,7 @@ col_names = [
     "date_collected",
     "time_collected",
     "BarcodeSequence",
+    "flow_cell_lane",
 ]
 
 good_samples = [
@@ -115,6 +117,7 @@ good_samples = [
         "01-04-21",
         "12:00:00",
         "ATCG",
+        "1-2",
     ],
     [
         "AnotherOne",
@@ -128,5 +131,6 @@ good_samples = [
         "06-07-23",
         "12:00:00",
         "TCGA",
+        "3-4",
     ],
 ]
